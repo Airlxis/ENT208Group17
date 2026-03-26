@@ -1,0 +1,6 @@
+python-dotenv
+langgraph
+langchain-core
+langchain-deepseek
+fastapi
+uvicorn
