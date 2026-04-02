@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # CampusAI 🤖🎓
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -9,6 +8,7 @@ An intelligent conversational assistant for university students, featuring a res
 
 [Demo](#) • [Documentation](#api-documentation) • [Deployment](#deployment)
 
+![4e5bc22cc90754448bcc8f290668b85f](https://github.com/user-attachments/assets/f6ccd32c-a2eb-4cc4-b15d-93af38e91939)
 ---
 
 ## ✨ Features
@@ -207,79 +207,3 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 **Built with ❤️ for XJTLU students**
 =======
-
-# ENT208Group17
-
-A comprehensive project for data collection and web model development, combining Python backend processing with web interface components.
-
-![4e5bc22cc90754448bcc8f290668b85f](https://github.com/user-attachments/assets/f6ccd32c-a2eb-4cc4-b15d-93af38e91939)
-
-## 📋 Overview
-
-This project is part of the ENT208 course group assignment (Group 17). It focuses on data collection, processing, and web-based interaction through an integrated system with large language model capabilities.
-
-## 🏗️ Project Structure
-
-
-ENT208Group17/
-├── Data_Collection/     # Data collection scripts and utilities
-├── Web_Model/           # Web application and API interfaces
-├── LICENSE              # Project license
-└── README.md            # Project documentation
-```
-
-## 🛠️ Technology Stack
-
-- **Backend**: Python (Data processing, API integration)
-- **Frontend**: HTML/CSS/JavaScript (Web interface)
-- **Data Source**: Structured web content collection
-- **AI Integration**: LLM API for intelligent dialogue
-
-## 📦 Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/Airlxis/ENT208Group17.git
-cd ENT208Group17
-```
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-## 🚀 Usage
-
-### Data Collection
-Navigate to the `Data_Collection` directory to access data collection utilities for structured content gathering and preprocessing.
-
-### Web Model
-Access the `Web_Model` directory for the web application. The interface supports:
-- Real-time dialogue with AI models
-- Local network deployment
-- Interactive data visualization
-
-## ✨ Key Features
-
-- **Data Pipeline**: Automated content gathering with validation workflows
-- **API Integration**: Local network LLM API calling capability
-- **Web Interface**: Clean, responsive UI for user interaction
-- **Modular Architecture**: Separated components for maintainability and scalability
-
-## 📝 License
-
-This project is licensed under the terms specified in the LICENSE file.
-
-## 👥 Team
-
-**Group 17** - ENT208 Course Project
-
-## 📞 Contact
-
-For questions or issues, please open an issue on the GitHub repository.
-
----
-
-Last updated: 2026-04-02
-```
->>>>>>> fbc3ee017610ab6ef1f090f4a3541e7a50565590
