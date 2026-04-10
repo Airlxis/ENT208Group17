@@ -20,16 +20,33 @@
       flex-direction: column;
       justify-content: flex-start;
       padding: 32px 0;
+      padding-left: 0;
+      padding-right: 0;
+      transition: padding-left 0.2s ease, padding-right 0.2s ease;
+    }
+
+    /* 桌面端：侧边栏收起时给左侧按钮预留空白边 */
+    @media (min-width: 901px) {
+      body {
+        padding-left: 46px;
+      }
+      body.sidebar-open {
+        padding-left: 324px;
+      }
+    }
+
+    body.sidebar-open {
+      padding-left: 320px;
     }
 
     .app {
       width: 100%;
-      max-width: 1100px;
+      max-width: 1400px; /* 让对话白框更贴近两侧边栏 */
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       height: calc(100vh - 64px);
-      padding: 0 24px;
+      padding: 0 14px; /* 减少左右留白 */
     }
 
     .header {
@@ -39,9 +56,57 @@
       justify-content: space-between;
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .menu-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      cursor: pointer;
+      display: none; /* 桌面端不显示，通过侧边栏右上角按钮控制展开/收起 */
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      flex: 0 0 auto;
+    }
+
+    .menu-btn:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    .hamburger {
+      width: 16px;
+      height: 12px;
+      position: relative;
+    }
+
+    .hamburger span {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #111827;
+      border-radius: 2px;
+    }
+
+    .hamburger span:nth-child(1) { top: 0; }
+    .hamburger span:nth-child(2) { top: 5px; }
+    .hamburger span:nth-child(3) { top: 10px; }
+
     .header-title {
       font-size: 20px;
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .header-subtitle {
@@ -51,14 +116,69 @@
 
     .chat-container {
       flex: 1;
-      margin-top: 12px;
-      padding: 20px;
+      margin-top: 8px;
+      padding: 12px;
       border-radius: 16px;
       background: #ffffff;
       box-shadow: 0 10px 15px -10px rgba(15, 23, 42, 0.25);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      position: relative;
+    }
+
+    /* 空白态（ChatGPT 风格）：问候语 + 短输入框居中展示 */
+    .chat-container.chat-empty {
+      justify-content: center;
+      padding: 26px 18px 22px;
+    }
+
+    .chat-container.chat-empty .messages {
+      display: none;
+    }
+
+    .chat-container.chat-empty .empty-prompt {
+      position: static;
+      display: flex;
+      bottom: auto;
+      pointer-events: none;
+      padding: 0 0 14px;
+    }
+
+    .chat-container.chat-empty .input-area {
+      border-top: none;
+      margin-top: 0;
+      padding-top: 0;
+      justify-content: center;
+    }
+
+    .chat-container.chat-empty .input-area textarea {
+      flex: 0 1 auto;
+      width: min(560px, 92%); /* 约缩短到原来的 2/3 */
+      min-width: 260px;
+    }
+
+    .empty-prompt {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      bottom: 80px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      text-align: center;
+      padding: 24px 16px;
+      gap: 10px;
+      pointer-events: none; /* 防止遮挡输入区域交互 */
+    }
+
+    .empty-prompt-title {
+      font-size: 20px;
+      color: #111827;
+      font-weight: 650;
     }
 
     .messages {
@@ -70,33 +190,107 @@
 
     .message-row {
       display: flex;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .message-row.user {
       justify-content: flex-end;
     }
 
+    .message-body {
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message-row.user .message-body {
+      align-items: flex-end;
+    }
+
+    .message-row.assistant .message-body {
+      align-items: flex-start;
+    }
+
+    .assistant-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      align-items: center;
+    }
+
+    .assistant-mini-btn {
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      color: #111827;
+      font-size: 12px;
+      font-weight: 700;
+      width: 28px;
+      padding: 0;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .assistant-mini-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    .assistant-mini-btn.copied {
+      color: #16a34a;
+      border-color: #86efac;
+      background: #f0fdf4;
+    }
+
+    .assistant-mini-btn:hover {
+      background: #f9fafb;
+      border-color: #c7d2fe;
+    }
+
+    .assistant-mini-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .message-bubble {
-      max-width: 70%;
+      /* 让气泡“内容宽度自适应”，只在超过最大宽度时才自动换行 */
+      display: inline-block;
+      max-width: 560px;
       padding: 10px 14px;
       border-radius: 14px;
       line-height: 1.5;
       font-size: 14px;
       white-space: pre-wrap;
-      word-wrap: break-word;
+      /* 英文换行：不在单词中间强行拆开（需要完整词语/空格才能换行） */
+      word-break: normal;
+      overflow-wrap: normal;
     }
 
     .message-row.user .message-bubble {
       background: #2563eb;
       color: #ffffff;
       border-bottom-right-radius: 4px;
+      /* 用户消息不需要保留换行语义，避免短文本在窄宽度下被拆成多行/竖排 */
+      white-space: normal;
     }
 
     .message-row.assistant .message-bubble {
       background: #f3f4f6;
       color: #111827;
       border-bottom-left-radius: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .message-bubble {
+        max-width: 100%;
+      }
     }
 
     .input-area {
@@ -106,19 +300,39 @@
       display: flex;
       gap: 8px;
       align-items: flex-end;
+      min-width: 0;
+      max-width: 580px; /* 约缩短到原来的 2/3 */
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* 左右边栏都展开时：中间区域更窄，输入框也跟随收一点 */
+    body.sidebar-open.right-expanded .input-area {
+      max-width: 520px;
     }
 
     textarea {
-      flex: 1;
+      flex: 1 0 auto;
+      min-width: 200px;
       resize: none;
       border-radius: 14px;
       border: 1px solid #d1d5db;
-      padding: 10px 14px;
+      padding: 8px 12px;
       font-size: 14px;
       line-height: 1.4;
       outline: none;
-      max-height: 120px;
-      min-height: 44px;
+      max-height: 110px;
+      min-height: 40px;
+      /* 禁用自动换行：短输入时避免“两个字就换行”（保持单行，宽度不够就横向滚动） */
+      white-space: nowrap;
+      word-break: keep-all;
+      overflow-wrap: normal;
+      overflow-x: auto;
+    }
+
+    #send {
+      flex: 0 0 auto;
     }
 
     textarea:focus {
@@ -130,7 +344,7 @@
       border-radius: 999px;
       border: none;
       padding: 0 18px;
-      height: 40px;
+      height: 38px;
       background: #2563eb;
       color: #ffffff;
       font-size: 14px;
@@ -163,28 +377,1062 @@
       }
 
       .chat-container {
+        padding: 10px;
+      }
+    }
+
+    /* Right Sidebar (new): 模块服务 */
+    .right-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 360px;
+      height: 100vh;
+      background: #ffffff;
+      border-left: 2px solid #d1d5db;
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.04);
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      padding: 18px;
+      overflow: hidden; /* 顶部按钮不滚动，滚动交给下方区域 */
+      transition: width 0.22s ease;
+      /* 本身为 fixed，可作为绝对定位子元素参考 */
+    }
+
+    .right-sidebar.expanded {
+      width: 864px; /* 360 * 2.4 */
+      padding-top: 60px; /* 给左上角返回按钮留出空间，避免遮挡内容 */
+    }
+
+    .right-sidebar-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #111827;
+      margin-bottom: 12px;
+      padding: 2px 2px;
+    }
+
+    .right-sidebar-card {
+      /* 收缩态：按钮不需要再套一层“卡片框” */
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1 1 auto;
+      overflow: hidden; /* 只允许下方动态区域滚动 */
+    }
+
+    .right-module-content {
+      display: none;
+      flex: 0 0 auto; /* 让下方 AI 区域有稳定空间 */
+      margin-top: 12px;
+      border-radius: 16px;
+      min-height: 220px;
+      background: transparent;
+      overflow: auto;
+      max-height: 54vh; /* 避免把 AI 区域挤到看不见 */
+    }
+
+    /* Right module page (expanded content) */
+    .module-page {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -18px rgba(15, 23, 42, 0.35);
+      padding: 14px;
+    }
+
+    .module-page-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .module-page-title {
+      font-weight: 900;
+      font-size: 14px;
+      color: #111827;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .module-inline-back {
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      border-radius: 12px;
+      width: 38px;
+      height: 34px;
+      padding: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      color: #111827; /* 确保返回图标不会变成白色 */
+    }
+
+    .module-inline-back:hover {
+      background: #f9fafb;
+      border-color: #c7d2fe;
+    }
+
+    .module-inline-back svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      color: currentColor;
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 1100px) {
+      .right-sidebar.expanded .module-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .module-action-btn {
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 56px;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.06s ease;
+    }
+
+    .module-action-btn:hover {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+    }
+
+    .module-action-btn:active {
+      transform: translateY(1px);
+    }
+
+    .module-action-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      color: #1d4ed8;
+    }
+
+    .module-action-icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .module-action-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .module-action-title {
+      font-weight: 900;
+      font-size: 13px;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .module-action-sub {
+      font-size: 12px;
+      color: #6b7280;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .module-section {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .module-paragraph {
+      font-size: 13px;
+      color: #111827;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .module-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #111827;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .right-back-btn {
+      display: none;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 0;
+      cursor: pointer;
+      color: #111827;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      width: 42px;
+      height: 36px;
+    }
+
+    .right-back-btn:hover {
+      background: #f9fafb;
+      border-color: #c7d2fe;
+    }
+
+    .right-sidebar.expanded .right-back-btn {
+      display: flex;
+      position: absolute;
+      top: 12px;
+      left: 12px;
+    }
+
+    /* 右侧展开态：左上角显示“模块名”（例如：学习帮助） */
+    .right-sidebar.expanded .right-sidebar-title {
+      display: block;
+      position: absolute;
+      top: 18px;
+      left: 62px; /* 给左侧按钮留空间 */
+      margin: 0;
+      padding: 0;
+    }
+
+    .right-sidebar.expanded .right-sidebar-card {
+      display: none; /* 展开后进入“页面式内容”，不固定显示主模块按钮区 */
+    }
+
+    .right-sidebar.expanded .right-module-content {
+      display: block;
+    }
+
+    .right-back-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      color: #111827;
+    }
+
+    .right-module-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 0;
+      flex: 0 0 auto;
+    }
+
+    /* 右侧栏（未展开时）模块按钮下方的“动态模块”承载区 */
+    .right-dynamic-modules {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1 1 auto;
+      overflow-y: auto; /* 只有这里可滚动 */
+      padding-right: 4px;
+      padding-bottom: 6px;
+    }
+
+    /* 仅在展开态显示下方 AI 区域（列表/详情切换都在这里） */
+    .right-sidebar:not(.expanded) .right-dynamic-modules {
+      display: none;
+    }
+
+    .right-sidebar.expanded .right-dynamic-modules {
+      display: flex;
+      flex: 1 1 auto;
+      overflow-y: auto;
+    }
+
+    .right-dynamic-card {
+      width: 100%;
+      max-width: 100%;
+      border-radius: 18px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      padding: 16px 16px;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: 0 10px 20px -20px rgba(15, 23, 42, 0.35);
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.06s ease;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: nowrap;
+      min-width: 0;
+      overflow: hidden; /* 防止图标/文字挤出卡片 */
+      min-height: 64px; /* 上下更丰富 */
+    }
+
+    .right-dynamic-card:hover {
+      background: #f8fafc;
+      border-color: #c7d2fe;
+    }
+
+    .right-dynamic-card:active {
+      transform: translateY(1px);
+    }
+
+    .right-dynamic-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      color: #1d4ed8;
+    }
+
+    .right-dynamic-card-icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .right-dynamic-card-body {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1 1 auto;
+      overflow: hidden;
+    }
+
+    .right-dynamic-card-title {
+      font-weight: 900;
+      font-size: 13px;
+      color: #111827;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      word-break: break-word;
+    }
+
+    .right-dynamic-card-desc {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* 让卡片比右侧栏稍窄一点，形成“留边”观感 */
+    .right-dynamic-modules .right-dynamic-card {
+      width: calc(100% - 10px);
+      margin: 0 auto;
+    }
+
+    /* 展开态：在模块页面下方展示动态卡片 */
+    .module-dynamic-wrap {
+      margin-top: 12px;
+    }
+
+    .right-dynamic-loading {
+      width: calc(100% - 10px);
+      margin: 0 auto;
+      border-radius: 18px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    .ai-detail {
+      width: calc(100% - 10px);
+      margin: 0 auto;
+      border-radius: 18px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      padding: 14px;
+      overflow: hidden;
+    }
+
+    .ai-detail-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .ai-detail-head {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .ai-detail-title {
+      font-weight: 950;
+      font-size: 17px;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ai-detail-desc {
+      margin-top: 6px;
+      font-size: 14px;
+      color: #4b5563;
+      line-height: 1.6;
+    }
+
+    .ai-detail-text {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #111827;
+      line-height: 1.75;
+    }
+
+    .ai-detail-list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 8px;
+      font-size: 14px;
+      color: #111827;
+      line-height: 1.75;
+    }
+
+    .ai-detail-olist {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 8px;
+      font-size: 14px;
+      color: #111827;
+      line-height: 1.75;
+    }
+
+    .right-dynamic-spinner {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(37, 99, 235, 0.18);
+      border-top-color: #2563eb; /* 常见“圆环旋转”加载图标 */
+      animation: spin 0.8s linear infinite;
+      flex: 0 0 auto;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .chat-loading {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .chat-loading-spinner {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(107, 114, 128, 0.25);
+      border-top-color: #6b7280;
+      animation: spin 0.8s linear infinite;
+      flex: 0 0 auto;
+    }
+
+    .chat-loading-dots::after {
+      content: "";
+      display: inline-block;
+      width: 18px;
+      text-align: left;
+      animation: dots 1.2s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0% { content: ""; }
+      25% { content: "."; }
+      50% { content: ".."; }
+      75% { content: "..."; }
+      100% { content: ""; }
+    }
+
+    .right-module-btn {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
+      padding: 16px 16px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 14px;
+      color: #111827;
+      font-weight: 750;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 56px; /* 上下更高 */
+    }
+
+    .right-module-btn-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      color: #1d4ed8;
+    }
+
+    .right-module-btn-icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .right-module-btn-text {
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .right-module-btn:hover {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+    }
+
+    @media (min-width: 901px) {
+      body {
+        padding-right: 372px; /* 为右侧固定栏预留空间（宽度360 + 边框/间距） */
+      }
+
+      body.right-expanded {
+        /* 右侧扩展后不遮挡聊天区域 */
+        padding-right: 888px; /* 864(右侧展开宽) + 24(留白)；避免聊天白板离右侧栏太远 */
+      }
+    }
+
+    @media (max-width: 900px) {
+      .right-sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-left: none;
+        border-top: 2px solid #d1d5db;
+        box-shadow: none;
         padding: 12px;
+      }
+      body {
+        padding-right: 0;
+      }
+    }
+
+    /* Sidebar (GPT-like) */
+    .sidebar-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      z-index: 50;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 312px;
+      height: 100vh;
+      background: #ffffff;
+      border-right: 2px solid #d1d5db;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.04);
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      transition: left 0.2s ease;
+      padding: 14px;
+    }
+
+    .sidebar.collapsed {
+      left: -268px; /* 仅露出约 44px 的空白边与边框 */
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    /* 桌面端收起时：只保留“展开/收起”按钮，不显示其它内容 */
+    .sidebar.collapsed .sidebar-title {
+      display: none;
+    }
+
+    .sidebar.collapsed .login-card {
+      display: none;
+    }
+
+    .sidebar.collapsed .sidebar-section {
+      display: none;
+    }
+
+    .sidebar.collapsed .sidebar-hint {
+      display: none;
+    }
+
+    .sidebar.collapsed #historyList {
+      display: none;
+    }
+
+    .sidebar.collapsed .sidebar-header {
+      /* 把按钮锁在“可见窄栏(44px)”里：横向居中，纵向保持顶部 */
+      position: absolute;
+      top: 14px;
+      right: 0;
+      width: 44px;
+      padding: 0;
+      justify-content: center;
+      gap: 0;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    /* （切换按钮改为放在侧边栏右上角） */
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      flex-direction: row-reverse; /* 按钮在左，标题在右（展开态） */
+      padding: 4px 2px 12px;
+      overflow: hidden; /* 避免收起态/贴边定位导致按钮溢出可视区域 */
+    }
+
+    /* 展开态：把收缩按钮挪到更靠边的位置（与 flex-direction: row-reverse 配套） */
+    .sidebar:not(.collapsed) .sidebar-close {
+      right: auto;
+      left: 0;
+    }
+
+    /* 桌面端收缩态：按钮回到右侧，标题隐藏 */
+    .sidebar.collapsed .sidebar-header {
+      flex-direction: row;
+      justify-content: center; /* 在可见窄栏内横向居中按钮 */
+      gap: 0;
+    }
+
+    .sidebar-title {
+      font-weight: 650;
+      font-size: 14px;
+      color: #111827;
+    }
+
+    .sidebar-close {
+      width: 20.58px; /* 再在当前基础上加宽 2/5（14.7 * 1.4） */
+      min-width: 20.58px;
+      height: 28px;
+      border-radius: 9px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      right: 0;
+      padding: 0;
+      flex: 0 0 auto;
+    }
+
+    /* 收起态：可见区域很窄，按钮不要再向外“挤出” */
+    .sidebar.collapsed .sidebar-close {
+      position: relative; /* 跟随侧边栏一起移动，避免“闪现” */
+      left: auto;
+      right: auto;
+      top: auto;
+      transform: none;
+    }
+
+    .sidebar-toggle-icon {
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1;
+      color: #111827;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-toggle-icon svg {
+      width: 12px;
+      height: 14px;
+      display: block;
+    }
+
+    /* 左侧收缩按钮：展开显示 "<<"，收缩显示 ">>" */
+    .sidebar-icon-expand {
+      display: none;
+    }
+
+    body.sidebar-open .sidebar-icon-collapse {
+      display: block;
+    }
+
+    body.sidebar-open .sidebar-icon-expand {
+      display: none;
+    }
+
+    body:not(.sidebar-open) .sidebar-icon-collapse {
+      display: none;
+    }
+
+    body:not(.sidebar-open) .sidebar-icon-expand {
+      display: block;
+    }
+
+    .sidebar-section {
+      margin-top: 10px;
+    }
+
+    .login-card {
+      margin-top: 4px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #f8fafc;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .login-card:hover {
+      border-color: #cbd5e1;
+      background: #f1f5f9;
+    }
+
+    .login-title {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    .login-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .login-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .login-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid #d1d5db;
+      object-fit: cover;
+      flex: 0 0 auto;
+      background: #fff;
+    }
+
+    .login-name {
+      font-size: 13px;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
+    }
+
+    .login-action {
+      font-size: 12px;
+      color: #2563eb;
+      flex: 0 0 auto;
+    }
+
+    .logout-btn {
+      margin-left: auto;
+      border: 1px solid #dbeafe;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-radius: 999px;
+      font-size: 11px;
+      height: 24px;
+      padding: 0 10px;
+      cursor: pointer;
+    }
+
+    .sidebar-item {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 10px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 13px;
+      color: #111827;
+    }
+
+    .sidebar-item:hover {
+      background: #f9fafb;
+      border-color: #e5e7eb;
+    }
+
+    .sidebar-hint {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .history-item {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 10px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 13px;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item:hover {
+      background: #f9fafb;
+      border-color: #e5e7eb;
+    }
+
+    .history-item.active {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+      color: #3730a3;
+    }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        width: 280px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .menu-btn {
+        display: flex;
+      }
+
+      .sidebar {
+        left: -320px; /* 移动端默认隐藏 */
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      body.sidebar-open {
+        padding-left: 0;
       }
     }
   </style>
 </head>
 <body>
+  <div class="sidebar-mask" id="sidebarMask"></div>
+  <aside class="sidebar" id="sidebar" aria-label="侧边栏">
+    <div class="sidebar-header">
+      <div class="sidebar-title" id="leftSidebarModuleLabel">西浦生活助手</div>
+      <button class="sidebar-close" id="sidebarClose" aria-label="切换侧边栏">
+        <span class="sidebar-toggle-icon" aria-hidden="true">
+          <!-- Expanded: show "<<" ; Collapsed: show ">>" -->
+          <span class="sidebar-icon-collapse" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="14 18 9 12 14 6"></polyline>
+              <polyline points="7 18 2 12 7 6"></polyline>
+            </svg>
+          </span>
+          <span class="sidebar-icon-expand" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="10 18 15 12 10 6"></polyline>
+              <polyline points="17 18 22 12 17 6"></polyline>
+            </svg>
+          </span>
+        </span>
+      </button>
+    </div>
+
+    <div class="login-card" id="loginCard" role="button" tabindex="0" aria-label="登录入口">
+      <div class="login-title">账号</div>
+      <div class="login-content" id="loginContent"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <button class="sidebar-item" id="btnNewChat">＋ 开始新对话</button>
+      <button class="sidebar-item" id="btnClear" type="button">🧹 清空对话</button>
+    </div>
+
+    <div class="sidebar-hint">
+      历史记录
+    </div>
+
+    <div class="sidebar-section" style="margin-top:10px;">
+      <div id="historyList" class="history-list"></div>
+    </div>
+  </aside>
+
+  <aside class="right-sidebar" id="rightSidebar" aria-label="右侧板块服务">
+    <button class="right-back-btn" id="rightBackBtn" type="button" aria-label="返回" title="返回">
+      <!-- Back icon (inline SVG) -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+    <div class="right-sidebar-title" id="rightSidebarTitle">板块服务</div>
+    <div class="right-sidebar-card">
+      <div class="right-module-buttons" aria-label="板块按钮列表">
+        <button class="right-module-btn" type="button" data-module="study">
+          <span class="right-module-btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M4 4.5A2.5 2.5 0 0 1 6.5 7H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+          </span>
+          <span class="right-module-btn-text">学习帮助</span>
+        </button>
+        <button class="right-module-btn" type="button" data-module="intern">
+          <span class="right-module-btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="7" width="18" height="14" rx="2"></rect>
+              <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+              <path d="M3 13h18"></path>
+            </svg>
+          </span>
+          <span class="right-module-btn-text">实习就业</span>
+        </button>
+        <button class="right-module-btn" type="button" data-module="campus">
+          <span class="right-module-btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10L12 5 2 10l10 5 10-5z"></path>
+              <path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"></path>
+            </svg>
+          </span>
+          <span class="right-module-btn-text">校园活动</span>
+        </button>
+        <button class="right-module-btn" type="button" data-module="life">
+          <span class="right-module-btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path>
+            </svg>
+          </span>
+          <span class="right-module-btn-text">生活支持</span>
+        </button>
+        <button class="right-module-btn" type="button" data-module="research">
+          <span class="right-module-btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 2v6l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 17l-5-9V2"></path>
+              <path d="M8 8h8"></path>
+            </svg>
+          </span>
+          <span class="right-module-btn-text">科研探索</span>
+        </button>
+      </div>
+    </div>
+    <div id="rightModuleContent" class="right-module-content"></div>
+    <!-- 展开态下方 AI 区域（列表/详情都在这里切换） -->
+    <div id="rightDynamicModules" class="right-dynamic-modules" aria-label="动态模块区域"></div>
+  </aside>
+
   <div class="app">
     <header class="header">
-      <div>
-        <div class="header-title">XJTLU学习生活助理</div>
+      <div class="header-left">
+        <button class="menu-btn" id="menuBtn" aria-label="打开侧边栏">
+          <div class="hamburger" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+        </button>
+        <div class="header-title">西浦生活助手</div>
       </div>
       <div class="status" id="status">就绪</div>
     </header>
 
     <main class="chat-container">
       <div id="messages" class="messages"></div>
+      <div id="emptyPrompt" class="empty-prompt">
+        <div class="empty-prompt-title">今天有什么可以帮到你？</div>
+        <div style="font-size:12px;color:#6b7280;">从“宿舍/校园卡/选课/报到/生活安排”里选一个问问我。</div>
+      </div>
 
       <div class="input-area">
         <textarea
           id="input"
           rows="1"
-          placeholder="向模型提问吧，比如：帮我写一段 SQL 查询..."
+          wrap="off"
+          placeholder="请输入你的问题…"
         ></textarea>
         <button id="send">发送</button>
       </div>
@@ -196,51 +1444,2598 @@
     const inputEl = document.getElementById("input");
     const sendBtn = document.getElementById("send");
     const statusEl = document.getElementById("status");
+    const sidebarEl = document.getElementById("sidebar");
+    const sidebarMaskEl = document.getElementById("sidebarMask");
+    const menuBtnEl = document.getElementById("menuBtn");
+    const sidebarCloseEl = document.getElementById("sidebarClose");
+    const btnNewChatEl = document.getElementById("btnNewChat");
+    const btnClearEl = document.getElementById("btnClear");
+    const emptyPromptEl = document.getElementById("emptyPrompt");
+    const historyListEl = document.getElementById("historyList");
+    const loginCardEl = document.getElementById("loginCard");
+    const loginContentEl = document.getElementById("loginContent");
+    const rightSidebarEl = document.getElementById("rightSidebar");
+    const rightModuleContentEl = document.getElementById("rightModuleContent");
+    const rightBackBtnEl = document.getElementById("rightBackBtn");
+    const leftSidebarModuleLabelEl = document.getElementById("leftSidebarModuleLabel");
+    const rightSidebarTitleEl = document.getElementById("rightSidebarTitle");
+    const rightDynamicModulesEl = document.getElementById("rightDynamicModules");
+    const chatContainerEl = document.querySelector(".chat-container");
 
-    function appendMessage(role, text) {
+    const MODULE_NAME_MAP = {
+      study: "学习帮助",
+      intern: "实习就业",
+      campus: "校园活动",
+      life: "生活支持",
+      research: "科研探索",
+    };
+
+    const LEFT_SIDEBAR_TITLE = "西浦生活助手";
+    let currentModuleName = LEFT_SIDEBAR_TITLE;
+    let rightModuleKey = "";
+    let rightPageStack = [];
+    let dynamicModulesByKey = {
+      study: [],
+      intern: [],
+      campus: [],
+      life: [],
+      research: [],
+    };
+
+    // 预生成缓存：大模块点击时一次性把“模块 + 子模块”的 QA 卡片都取回来
+    // key 约定：大模块用 "campus"，子模块用 "campus_volunteer" 这种完整 key
+    let dynamicModulesPrefetch = {};
+    let dynamicLoadingByKey = {};
+    let dynamicRewriteLoadingByKey = {};
+    let dynamicRewriteCacheByKey = {}; // { [key]: { ts:number, list:any[] } }
+    let dynamicDetailCacheByKey = {}; // { [detailKey]: { ts:number, data:{title,desc,details,icon} } }
+    const DYNAMIC_REWRITE_TTL_MS = 5 * 60 * 1000;
+    let lastSortQueryByKey = {}; // { [key]: string } 用于“同 key 不同 query 重新排序”
+    let isChatStreaming = false;
+    let pendingListRewriteKeys = new Set();
+    let pendingDetailCards = [];
+    let isAwaitingAssistant = false;
+    let lastClickedModuleKey = "";
+    let activeDynamicKey = "";
+    let activeDynamicCard = null;
+    // 右侧 AI 区域视图模式：详情展开时，后台可更新数据，但不要把当前详情 UI 刷掉
+    let dynamicViewMode = "list"; // "list" | "detail"
+
+    function updateLeftSidebarModuleLabel() {
+      if (!leftSidebarModuleLabelEl) return;
+      // 左侧栏标题固定，不跟随右侧模块变化
+      leftSidebarModuleLabelEl.textContent = LEFT_SIDEBAR_TITLE;
+    }
+
+    function setRightPageStack(stack) {
+      rightPageStack = Array.isArray(stack) ? stack : [];
+    }
+
+    function pushRightPage(page) {
+      rightPageStack.push(page);
+    }
+
+    function popRightPage() {
+      rightPageStack.pop();
+    }
+
+    function currentRightPage() {
+      return rightPageStack[rightPageStack.length - 1] || null;
+    }
+
+    function svgIcon(name) {
+      if (name === "book") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M4 4.5A2.5 2.5 0 0 1 6.5 7H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+        `;
+      }
+      if (name === "globe") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M2 12h20"></path>
+            <path d="M12 2a15 15 0 0 1 0 20"></path>
+            <path d="M12 2a15 15 0 0 0 0 20"></path>
+          </svg>
+        `;
+      }
+      if (name === "calendar") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <path d="M16 2v4M8 2v4M3 10h18"></path>
+          </svg>
+        `;
+      }
+      if (name === "pen") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+          </svg>
+        `;
+      }
+      if (name === "target") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="12" cy="12" r="5"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M22 12h-2"></path>
+          </svg>
+        `;
+      }
+      if (name === "arrow-left") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        `;
+      }
+      if (name === "briefcase") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="7" width="18" height="14" rx="2"></rect>
+            <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+            <path d="M3 13h18"></path>
+          </svg>
+        `;
+      }
+      if (name === "school") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 10L12 5 2 10l10 5 10-5z"></path>
+            <path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"></path>
+          </svg>
+        `;
+      }
+      if (name === "heart") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path>
+          </svg>
+        `;
+      }
+      if (name === "flask") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 2v6l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 17l-5-9V2"></path>
+            <path d="M8 8h8"></path>
+          </svg>
+        `;
+      }
+      if (name === "home") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 10.5L12 3l9 7.5"></path>
+            <path d="M5 10v10a2 2 0 0 0 2 2h3v-7h4v7h3a2 2 0 0 0 2-2V10"></path>
+          </svg>
+        `;
+      }
+      if (name === "map") {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"></path>
+            <path d="M9 3v15"></path>
+            <path d="M15 6v15"></path>
+          </svg>
+        `;
+      }
+      return "";
+    }
+
+    function renderModulePage({ title, showInlineBack, bodyHtml }) {
+      const backBtnHtml = showInlineBack
+        ? `<button class="module-inline-back" type="button" data-right-action="back" aria-label="返回上一级" title="返回">${svgIcon(
+            "arrow-left"
+          )}</button>`
+        : `<span style="width:38px;flex:0 0 auto;"></span>`;
+
+      return `
+        <div class="module-page" role="region" aria-label="${String(title || "")}">
+          <div class="module-page-topbar">
+            ${backBtnHtml}
+            <div class="module-page-title">${String(title || "")}</div>
+            <span style="width:38px;flex:0 0 auto;"></span>
+          </div>
+          ${bodyHtml || ""}
+        </div>
+      `;
+    }
+
+    function renderStudyHome() {
+      const bodyHtml = `
+        <div class="module-grid" aria-label="学习帮助功能列表">
+          <button class="module-action-btn" type="button" data-right-page="study_my">
+            <div class="module-action-icon">${svgIcon("target")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">我的学习</div>
+              <div class="module-action-sub">目标/进度/本周待办与复盘</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_course">
+            <div class="module-action-icon">${svgIcon("book")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">课程学习</div>
+              <div class="module-action-sub">预习/复习/作业/考试复盘</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_english">
+            <div class="module-action-icon">${svgIcon("globe")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">英语教育</div>
+              <div class="module-action-sub">听说读写与雅思托福规划</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_plan">
+            <div class="module-action-icon">${svgIcon("calendar")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">学习计划</div>
+              <div class="module-action-sub">周计划/番茄钟/复习节奏</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_writing">
+            <div class="module-action-icon">${svgIcon("pen")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">论文与写作</div>
+              <div class="module-action-sub">结构/引用/润色与反馈</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_methods">
+            <div class="module-action-icon">${svgIcon("target")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">学习方法</div>
+              <div class="module-action-sub">高效记忆、做题与复盘模板</div>
+            </div>
+          </button>
+        </div>
+      `;
+      return renderModulePage({ title: "学习帮助", showInlineBack: false, bodyHtml });
+    }
+
+    function renderStudyCourse() {
+      const bodyHtml = `
+        <div class="module-paragraph">先选一门课（我按常见课程给你做了更真实的学习路径与资料清单）。</div>
+        <div class="module-grid" aria-label="课程列表">
+          <button class="module-action-btn" type="button" data-right-page="study_course_calc">
+            <div class="module-action-icon">${svgIcon("book")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">微积分 / 数学分析</div>
+              <div class="module-action-sub">极限、导数、积分、级数、常微分</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_course_stats">
+            <div class="module-action-icon">${svgIcon("target")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">概率统计</div>
+              <div class="module-action-sub">分布、期望、估计、检验、回归</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_course_cs">
+            <div class="module-action-icon">${svgIcon("pen")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">编程基础（Python/C）</div>
+              <div class="module-action-sub">语法、调试、数据结构、刷题路线</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_course_econ">
+            <div class="module-action-icon">${svgIcon("calendar")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">经济学原理（微/宏）</div>
+              <div class="module-action-sub">供需、弹性、博弈、IS-LM、增长</div>
+            </div>
+          </button>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>你也可以直接说：</b>“课程名 + 章节 + 你卡住的题型/概念”，我会按你课件风格组织答案。</div>
+        </div>
+      `;
+      return renderModulePage({ title: "课程学习", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyEnglish() {
+      const bodyHtml = `
+        <div class="module-paragraph">先选一个方向（我会给你更细的训练安排与可执行任务）。</div>
+        <div class="module-grid" aria-label="英语学习方向">
+          <button class="module-action-btn" type="button" data-right-page="study_english_vocab">
+            <div class="module-action-icon">${svgIcon("book")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">单词与语法</div>
+              <div class="module-action-sub">高频词表、记忆策略、语法纠错</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_english_reading">
+            <div class="module-action-icon">${svgIcon("target")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">阅读</div>
+              <div class="module-action-sub">定位技巧、题型方法、速度提升</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_english_writing">
+            <div class="module-action-icon">${svgIcon("pen")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">写作</div>
+              <div class="module-action-sub">结构、论证、句式升级、批改清单</div>
+            </div>
+          </button>
+          <button class="module-action-btn" type="button" data-right-page="study_english_speaking">
+            <div class="module-action-icon">${svgIcon("globe")}</div>
+            <div class="module-action-text">
+              <div class="module-action-title">口语与听力</div>
+              <div class="module-action-sub">跟读复述、话题卡、精听听写</div>
+            </div>
+          </button>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>你可以这样问：</b>“目标：雅思6.5；时间：12周；弱项：写作+口语；每天可用45分钟”。</div>
+        </div>
+      `;
+      return renderModulePage({ title: "英语教育", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyPlan() {
+      const bodyHtml = `
+        <div class="module-paragraph">把你的一周拆成可执行的学习块（学习-复盘-休息）。</div>
+        <ul class="module-list">
+          <li>每周 3 个最重要目标（可量化）</li>
+          <li>每天 2 个深度学习块（45-60 分钟）</li>
+          <li>每天 10 分钟复盘（今天学了什么/卡点/明天怎么改）</li>
+        </ul>
+      `;
+      return renderModulePage({ title: "学习计划", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyMy() {
+      const bodyHtml = `
+        <div class="module-paragraph">这是一个“我的学习”面板（后续你要接本地存储/同步也很方便）。先按真实学习场景给你做了可直接照做的模板。</div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>本周目标（示例）</b></div>
+          <ul class="module-list">
+            <li>微积分：完成第 3 章泰勒展开与 20 道典型题（含错题复盘）</li>
+            <li>英语：完成 4 次口语录音 + 2 篇 Task 2 写作（带自查清单）</li>
+            <li>编程：完成 10 道数组/字符串题，整理 1 份调试清单</li>
+          </ul>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>今天我该做什么？</b></div>
+          <div class="module-grid">
+            <button class="module-action-btn" type="button" data-right-page="study_my_today">
+              <div class="module-action-icon">${svgIcon("calendar")}</div>
+              <div class="module-action-text">
+                <div class="module-action-title">生成今日任务</div>
+                <div class="module-action-sub">按 60-90 分钟版本拆分学习块</div>
+              </div>
+            </button>
+            <button class="module-action-btn" type="button" data-right-page="study_my_review">
+              <div class="module-action-icon">${svgIcon("target")}</div>
+              <div class="module-action-text">
+                <div class="module-action-title">复盘模板</div>
+                <div class="module-action-sub">错因分类 + 明日改进</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      `;
+      return renderModulePage({ title: "我的学习", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyMyToday() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>60 分钟版本（示例）</b></div>
+        <ul class="module-list">
+          <li>20 分钟：微积分第 3 章小结（定义/常用展开式/误差项）</li>
+          <li>25 分钟：做 3 道代表题（展开近似、求极限、误差估计）</li>
+          <li>15 分钟：错题复盘（错因 + 正确套路 + 防错提醒一句话）</li>
+        </ul>
+        <div class="module-section">
+          <div class="module-paragraph"><b>90 分钟版本（示例）</b></div>
+          <ul class="module-list">
+            <li>30 分钟：英语口语 Part 2 话题卡（录音一次）</li>
+            <li>40 分钟：写作 Task 2 立意与提纲（2 个观点 + 反例）</li>
+            <li>20 分钟：编程题 2 道（先写伪代码，再写实现）</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "今日任务", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyMyReview() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>每日复盘（可复制）</b></div>
+        <ul class="module-list">
+          <li>今天我完成了什么？（列 3 条）</li>
+          <li>卡点是什么？（概念/计算/方法/注意力/时间管理）</li>
+          <li>我明天要怎么改？（具体到“下一次怎么做”）</li>
+          <li>一个小奖励：做完后可以做什么放松 10 分钟？</li>
+        </ul>
+      `;
+      return renderModulePage({ title: "复盘模板", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyCourseCalc() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>微积分 / 数学分析</b>（示例课程）</div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>重点章节</b></div>
+          <div class="module-grid">
+            <button class="module-action-btn" type="button" data-right-page="study_course_calc_limits">
+              <div class="module-action-icon">${svgIcon("target")}</div>
+              <div class="module-action-text">
+                <div class="module-action-title">极限与连续</div>
+                <div class="module-action-sub">等价无穷小、夹逼、洛必达常见坑</div>
+              </div>
+            </button>
+            <button class="module-action-btn" type="button" data-right-page="study_course_calc_series">
+              <div class="module-action-icon">${svgIcon("book")}</div>
+              <div class="module-action-text">
+                <div class="module-action-title">泰勒展开与级数</div>
+                <div class="module-action-sub">展开式、收敛、余项与误差估计</div>
+              </div>
+            </button>
+          </div>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>推荐练习顺序</b></div>
+          <ul class="module-list">
+            <li>先做 5 道“等价无穷小/常用展开式”快速题（建立手感）</li>
+            <li>再做 10 道“证明极限/判断收敛”题（写出步骤模板）</li>
+            <li>最后做 5 道“综合题”（把图像直觉 + 推导结合）</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "微积分 / 数学分析", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyCourseCalcLimits() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>极限与连续：常用解题模板</b></div>
+        <ul class="module-list">
+          <li>识别形式：0/0、∞/∞、0·∞、∞-∞、1^∞、0^0、∞^0</li>
+          <li>优先策略：等价无穷小 → 泰勒展开 → 变量代换 → 洛必达（最后再用）</li>
+          <li>检查：展开阶数是否够、是否引入高阶误差、是否漏了绝对值/正负号</li>
+        </ul>
+        <div class="module-section">
+          <div class="module-paragraph"><b>易错点清单</b></div>
+          <ul class="module-list">
+            <li>把 \(\\sin x \\approx x\) 用在 \(x\\to a\\neq 0\) 的情形（需要先移到 0）</li>
+            <li>洛必达条件没验证：可导、分母不为 0、形式正确</li>
+            <li>等价替换范围搞错：只有在同阶小量才可直接替换</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "极限与连续", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyCourseCalcSeries() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>泰勒展开与级数：快速复习卡</b></div>
+        <ul class="module-list">
+          <li>常用展开：\(e^x\\)、\(\\ln(1+x)\\)、\(\\sin x\\)、\(\\cos x\\)、\(1/(1-x)\\)</li>
+          <li>做题顺序：先写目标“需要到几阶” → 再展开 → 合并同阶 → 看主导项</li>
+          <li>误差：余项 \(R_n(x)\) 估计决定你能不能“近似”</li>
+        </ul>
+        <div class="module-section">
+          <div class="module-paragraph"><b>典型题型</b></div>
+          <ul class="module-list">
+            <li>用展开求极限（主导项抵消）</li>
+            <li>比较判别（用主项与标准级数对比）</li>
+            <li>误差估计（给定 x 范围下的上界）</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "泰勒展开与级数", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyCourseStats() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>概率统计</b>（示例课程）</div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>核心路线</b></div>
+          <ul class="module-list">
+            <li>随机变量与分布：离散/连续、常见分布、CDF/PDF/PMF</li>
+            <li>期望与方差：线性性质、协方差、相关系数</li>
+            <li>大数定律与中心极限定理：何时可近似正态</li>
+            <li>参数估计与检验：置信区间、假设检验、p-value</li>
+          </ul>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>练习建议</b></div>
+          <ul class="module-list">
+            <li>每个分布都整理：均值、方差、MGF（若讲）与典型应用</li>
+            <li>错题按“概念/计算/建模”三类归档</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "概率统计", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyCourseCS() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>编程基础（Python/C）</b>（示例课程）</div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>一周刷题路线（示例）</b></div>
+          <ul class="module-list">
+            <li>Day1：数组/循环（边界、下标、空数组）</li>
+            <li>Day2：字符串（双指针、切片、计数）</li>
+            <li>Day3：哈希表（去重、频次、Two Sum 类）</li>
+            <li>Day4：栈/队列（括号匹配、单调栈入门）</li>
+            <li>Day5：基础递归（阶乘、回溯模板）</li>
+          </ul>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>调试清单</b></div>
+          <ul class="module-list">
+            <li>先打印输入规模、关键变量（而不是整段输出）</li>
+            <li>写 3 个测试：最小值/最大值/随机值</li>
+            <li>遇到 WA：先查边界，再查 off-by-one，再查类型/溢出</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "编程基础", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyCourseEcon() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>经济学原理（微/宏）</b>（示例课程）</div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>高频考点</b></div>
+          <ul class="module-list">
+            <li>微观：供需与弹性、消费者/生产者剩余、市场结构</li>
+            <li>博弈：占优策略、纳什均衡、囚徒困境类题</li>
+            <li>宏观：GDP、通胀、失业、IS-LM/AD-AS（若覆盖）</li>
+          </ul>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>答题套路</b></div>
+          <ul class="module-list">
+            <li>先画图：坐标、曲线移动方向、均衡点</li>
+            <li>再写结论：价格/数量怎么变，福利怎么变</li>
+            <li>最后补一句原因：因为需求/供给变化带来的边际影响</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "经济学原理", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyEnglishVocab() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>单词与语法：可执行训练（示例）</b></div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>每日 20 分钟词汇</b></div>
+          <ul class="module-list">
+            <li>8 分钟：新词 12 个（词根词缀/同反义/例句）</li>
+            <li>7 分钟：旧词复习（间隔：1-3-7-14 天）</li>
+            <li>5 分钟：造句（每个新词 1 句，尽量用同一主题）</li>
+          </ul>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>语法纠错清单</b></div>
+          <ul class="module-list">
+            <li>主谓一致、时态一致、冠词 a/an/the</li>
+            <li>从句连接词（which/that/where/when）</li>
+            <li>搭配错误（do a decision ✗ → make a decision ✓）</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "单词与语法", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyEnglishReading() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>阅读：速度与正确率一起提</b></div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>练习流程（30 分钟）</b></div>
+          <ul class="module-list">
+            <li>3 分钟：扫标题/小标题/首尾段，预判结构</li>
+            <li>20 分钟：做题（先定位，再读句子，不整篇精读）</li>
+            <li>7 分钟：错题复盘（错在定位/同义替换/推断过度）</li>
+          </ul>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>常见题型小抄</b></div>
+          <ul class="module-list">
+            <li>主旨题：看段首主题句 + 反复出现的概念</li>
+            <li>T/F/NG：只在原文“明确说了”才 True/False，不确定就是 NG</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "阅读", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyEnglishWriting() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>写作：从“可控得分”开始</b></div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>Task 2 结构模板（示例）</b></div>
+          <ul class="module-list">
+            <li>引言：改写题目 + 立场（agree/disagree/partial）</li>
+            <li>主体 1：观点 + 解释 + 例子</li>
+            <li>主体 2：观点 + 对比/让步 + 例子</li>
+            <li>结论：总结 + 建议/展望（可选）</li>
+          </ul>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>自查清单（写完必做）</b></div>
+          <ul class="module-list">
+            <li>每段第一句是否是主题句？</li>
+            <li>连接词是否重复？（however/therefore/for example）</li>
+            <li>是否有 3 个以上语法错误？（时态/冠词/单复数）</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "写作", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyEnglishSpeaking() {
+      const bodyHtml = `
+        <div class="module-paragraph"><b>口语与听力：把输出做成习惯</b></div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>口语（每周 3 次）</b></div>
+          <ul class="module-list">
+            <li>选 1 个话题卡：人物/地点/经历/计划</li>
+            <li>写 6 句要点（不用长句）</li>
+            <li>录音 1 次 → 听回放 → 标出 3 个卡顿点</li>
+          </ul>
+        </div>
+        <div class="module-section">
+          <div class="module-paragraph"><b>听力（每天 10 分钟）</b></div>
+          <ul class="module-list">
+            <li>精听一小段：听写 → 对照 → 跟读 → 复述</li>
+            <li>重点抓：连读、弱读、同义替换</li>
+          </ul>
+        </div>
+      `;
+      return renderModulePage({ title: "口语与听力", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyWriting() {
+      const bodyHtml = `
+        <div class="module-paragraph">论文与写作：结构、论证逻辑、表达润色、引用规范。</div>
+        <ul class="module-list">
+          <li>先定提纲：论点-论据-反例-结论</li>
+          <li>再写段落：主题句-展开-例子-总结句</li>
+          <li>最后润色：术语一致、句式多样、引用格式检查</li>
+        </ul>
+      `;
+      return renderModulePage({ title: "论文与写作", showInlineBack: true, bodyHtml });
+    }
+
+    function renderStudyMethods() {
+      const bodyHtml = `
+        <div class="module-paragraph">学习方法与模板（需要的话我可以按你的课程生成可复制模板）。</div>
+        <ul class="module-list">
+          <li>费曼：用自己的话讲清楚，暴露漏洞</li>
+          <li>间隔重复：1-3-7-14 天复习节奏</li>
+          <li>错题复盘：错因分类（概念/计算/审题/方法）</li>
+        </ul>
+      `;
+      return renderModulePage({ title: "学习方法", showInlineBack: true, bodyHtml });
+    }
+
+    function renderRightModule() {
+      if (!rightModuleContentEl) return;
+      const page = currentRightPage();
+
+      // 当前动态 key：优先子模块页，其次模块首页
+      if (!page || /_home$/.test(String(page))) activeDynamicKey = rightModuleKey;
+      else activeDynamicKey = String(page);
+
+      // 动态详情页（任意模块通用）
+      if (page === "dyn_detail" && activeDynamicCard) {
+        const detailsText = String(activeDynamicCard.details || "").trim();
+        const bodyHtml = `
+          <div class="module-paragraph">${detailsText ? _escapeAndLinkify(detailsText).replace(/\n/g, "<br>") : "（暂无详情）"}</div>
+          ${
+            activeDynamicCard.action
+              ? `<div class="module-section">
+                   <button class="module-action-btn" type="button" data-right-action="use_action">
+                     <div class="module-action-icon">${svgIcon("pen")}</div>
+                     <div class="module-action-text">
+                       <div class="module-action-title">把这条建议填入输入框</div>
+                       <div class="module-action-sub">${_escapeHtml(String(activeDynamicCard.action)).slice(0, 40)}${
+                  String(activeDynamicCard.action).length > 40 ? "…" : ""
+                }</div>
+                     </div>
+                   </button>
+                 </div>`
+              : ""
+          }
+        `;
+        rightModuleContentEl.innerHTML = renderModulePage({
+          title: activeDynamicCard.title || "推荐内容",
+          showInlineBack: true,
+          bodyHtml,
+        });
+        return;
+      }
+
+      if (rightModuleKey === "study") {
+        if (!page || page === "study_home") rightModuleContentEl.innerHTML = renderStudyHome();
+        else if (page === "study_my") rightModuleContentEl.innerHTML = renderStudyMy();
+        else if (page === "study_my_today") rightModuleContentEl.innerHTML = renderStudyMyToday();
+        else if (page === "study_my_review") rightModuleContentEl.innerHTML = renderStudyMyReview();
+        else if (page === "study_course") rightModuleContentEl.innerHTML = renderStudyCourse();
+        else if (page === "study_course_calc") rightModuleContentEl.innerHTML = renderStudyCourseCalc();
+        else if (page === "study_course_calc_limits") rightModuleContentEl.innerHTML = renderStudyCourseCalcLimits();
+        else if (page === "study_course_calc_series") rightModuleContentEl.innerHTML = renderStudyCourseCalcSeries();
+        else if (page === "study_course_stats") rightModuleContentEl.innerHTML = renderStudyCourseStats();
+        else if (page === "study_course_cs") rightModuleContentEl.innerHTML = renderStudyCourseCS();
+        else if (page === "study_course_econ") rightModuleContentEl.innerHTML = renderStudyCourseEcon();
+        else if (page === "study_english") rightModuleContentEl.innerHTML = renderStudyEnglish();
+        else if (page === "study_english_vocab") rightModuleContentEl.innerHTML = renderStudyEnglishVocab();
+        else if (page === "study_english_reading") rightModuleContentEl.innerHTML = renderStudyEnglishReading();
+        else if (page === "study_english_writing") rightModuleContentEl.innerHTML = renderStudyEnglishWriting();
+        else if (page === "study_english_speaking") rightModuleContentEl.innerHTML = renderStudyEnglishSpeaking();
+        else if (page === "study_plan") rightModuleContentEl.innerHTML = renderStudyPlan();
+        else if (page === "study_writing") rightModuleContentEl.innerHTML = renderStudyWriting();
+        else if (page === "study_methods") rightModuleContentEl.innerHTML = renderStudyMethods();
+        else rightModuleContentEl.innerHTML = renderStudyHome();
+        // AI 推荐内容在右侧栏下方区域渲染（不在页面内容里重复插入）
+        // 子模块为空时回退到大模块列表，避免 AI 框“消失”
+        renderDynamicModulesForKey(getBestDynamicKey());
+        return;
+      }
+      if (rightModuleKey === "intern") {
+        if (!page || page === "intern_home") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "实习就业",
+            showInlineBack: false,
+            bodyHtml: `
+              <div class="module-grid" aria-label="实习就业功能列表">
+                <button class="module-action-btn" type="button" data-right-page="intern_resume">
+                  <div class="module-action-icon">${svgIcon("briefcase")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">简历与作品集</div>
+                    <div class="module-action-sub">模板、项目描述、量化成果</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="intern_interview">
+                  <div class="module-action-icon">${svgIcon("target")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">面试训练</div>
+                    <div class="module-action-sub">自我介绍、常见题、STAR</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="intern_network">
+                  <div class="module-action-icon">${svgIcon("map")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">投递与内推</div>
+                    <div class="module-action-sub">岗位筛选、投递节奏、跟进话术</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="intern_plan">
+                  <div class="module-action-icon">${svgIcon("calendar")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">30 天冲刺计划</div>
+                    <div class="module-action-sub">一周一迭代：简历-项目-面试</div>
+                  </div>
+                </button>
+              </div>
+            `,
+          });
+        } else if (page === "intern_resume") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "简历与作品集",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>简历结构（推荐 1 页）</b></div>
+              <ul class="module-list">
+                <li>教育背景：GPA/核心课程/奖项（只写最强）</li>
+                <li>项目经历：每个项目 3-5 条 bullet，突出“你的贡献 + 指标”</li>
+                <li>实习/竞赛：用 STAR/结果导向写法</li>
+                <li>技能：分层（熟练/了解），避免堆砌</li>
+              </ul>
+              <div class="module-section">
+                <div class="module-paragraph"><b>项目描述模板（可直接套）</b></div>
+                <ul class="module-list">
+                  <li>背景：解决什么问题/面向谁</li>
+                  <li>动作：你做了哪些关键设计/实现</li>
+                  <li>结果：性能/准确率/效率提升多少（没有就给对比）</li>
+                </ul>
+              </div>
+              <div class="module-section">
+                <div class="module-paragraph"><b>下一步</b>：把你现有简历粘贴出来，我按岗位方向逐条改写并给出缺口清单。</div>
+              </div>
+            `,
+          });
+        } else if (page === "intern_interview") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "面试训练",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>一分钟自我介绍结构</b></div>
+              <ul class="module-list">
+                <li>我是谁：专业/方向/一句定位</li>
+                <li>我做过什么：1 个代表项目 + 1 个结果</li>
+                <li>我想要什么：岗位方向 + 为什么匹配</li>
+              </ul>
+              <div class="module-section">
+                <div class="module-paragraph"><b>高频题库</b></div>
+                <ul class="module-list">
+                  <li>为什么选这个专业/岗位？</li>
+                  <li>最难的项目问题怎么解决的？</li>
+                  <li>你失败过吗？学到了什么？</li>
+                  <li>冲突与合作：怎么推进一个不配合的人？</li>
+                </ul>
+              </div>
+              <div class="module-section">
+                <div class="module-paragraph"><b>模拟面试</b>：你选岗位（产品/数据/前端/后端/咨询），我按真实面试节奏追问。</div>
+              </div>
+            `,
+          });
+        } else if (page === "intern_network") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "投递与内推",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>岗位筛选三条件</b></div>
+              <ul class="module-list">
+                <li>硬条件：技术栈/语言/身份要求</li>
+                <li>成长性：有人带/有明确评估/能写进简历</li>
+                <li>匹配度：你能用“证据”证明（项目/课程/作品）</li>
+              </ul>
+              <div class="module-section">
+                <div class="module-paragraph"><b>跟进话术（示例）</b></div>
+                <ul class="module-list">
+                  <li>投递后 5-7 天：简短提醒 + 亮点 1 句</li>
+                  <li>内推：先自我介绍 + 目标岗位 + 附件简历 + 2 个亮点</li>
+                </ul>
+              </div>
+            `,
+          });
+        } else if (page === "intern_plan") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "30 天冲刺计划",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>Week1</b>：定方向 + 简历一版 + 项目补强清单</div>
+              <div class="module-paragraph"><b>Week2</b>：作品集/项目迭代 + 10 次定向投递</div>
+              <div class="module-paragraph"><b>Week3</b>：面试题库 + 2 次模拟面试 + 继续投递</div>
+              <div class="module-paragraph"><b>Week4</b>：查缺补漏 + 强化弱项 + 复盘调整策略</div>
+              <div class="module-section">
+                <div class="module-paragraph">你告诉我：目标岗位、现有项目、每周可投入时间，我把它变成每日任务清单。</div>
+              </div>
+            `,
+          });
+        } else {
+          rightModuleContentEl.innerHTML = renderModulePage({ title: "实习就业", showInlineBack: false, bodyHtml: "" });
+        }
+        // 下方 AI 区域跟随“当前页面 key”（子模块也有自己的列表）
+        renderDynamicModulesForKey(getBestDynamicKey());
+        return;
+      }
+
+      if (rightModuleKey === "campus") {
+        if (!page || page === "campus_home") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "校园活动",
+            showInlineBack: false,
+            bodyHtml: `
+              <div class="module-grid" aria-label="校园活动功能列表">
+                <button class="module-action-btn" type="button" data-right-page="campus_club">
+                  <div class="module-action-icon">${svgIcon("school")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">社团选择与加入</div>
+                    <div class="module-action-sub">匹配兴趣、面试、破冰</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="campus_event">
+                  <div class="module-action-icon">${svgIcon("calendar")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">活动规划</div>
+                    <div class="module-action-sub">从想法到落地：流程与分工</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="campus_volunteer">
+                  <div class="module-action-icon">${svgIcon("heart")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">志愿与公益</div>
+                    <div class="module-action-sub">时间记录、材料准备、叙事</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="campus_leadership">
+                  <div class="module-action-icon">${svgIcon("target")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">学生组织与领导力</div>
+                    <div class="module-action-sub">竞选、项目管理、复盘</div>
+                  </div>
+                </button>
+              </div>
+            `,
+          });
+        } else if (page === "campus_club") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "社团选择与加入",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>三步选社团</b></div>
+              <ul class="module-list">
+                <li>兴趣：你愿意每周持续投入的主题</li>
+                <li>收益：技能/朋友/履历（选你最缺的那项）</li>
+                <li>成本：时间、地点、训练强度</li>
+              </ul>
+              <div class="module-section">
+                <div class="module-paragraph"><b>加入面试常见问题</b></div>
+                <ul class="module-list">
+                  <li>你为什么来？你能带来什么？</li>
+                  <li>过去组织过活动吗？遇到问题怎么解决？</li>
+                  <li>每周能投入多少时间？</li>
+                </ul>
+              </div>
+            `,
+          });
+        } else if (page === "campus_event") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "活动规划",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>从 0 到 1 活动落地清单</b></div>
+              <ul class="module-list">
+                <li>明确目标与受众（100 字以内）</li>
+                <li>预算与场地（最早确认）</li>
+                <li>流程与分工（主持/物料/宣传/现场）</li>
+                <li>报名与签到（表单、二维码、座位）</li>
+                <li>风险预案（迟到、设备、天气）</li>
+              </ul>
+              <div class="module-section">
+                <div class="module-paragraph">你告诉我活动类型（讲座/比赛/聚会），我可以帮你生成：流程表、物料清单、海报文案。</div>
+              </div>
+            `,
+          });
+        } else if (page === "campus_volunteer") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "志愿与公益",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>做志愿别只记时长</b>：把“做了什么 + 影响”写清楚，未来简历才有用。</div>
+              <ul class="module-list">
+                <li>服务对象是谁？你的具体职责是什么？</li>
+                <li>你解决了什么问题？用什么方法？</li>
+                <li>结果如何？（人数/次数/反馈）</li>
+              </ul>
+            `,
+          });
+        } else if (page === "campus_leadership") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "学生组织与领导力",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>竞选/负责一个项目时的核心</b>：目标清晰、节奏可控、复盘及时。</div>
+              <ul class="module-list">
+                <li>把大目标拆成每周交付物（可检查）</li>
+                <li>每周 15 分钟站会：进度/风险/协作</li>
+                <li>活动结束 24 小时内复盘：做得好/不足/下次改</li>
+              </ul>
+            `,
+          });
+        }
+        // 下方 AI 区域跟随“当前页面 key”（子模块也有自己的列表）
+        renderDynamicModulesForKey(getBestDynamicKey());
+        return;
+      }
+
+      if (rightModuleKey === "life") {
+        if (!page || page === "life_home") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "生活支持",
+            showInlineBack: false,
+            bodyHtml: `
+              <div class="module-grid" aria-label="生活支持功能列表">
+                <button class="module-action-btn" type="button" data-right-page="life_dorm">
+                  <div class="module-action-icon">${svgIcon("map")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">宿舍与搬入</div>
+                    <div class="module-action-sub">清单、布置、室友相处</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="life_health">
+                  <div class="module-action-icon">${svgIcon("heart")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">健康与作息</div>
+                    <div class="module-action-sub">睡眠、饮食、情绪压力</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="life_food">
+                  <div class="module-action-icon">${svgIcon("target")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">饮食与省钱</div>
+                    <div class="module-action-sub">预算、外卖/食堂策略</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="life_emergency">
+                  <div class="module-action-icon">${svgIcon("briefcase")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">突发情况</div>
+                    <div class="module-action-sub">丢卡、报修、时间冲突</div>
+                  </div>
+                </button>
+              </div>
+            `,
+          });
+        } else if (page === "life_dorm") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "宿舍与搬入",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>搬入清单（精简但够用）</b></div>
+              <ul class="module-list">
+                <li>床品：床垫/床单/枕头/被子（按季节）</li>
+                <li>收纳：挂钩、收纳盒、衣架、脏衣篓</li>
+                <li>学习：台灯、插线板、耳塞、文件夹</li>
+                <li>卫生：纸巾、洗衣液、拖鞋、基础药品</li>
+              </ul>
+              <div class="module-section">
+                <div class="module-paragraph"><b>室友相处</b>：先约定 3 件事（作息、卫生、公共物品），减少长期摩擦。</div>
+              </div>
+            `,
+          });
+        } else if (page === "life_health") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "健康与作息",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>学生常见作息问题</b></div>
+              <ul class="module-list">
+                <li>熬夜：用“固定起床时间”反推入睡时间</li>
+                <li>注意力差：学习块 45 分钟 + 8 分钟休息</li>
+                <li>压力大：先把任务写出来再排序（脑内焦虑会放大）</li>
+              </ul>
+              <div class="module-section">
+                <div class="module-paragraph">如果你愿意说：最近一周睡眠、课程压力、运动频率，我可以给你一份可执行的 7 天游程。</div>
+              </div>
+            `,
+          });
+        } else if (page === "life_food") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "饮食与省钱",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>一周预算法（示例）</b></div>
+              <ul class="module-list">
+                <li>把餐费拆成：主食/蛋白/蔬菜（每餐至少 2 类）</li>
+                <li>每周 2 次“便宜大份”补给（例如米饭+鸡蛋+蔬菜）</li>
+                <li>外卖只在“时间最紧”的那 2 天用</li>
+              </ul>
+            `,
+          });
+        } else if (page === "life_emergency") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "突发情况",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>常见突发情景处理清单</b></div>
+              <ul class="module-list">
+                <li>丢卡/忘带：先冻结账户，再补办，再更新绑定</li>
+                <li>报修：拍照 + 描述问题 + 时间窗口（效率高）</li>
+                <li>行程冲突：先保留必须到场的，再发邮件说明与补交方案</li>
+              </ul>
+            `,
+          });
+        }
+        // 下方 AI 区域跟随“当前页面 key”（子模块也有自己的列表）
+        renderDynamicModulesForKey(getBestDynamicKey());
+        return;
+      }
+
+      if (rightModuleKey === "research") {
+        if (!page || page === "research_home") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "科研探索",
+            showInlineBack: false,
+            bodyHtml: `
+              <div class="module-grid" aria-label="科研探索功能列表">
+                <button class="module-action-btn" type="button" data-right-page="research_topic">
+                  <div class="module-action-icon">${svgIcon("flask")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">选题与方向</div>
+                    <div class="module-action-sub">从兴趣到可做：问题拆解</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="research_paper">
+                  <div class="module-action-icon">${svgIcon("book")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">论文阅读</div>
+                    <div class="module-action-sub">读法、笔记模板、复现路线</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="research_method">
+                  <div class="module-action-icon">${svgIcon("target")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">实验与方法</div>
+                    <div class="module-action-sub">变量、对照、指标、复现</div>
+                  </div>
+                </button>
+                <button class="module-action-btn" type="button" data-right-page="research_writing">
+                  <div class="module-action-icon">${svgIcon("pen")}</div>
+                  <div class="module-action-text">
+                    <div class="module-action-title">科研写作</div>
+                    <div class="module-action-sub">摘要/引言/方法/结果/讨论</div>
+                  </div>
+                </button>
+              </div>
+            `,
+          });
+        } else if (page === "research_topic") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "选题与方向",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>选题三件事</b></div>
+              <ul class="module-list">
+                <li>问题：一句话说清楚“要解决什么”</li>
+                <li>方法：你打算怎么做（数据/实验/理论/系统）</li>
+                <li>可行：你在 4-8 周能交付什么结果</li>
+              </ul>
+              <div class="module-section">
+                <div class="module-paragraph">你告诉我：专业方向 + 你感兴趣的关键词，我帮你生成 3 个可做的题目（含验证路径）。</div>
+              </div>
+            `,
+          });
+        } else if (page === "research_paper") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "论文阅读",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>30 分钟读一篇的框架</b></div>
+              <ul class="module-list">
+                <li>先看摘要/图 1/结论（判断值不值得读）</li>
+                <li>再看方法：输入-输出-关键假设</li>
+                <li>最后看实验：数据集、指标、对比、消融</li>
+              </ul>
+              <div class="module-section">
+                <div class="module-paragraph"><b>笔记模板</b>：问题/方法/贡献/复现要点/我能改进什么。</div>
+              </div>
+            `,
+          });
+        } else if (page === "research_method") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "实验与方法",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>实验设计要点</b></div>
+              <ul class="module-list">
+                <li>明确指标：准确率不够就加鲁棒性/效率/可解释性</li>
+                <li>做对照：baseline、公平对比、消融实验</li>
+                <li>记录：版本、随机种子、超参、环境</li>
+              </ul>
+            `,
+          });
+        } else if (page === "research_writing") {
+          rightModuleContentEl.innerHTML = renderModulePage({
+            title: "科研写作",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph"><b>论文结构（按段落写）</b></div>
+              <ul class="module-list">
+                <li>引言：背景→缺口→本文贡献（3 条以内）</li>
+                <li>方法：问题定义→总体框架→关键模块</li>
+                <li>实验：设置→结果→分析→局限</li>
+                <li>讨论：为什么有效/什么时候失效/未来方向</li>
+              </ul>
+            `,
+          });
+        }
+        // 下方 AI 区域跟随“当前页面 key”（子模块也有自己的列表）
+        renderDynamicModulesForKey(getBestDynamicKey());
+        return;
+      }
+
+      rightModuleContentEl.innerHTML = "";
+    }
+
+    function _escapeHtml(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function _escapeAndLinkify(text) {
+      const s = String(text || "");
+      const re = /\bhttps?:\/\/[^\s<>"']+/gi;
+      let out = "";
+      let last = 0;
+      let m = null;
+      while ((m = re.exec(s))) {
+        const url = String(m[0] || "");
+        out += _escapeHtml(s.slice(last, m.index));
+        const safeHref = url.replace(/[\u0000-\u001F\u007F]/g, "");
+        out += `<a href="${_escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer">${_escapeHtml(url)}</a>`;
+        last = m.index + url.length;
+      }
+      out += _escapeHtml(s.slice(last));
+      return out;
+    }
+
+    function toDeclarativeTitle(rawTitle) {
+      let s = String(rawTitle || "").trim();
+      if (!s) return "推荐内容";
+      s = s.replace(/[？?]+$/g, "").trim();
+      s = s.replace(/^请问[:：]?\s*/g, "");
+      // 常见“疑问字段”直接映射为陈述句字段标题（避免看起来像问句）
+      if (/(几号|什么时候|何时|时间|日期|几点).*(开学)/.test(s) || /(开学).*(几号|什么时候|何时|时间|日期|几点)/.test(s)) {
+        return "学校开学时间";
+      }
+      if (/(几号|什么时候|何时|时间|日期|几点).*(报到)/.test(s) || /(报到).*(几号|什么时候|何时|时间|日期|几点)/.test(s)) {
+        return "新生报到时间";
+      }
+      if (/(截止|ddl|截至).*(什么时候|何时|时间|日期|几点)/i.test(s) || /(什么时候|何时|时间|日期|几点).*(截止|ddl|截至)/i.test(s)) {
+        return "申请截止时间";
+      }
+      if (/(在哪|哪里|地点|地址|位置)/.test(s)) {
+        // 不强行猜具体事项，给出字段型标题
+        return "相关办理地点";
+      }
+      if (/(多少钱|费用|收费|价格)/.test(s)) {
+        return "相关费用信息";
+      }
+      if (/(电话|联系方式|邮箱|联系)/.test(s)) {
+        return "相关联系方式";
+      }
+      if (/(入口|链接|官网|网站|平台|系统)/.test(s)) {
+        return "相关办理入口";
+      }
+      const lead = ["如何", "怎么", "怎样", "是否", "能否", "可以", "有没有", "是不是"];
+      for (const p of lead) {
+        if (s.startsWith(p)) {
+          s = s.slice(p.length).trim();
+          break;
+        }
+      }
+      // 只做“去问号 + 去疑问开头”的最小清洗；标题质量由后端提示词改写来保证
+      // 去掉尾部语气词（让标题更像陈述句）
+      s = s.replace(/(吗|呢|呀|嘛)\s*$/g, "").trim();
+      // 去掉开头“几号/什么时候/何时”等疑问字段词（避免标题看起来像问句）
+      s = s.replace(/^(几号|什么时候|何时|几点|多少|多少钱)\s*/g, "").trim();
+      // 不做字数硬限制：标题应尽量语义完整
+      if (s.length < 6 && rawTitle) {
+        // 太短时回退原文去问号
+        const t = String(rawTitle).replace(/[？?]+$/g, "").trim();
+        if (t) s = t;
+      }
+      return s;
+    }
+
+    function renderDynamicCardsHtml(list, contextKey) {
+      const safeKey = _escapeHtml(contextKey || "");
+      if (!list || list.length === 0) return "";
+      return list
+        .map((m, idx) => {
+          const rawTitle = m && m.allowRawTitle ? String(m.title || "推荐模块") : toDeclarativeTitle(m.title || "推荐模块");
+          const title = _escapeHtml(rawTitle);
+          const desc = _escapeHtml(m.desc || "");
+          const icon = svgIcon(m.icon || "book");
+          const action = _escapeHtml(m.action || "");
+          const details = _escapeHtml(m.details || "");
+          return `
+            <button class="right-dynamic-card" type="button"
+              data-dyn-context="${safeKey}"
+              data-dyn-index="${idx}"
+              data-dyn-action="${action}"
+              data-dyn-title="${title}"
+              data-dyn-desc="${desc}"
+              data-dyn-icon="${_escapeHtml(m.icon || "book")}"
+              data-dyn-details="${details}">
+              <div class="right-dynamic-card-icon" aria-hidden="true">${icon}</div>
+              <div class="right-dynamic-card-body">
+                <div class="right-dynamic-card-title">${title}</div>
+                <div class="right-dynamic-card-desc">${desc}</div>
+              </div>
+            </button>
+          `;
+        })
+        .join("");
+    }
+
+    function renderDynamicModulesForKey(moduleKey) {
+      if (!rightDynamicModulesEl) return;
+      const key = String(moduleKey || "");
+      if (!key) return; // key 为空时不改动 UI，避免“误清空”
+      // 详情页展开时：只更新缓存，不重绘 UI，避免当前详情被刷回列表
+      if (dynamicViewMode === "detail") return;
+      const list = getDynamicListForKey(key);
+      if (!list || list.length === 0) {
+        // 如果还在请求中，用加载动画提示用户（避免误以为卡死/没内容）
+        if (key && dynamicLoadingByKey && dynamicLoadingByKey[key]) {
+          renderDynamicLoading(key);
+          return;
+        }
+        // 进入子模块时如果该子模块暂无推荐内容：不要把原有列表清空，保持不消失
+        return;
+      }
+      // 列表文案需要先经过改写：没改写完成前先显示加载，避免先出现“疑问句标题”
+      if (!list.__rewritten) {
+        ensureRewriteDynamicListForKey(key, list);
+        if (dynamicRewriteLoadingByKey && dynamicRewriteLoadingByKey[key]) {
+          renderDynamicLoading(key); // 共用旋转 loading
+          return;
+        }
+      }
+      rightDynamicModulesEl.innerHTML = renderDynamicCardsHtml(getDynamicListForKey(key), key);
+    }
+
+    function ensureRewriteDynamicListForKey(key, list) {
+      const k = String(key || "");
+      if (!k || !Array.isArray(list) || list.length === 0) return;
+      if (dynamicRewriteLoadingByKey[k]) return;
+      if (list && list.__rewritten) return;
+
+      // 聊天回复优先：流式输出期间不触发列表改写请求（只排队）
+      if (isChatStreaming) {
+        pendingListRewriteKeys.add(k);
+        return;
+      }
+
+      // cache hit (short TTL)
+      const cached = dynamicRewriteCacheByKey && dynamicRewriteCacheByKey[k];
+      if (cached && cached.list && Date.now() - (cached.ts || 0) < DYNAMIC_REWRITE_TTL_MS) {
+        const rewritten = cached.list;
+        rewritten.__rewritten = true;
+        dynamicModulesPrefetch[k] = rewritten;
+        dynamicModulesByKey[k] = rewritten;
+        if (dynamicViewMode !== "detail" && rightDynamicModulesEl && (activeDynamicKey === k || lastClickedModuleKey === k)) {
+          rightDynamicModulesEl.innerHTML = renderDynamicCardsHtml(rewritten, k);
+        }
+        return;
+      }
+
+      dynamicRewriteLoadingByKey[k] = true;
+      (async () => {
+        try {
+          const payload = list.slice(0, 12).map((c) => ({
+            q: c.action || c.title || "",
+            a: c.details || "",
+            icon: c.icon || "book",
+          }));
+          const res = await fetch("/api/rewrite_dynamic_list", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contextKey: k, items: payload }),
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          const out = data && Array.isArray(data.items) ? data.items : null;
+          if (!out) return;
+          const rewritten = list.map((c, idx) => {
+            if (idx >= out.length) return c;
+            const r = out[idx] || {};
+            return { ...c, title: r.title || c.title, desc: r.desc || c.desc, icon: r.icon || c.icon };
+          });
+          rewritten.__rewritten = true;
+          dynamicRewriteCacheByKey[k] = { ts: Date.now(), list: rewritten };
+          dynamicModulesPrefetch[k] = rewritten;
+          dynamicModulesByKey[k] = rewritten;
+          if (dynamicViewMode !== "detail" && rightDynamicModulesEl && (activeDynamicKey === k || lastClickedModuleKey === k)) {
+            rightDynamicModulesEl.innerHTML = renderDynamicCardsHtml(rewritten, k);
+          }
+        } catch (e) {
+          // 改写失败：标记为已完成，允许回退渲染（避免一直转圈）
+          try {
+            const fallback = Array.isArray(list) ? list.slice() : [];
+            fallback.__rewritten = true;
+            dynamicModulesPrefetch[k] = fallback;
+            dynamicModulesByKey[k] = fallback;
+            if (dynamicViewMode !== "detail" && rightDynamicModulesEl && (activeDynamicKey === k || lastClickedModuleKey === k)) {
+              rightDynamicModulesEl.innerHTML = renderDynamicCardsHtml(fallback, k);
+            }
+          } catch (e2) {}
+        } finally {
+          dynamicRewriteLoadingByKey[k] = false;
+        }
+      })();
+    }
+
+    function flushPendingAfterChat() {
+      // flush list rewrites
+      try {
+        const keys = Array.from(pendingListRewriteKeys || []);
+        pendingListRewriteKeys = new Set();
+        keys.forEach((k) => {
+          const list = getDynamicListForKey(k);
+          if (list && list.length) ensureRewriteDynamicListForKey(k, list);
+        });
+      } catch (e) {}
+
+      // flush detail rewrites (only last one)
+      try {
+        const last = pendingDetailCards && pendingDetailCards.length ? pendingDetailCards[pendingDetailCards.length - 1] : null;
+        pendingDetailCards = [];
+        if (last) openDynamicCardDetails(last);
+      } catch (e) {}
+    }
+
+    function renderDynamicLoading(moduleKey) {
+      if (!rightDynamicModulesEl) return;
+      if (!moduleKey) return;
+      rightDynamicModulesEl.innerHTML = `
+        <div class="right-dynamic-loading" role="status" aria-live="polite">
+          <div class="right-dynamic-spinner" aria-hidden="true"></div>
+          <div>正在加载推荐内容…</div>
+        </div>
+      `;
+    }
+
+    function getSubmoduleKeysForModule(moduleKey) {
+      const k = String(moduleKey || "");
+      if (k === "study") {
+        return [
+          "study_my",
+          "study_course",
+          "study_course_calc",
+          "study_course_stats",
+          "study_course_cs",
+          "study_course_econ",
+          "study_english",
+          "study_english_vocab",
+          "study_english_reading",
+          "study_english_writing",
+          "study_english_speaking",
+          "study_plan",
+          "study_writing",
+          "study_methods",
+        ];
+      }
+      if (k === "intern") {
+        return ["intern_resume", "intern_interview", "intern_network", "intern_plan"];
+      }
+      if (k === "campus") {
+        return ["campus_club", "campus_event", "campus_volunteer", "campus_leadership"];
+      }
+      if (k === "life") {
+        return ["life_dorm", "life_health", "life_food", "life_emergency"];
+      }
+      if (k === "research") {
+        return ["research_topic", "research_paper", "research_method", "research_writing"];
+      }
+      return [];
+    }
+
+    async function prefetchQaForModule(moduleKey, queryText = "") {
+      const key = String(moduleKey || "").trim();
+      if (!key) return;
+      const q = String(queryText || "").trim();
+
+      try {
+        // 如果同一个模块 key 的排序 query 变了：
+        // - 仍然会重新请求后端拿“新排序”
+        // - 但不要清空现有列表（避免右侧 AI 生成栏闪烁/丢内容）
+        // - 新结果会插入到现有列表前面，再去重合并
+        const prevQ = String((lastSortQueryByKey && lastSortQueryByKey[key]) || "");
+        if (q && q !== prevQ) {
+          lastSortQueryByKey[key] = q;
+          // 关键：列表文案“改写缓存”默认只按 key 缓存（不含 queryText）。
+          // 如果 query 变了但缓存仍在 TTL 内，会导致 UI 继续复用旧顺序的 rewritten list，
+          // 看起来就像“无论输入什么，AI 生成栏顺序都不变”。
+          // 所以：query 变化时只清理改写缓存（不清空列表内容），等新排序回来后再按新顺序改写。
+          try {
+            if (dynamicRewriteCacheByKey) delete dynamicRewriteCacheByKey[key];
+          } catch (e) {}
+          try {
+            const subs = getSubmoduleKeysForModule(key) || [];
+            subs.forEach((sk) => {
+              try {
+                if (dynamicRewriteCacheByKey) delete dynamicRewriteCacheByKey[sk];
+              } catch (e2) {}
+            });
+          } catch (e) {}
+        } else if (q && !prevQ) {
+          lastSortQueryByKey[key] = q;
+        }
+
+        dynamicLoadingByKey[key] = true;
+        // 如果还没有任何缓存内容，就展示加载态；有缓存则先显示缓存，避免闪烁
+        const existing = (dynamicModulesByKey && dynamicModulesByKey[key]) || [];
+        if (!existing || existing.length === 0) renderDynamicLoading(key);
+
+        const res = await fetch("/api/module_qa_scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            moduleKey: key,
+            submoduleKeys: getSubmoduleKeysForModule(key),
+            max_cards: 8,
+            queryText: q,
+          }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // module cards
+        if (data && data.moduleKey) {
+          const moduleCards = Array.isArray(data.cards) ? data.cards : [];
+          const globalHits = Array.isArray(data.globalHits) ? data.globalHits : [];
+          // 合并策略：
+          // - 先插入本次命中的新结果（globalHits + moduleCards），保证“命中模块/命中内容”优先出现在最上面
+          // - 再保留已有列表（避免其它内容突然消失）
+          // - 全部去重；如果同一条 QA 同时出现在“总 QA”与“模块 QA”，永远保留总 QA
+          const bestPriByKey = new Map(); // key -> { pri:number, idx:number }
+          const merged = [];
+          const oldList = (dynamicModulesByKey && dynamicModulesByKey[data.moduleKey]) || [];
+          const cardKey = (c) => String((c && (c.action || c.title)) || "");
+          const add = (c, pri) => {
+            const k = cardKey(c);
+            if (!k) return;
+            const cur = bestPriByKey.get(k);
+            if (!cur) {
+              bestPriByKey.set(k, { pri, idx: merged.length });
+              merged.push(c);
+              return;
+            }
+            // lower pri wins: 0=globalHits, 1=moduleCards, 2=oldList
+            if (pri < cur.pri) {
+              merged[cur.idx] = c; // replace in-place so ordering stays stable
+              bestPriByKey.set(k, { pri, idx: cur.idx });
+            }
+          };
+          globalHits.forEach((c) => add(c, 0));
+          moduleCards.forEach((c) => add(c, 1));
+          oldList.forEach((c) => add(c, 2));
+          dynamicModulesByKey[data.moduleKey] = merged;
+          dynamicModulesPrefetch[data.moduleKey] = merged;
+          // 重新排序后，标记为“未改写”，保证改写按新顺序再跑一遍
+          if (dynamicModulesByKey[data.moduleKey]) dynamicModulesByKey[data.moduleKey].__rewritten = false;
+          if (dynamicModulesPrefetch[data.moduleKey]) dynamicModulesPrefetch[data.moduleKey].__rewritten = false;
+        }
+
+        // submodule cards
+        if (data && data.submodules && typeof data.submodules === "object") {
+          Object.keys(data.submodules).forEach((subKey) => {
+            const list = data.submodules[subKey];
+            dynamicModulesPrefetch[subKey] = Array.isArray(list) ? list : [];
+            if (dynamicModulesPrefetch[subKey]) dynamicModulesPrefetch[subKey].__rewritten = false;
+          });
+        }
+
+        // 立即刷新当前大模块承载区
+        renderDynamicModulesForKey(key);
+        // 如果用户此时正处于该模块页面（已展开），也要立即刷新一次右侧内容，避免“要进子模块再退回才出现”
+        if (dynamicViewMode !== "detail" && document.body.classList.contains("right-expanded") && rightModuleKey === key) {
+          renderRightModule();
+          // 同步刷新顶部下方的动态列表
+          renderDynamicModulesForKey(key);
+        }
+      } catch (e) {
+        // 静默失败：不影响展开侧边栏
+      } finally {
+        dynamicLoadingByKey[key] = false;
+      }
+    }
+
+    // 提供一个“接口”：后续大模型/后端命中 QA 时，直接调用这个函数即可在按钮栏下方生成卡片
+    // modules: [{ title, desc, icon, action, details }]
+    window.setRightDynamicModules = function setRightDynamicModules(moduleKey, modules) {
+      const key = String(moduleKey || "");
+      if (!dynamicModulesByKey[key]) dynamicModulesByKey[key] = [];
+      dynamicModulesByKey[key] = Array.isArray(modules) ? modules : [];
+      renderDynamicModulesForKey(key);
+    };
+
+    function getDynamicListForKey(k) {
+      const key = String(k || "");
+      if (!key) return [];
+      if (dynamicModulesPrefetch && Array.isArray(dynamicModulesPrefetch[key])) return dynamicModulesPrefetch[key];
+      if (dynamicModulesByKey && Array.isArray(dynamicModulesByKey[key])) return dynamicModulesByKey[key];
+      return [];
+    }
+
+    function getBestDynamicKey() {
+      const preferred = String(activeDynamicKey || "");
+      if (preferred) {
+        const list = getDynamicListForKey(preferred);
+        if (list && list.length > 0) return preferred;
+        if (
+          (dynamicLoadingByKey && dynamicLoadingByKey[preferred]) ||
+          (dynamicRewriteLoadingByKey && dynamicRewriteLoadingByKey[preferred])
+        ) {
+          return preferred;
+        }
+      }
+      return String(lastClickedModuleKey || rightModuleKey || "");
+    }
+
+    function renderDynamicModulesForActiveKey() {
+      // 展开态：显示“当前子模块/页面”对应的动态卡片
+      const key = String(activeDynamicKey || "");
+      const list = getDynamicListForKey(key);
+      if (!list || list.length === 0) return "";
+      // 详情/列表已经在右侧栏下方 AI 区域渲染，这里不再往页面内容里插入第二份，避免“上面也有一块动态卡片”
+      return "";
+    }
+
+    function openDynamicCardDetails(card) {
+      if (!card) return;
+      // 确保右侧栏展开
+      if (!document.body.classList.contains("right-expanded")) {
+        expandRightSidebarAndCollapseLeft(lastClickedModuleKey || "study");
+      }
+      dynamicViewMode = "detail";
+      activeDynamicCard = card;
+      // 点击卡片后才开始“AI 生成/改写”：先显示加载，再请求后端改写接口
+      if (rightDynamicModulesEl) {
+        const ctxKey = String(activeDynamicKey || lastClickedModuleKey || "");
+        const qKey = String(card.action || card.title || "").trim();
+        const aKey = String(card.details || "").trim();
+        const detailKey = `${ctxKey}||${qKey}||${aKey.slice(0, 120)}`;
+
+        // short cache: repeated opens don't re-generate
+        const cached = dynamicDetailCacheByKey && dynamicDetailCacheByKey[detailKey];
+        if (cached && cached.data && Date.now() - (cached.ts || 0) < DYNAMIC_REWRITE_TTL_MS) {
+          const d = cached.data;
+          const title = _escapeHtml(toDeclarativeTitle(d.title || card.title || "推荐内容"));
+          const desc = _escapeHtml(d.desc || "");
+          const detailsText = String(d.details || "").trim();
+          const lines = detailsText
+            .split(/\n+/)
+            .map((x) => x.trim())
+            .filter(Boolean);
+          const stripLeadingNumbering = (s) =>
+            String(s || "")
+              .trim()
+              .replace(/^\s*\d+(?:\.\d+)*\s*[\.\)、)]\s*/g, "")
+              .trim();
+          const detailsHtml =
+            lines.length >= 2
+              ? `<ol class="ai-detail-olist">${lines.map((x) => `<li>${_escapeAndLinkify(stripLeadingNumbering(x))}</li>`).join("")}</ol>`
+              : `<div class="ai-detail-text">${detailsText ? _escapeAndLinkify(detailsText).replace(/\n/g, "<br>") : "（暂无详情）"}</div>`;
+          rightDynamicModulesEl.innerHTML = `
+            <div class="ai-detail">
+              <div class="ai-detail-top">
+                <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="返回列表" title="返回">
+                  ${svgIcon("arrow-left")}
+                </button>
+                <div class="ai-detail-head">
+                  <div class="ai-detail-title">${title}</div>
+                  ${desc ? `<div class="ai-detail-desc">${desc}</div>` : ""}
+                </div>
+              </div>
+              ${detailsHtml}
+            </div>
+          `;
+          return;
+        }
+
+        // 先展示“标题 + 加载态”，避免只看到空白加载框
+        const preTitle = _escapeHtml(toDeclarativeTitle(card.title || card.action || "推荐内容"));
+        rightDynamicModulesEl.innerHTML = `
+          <div class="ai-detail">
+            <div class="ai-detail-top">
+              <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="返回列表" title="返回">
+                ${svgIcon("arrow-left")}
+              </button>
+              <div class="ai-detail-head">
+                <div class="ai-detail-title">${preTitle}</div>
+                <div class="ai-detail-desc">正在生成更详细的内容，请稍等…</div>
+              </div>
+            </div>
+            <div class="right-dynamic-loading" style="margin-top:10px;">
+              <div class="right-dynamic-spinner" aria-hidden="true"></div>
+              <div>正在加载推荐内容…</div>
+            </div>
+          </div>
+        `;
+        // 聊天回复优先：流式输出期间不触发详情改写请求（只排队）
+        if (isChatStreaming) {
+          pendingDetailCards.push(card);
+          return;
+        }
+        (async () => {
+          try {
+            const res = await fetch("/api/rewrite_dynamic_card", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contextKey: activeDynamicKey || lastClickedModuleKey || "",
+                q: card.action || card.title || "",
+                a: card.details || "",
+                icon: card.icon || "book",
+              }),
+            });
+            const data = res.ok ? await res.json() : null;
+            const title = _escapeHtml(toDeclarativeTitle((data && data.title) || card.title || "推荐内容"));
+            const desc = _escapeHtml((data && data.desc) || card.desc || "");
+            const detailsText = String((data && data.details) || card.details || "").trim();
+
+            // cache it
+            if (data && (data.title || data.desc || data.details)) {
+              dynamicDetailCacheByKey[detailKey] = {
+                ts: Date.now(),
+                data: { title: data.title || "", desc: data.desc || "", details: data.details || "", icon: data.icon || card.icon || "book" },
+              };
+            }
+
+            // 解析形如 "['a','b']" 或 JSON 数组文本，渲染为要点列表
+            let listItems = null;
+            try {
+              const maybe = detailsText.trim();
+              const normalized = maybe
+                .replace(/^\s*\(\s*\[/, "[")
+                .replace(/\]\s*\)\s*$/, "]")
+                .replace(/^'/, '"')
+                .replace(/'\s*,/g, '",')
+                .replace(/,\s*'/g, ',"')
+                .replace(/'\s*\]/g, '"]')
+                .replace(/\[\s*'/g, '["');
+              const arr = JSON.parse(normalized);
+              if (Array.isArray(arr)) {
+                listItems = arr.map((x) => String(x || "").trim()).filter(Boolean);
+              }
+            } catch (e) {}
+
+            let detailsHtml = "";
+            const stripLeadingNumbering = (s) => {
+              const t = String(s || "").trim();
+              // 去掉开头自带序号：1. / 1、 / 1) / 1.1. / 1.2) 等
+              return t.replace(/^\s*\d+(?:\.\d+)*\s*[\.\)、)]\s*/g, "").trim();
+            };
+            if (listItems && listItems.length) {
+              detailsHtml = `<ol class="ai-detail-olist">${listItems
+                .map((x) => `<li>${_escapeAndLinkify(stripLeadingNumbering(x))}</li>`)
+                .join("")}</ol>`;
+            } else {
+              const lines = detailsText
+                .split(/\n+/)
+                .map((x) => x.trim())
+                .filter(Boolean);
+              if (lines.length >= 3) {
+                detailsHtml = `<ol class="ai-detail-olist">${lines
+                  .map((x) => `<li>${_escapeAndLinkify(stripLeadingNumbering(x))}</li>`)
+                  .join("")}</ol>`;
+              } else {
+                detailsHtml = `<div class="ai-detail-text">${
+                  detailsText ? _escapeAndLinkify(detailsText).replace(/\n/g, "<br>") : "（暂无详情）"
+                }</div>`;
+              }
+            }
+
+            rightDynamicModulesEl.innerHTML = `
+              <div class="ai-detail">
+                <div class="ai-detail-top">
+                  <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="返回列表" title="返回">
+                    ${svgIcon("arrow-left")}
+                  </button>
+                  <div class="ai-detail-head">
+                    <div class="ai-detail-title">${title}</div>
+                    ${desc ? `<div class="ai-detail-desc">${desc}</div>` : ""}
+                  </div>
+                </div>
+                ${detailsHtml}
+              </div>
+            `;
+          } catch (e) {
+            // fallback: 直接渲染原 details
+            const title = _escapeHtml(toDeclarativeTitle(card.title || "推荐内容"));
+            const details = String(card.details || "").trim();
+            rightDynamicModulesEl.innerHTML = `
+              <div class="ai-detail">
+                <div class="ai-detail-top">
+                  <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="返回列表" title="返回">
+                    ${svgIcon("arrow-left")}
+                  </button>
+                  <div class="ai-detail-head">
+                    <div class="ai-detail-title">${title}</div>
+                  </div>
+                </div>
+                <div class="ai-detail-text">${details ? _escapeAndLinkify(details).replace(/\n/g, "<br>") : "（暂无详情）"}</div>
+              </div>
+            `;
+          }
+        })();
+      }
+    }
+
+    // 动态卡片点击：打开详情（并展开右侧栏）
+    if (rightDynamicModulesEl) {
+      rightDynamicModulesEl.addEventListener("click", (e) => {
+        const t = e.target;
+        const backBtn = t && t.closest ? t.closest("[data-dyn-view=\"list\"]") : null;
+        if (backBtn) {
+          // 返回 AI 列表：按当前模块 key 重新渲染
+          dynamicViewMode = "list";
+          renderDynamicModulesForKey(getBestDynamicKey());
+          return;
+        }
+
+        const useBtn = t && t.closest ? t.closest("[data-dyn-use-action]") : null;
+        if (useBtn) {
+          if (activeDynamicCard && activeDynamicCard.action && inputEl) {
+            inputEl.value = String(activeDynamicCard.action);
+            inputEl.focus();
+          }
+          return;
+        }
+
+        const btn = t && t.closest ? t.closest("[data-dyn-details]") : null;
+        if (!btn) return;
+        const card = {
+          title: btn.getAttribute("data-dyn-title") || "推荐模块",
+          desc: btn.getAttribute("data-dyn-desc") || "",
+          icon: btn.getAttribute("data-dyn-icon") || "book",
+          action: btn.getAttribute("data-dyn-action") || "",
+          details: btn.getAttribute("data-dyn-details") || "",
+        };
+        openDynamicCardDetails(card);
+      });
+    }
+
+    const LOGIN_STORAGE_KEY = "xipu_life_assistant_user";
+
+    // sessions：只保存“已进入历史”的会话（即用户已发出过第一句）
+    let sessions = [];
+    // draftSession：当前正在对话但尚未加入历史的会话（用户还没发第一句）
+    let draftSession = null;
+    let currentSessionId = null;
+
+    function getCurrentSession() {
+      if (draftSession && draftSession.id === currentSessionId) return draftSession;
+      return sessions.find((s) => s.id === currentSessionId) || null;
+    }
+
+    function setActiveSession(sessionId) {
+      currentSessionId = sessionId;
+      draftSession = null; // 切到历史会话后，当前切换为已入历史的会话
+      renderSidebarHistory();
+      renderMessagesFromSession();
+      updateEmptyPrompt();
+    }
+
+    function renderSidebarHistory() {
+      if (!historyListEl) return;
+      historyListEl.innerHTML = "";
+      sessions.forEach((s) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "history-item" + (s.id === currentSessionId ? " active" : "");
+        btn.textContent = s.title || "新对话";
+        btn.addEventListener("click", () => setActiveSession(s.id));
+        historyListEl.appendChild(btn);
+      });
+    }
+
+    function renderMessagesFromSession() {
+      const session = getCurrentSession();
+      messagesEl.innerHTML = "";
+      if (!session) return;
+
+      session.messages.forEach((m, idx) => appendMessage(m.role, m.text, m.id, idx));
+    }
+
+    function createMessageId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function isMobile() {
+      return window.innerWidth <= 900;
+    }
+
+    function isLeftSidebarExpanded() {
+      if (!sidebarEl) return false;
+      if (isMobile()) {
+        return sidebarEl.classList.contains("open");
+      }
+      // 桌面端：sidebar-open 表示展开态（收起时会 remove）
+      return document.body.classList.contains("sidebar-open") && !sidebarEl.classList.contains("collapsed");
+    }
+
+    function expandRightSidebarAndCollapseLeft(moduleKey) {
+      if (!rightSidebarEl) return;
+      // 右侧：扩展到 2.4 倍
+      rightSidebarEl.classList.add("expanded");
+      document.body.classList.add("right-expanded");
+
+      currentModuleName = MODULE_NAME_MAP[moduleKey] || LEFT_SIDEBAR_TITLE;
+      // 左侧栏标题不跟随右侧模块变化
+      if (rightSidebarTitleEl) rightSidebarTitleEl.textContent = currentModuleName;
+      rightModuleKey = moduleKey || "";
+      setRightPageStack([
+        rightModuleKey === "study"
+          ? "study_home"
+          : rightModuleKey === "intern"
+          ? "intern_home"
+          : rightModuleKey === "campus"
+          ? "campus_home"
+          : rightModuleKey === "life"
+          ? "life_home"
+          : rightModuleKey === "research"
+          ? "research_home"
+          : "",
+      ]);
+      renderRightModule();
+
+      // 左侧：强制收缩（已收缩则保持不变）
+      if (isMobile()) {
+        closeSidebarMobile();
+      } else {
+        closeSidebarDesktop();
+      }
+
+      // 当前“内容还没填”，按你的要求展开后显示为空白即可
+      if (rightModuleContentEl) {
+        // 具体内容由 renderRightModule() 决定
+      }
+
+      // 右侧展开时：隐藏输入区域的空状态提示（包括“可以问我…”那句）
+      updateEmptyPrompt();
+    }
+
+    function collapseRightSidebar() {
+      if (!rightSidebarEl) return;
+      rightSidebarEl.classList.remove("expanded");
+      document.body.classList.remove("right-expanded");
+      if (rightModuleContentEl) rightModuleContentEl.innerHTML = "";
+      if (rightSidebarTitleEl) rightSidebarTitleEl.textContent = "板块服务";
+      rightModuleKey = "";
+      setRightPageStack([]);
+      // 回到“未选择模块”态：不展示 AI 生成卡片（下次点击模块再生成/渲染）
+      activeDynamicKey = "";
+      activeDynamicCard = null;
+      lastClickedModuleKey = "";
+      if (rightDynamicModulesEl) rightDynamicModulesEl.innerHTML = "";
+      // 收起后根据消息是否为空决定是否显示空状态提示
+      updateEmptyPrompt();
+    }
+
+    function getLoginUser() {
+      try {
+        const raw = localStorage.getItem(LOGIN_STORAGE_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (!data || !data.username) return null;
+        return data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function renderLoginCard() {
+      const user = getLoginUser();
+      if (!user) {
+        loginContentEl.innerHTML = `
+          <div class="login-user">
+            <img class="login-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=Guest" alt="guest">
+            <div class="login-name">未登录</div>
+          </div>
+          <div class="login-action">点击登录</div>
+        `;
+        return;
+      }
+
+      const safeName = String(user.username).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const avatar = user.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.username)}`;
+      loginContentEl.innerHTML = `
+        <div class="login-user">
+          <img class="login-avatar" src="${avatar}" alt="avatar">
+          <div class="login-name">${safeName}</div>
+        </div>
+        <button class="logout-btn" id="logoutBtn" type="button">退出</button>
+      `;
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          localStorage.removeItem(LOGIN_STORAGE_KEY);
+          renderLoginCard();
+        });
+      }
+    }
+
+    function gotoLoginPage() {
+      window.location.href = "/static/login.html?redirect=/";
+    }
+
+    function openSidebarMobile() {
+      sidebarEl.classList.add("open");
+      sidebarEl.classList.remove("collapsed");
+      sidebarMaskEl.style.display = "block";
+      updateLeftSidebarModuleLabel();
+      updateEmptyPrompt();
+    }
+
+    function closeSidebarMobile() {
+      sidebarEl.classList.remove("open");
+      sidebarEl.classList.add("collapsed");
+      sidebarMaskEl.style.display = "none";
+      updateEmptyPrompt();
+    }
+
+    function openSidebarDesktop() {
+      sidebarEl.classList.remove("collapsed");
+      sidebarEl.classList.remove("open");
+      document.body.classList.add("sidebar-open");
+      sidebarMaskEl.style.display = "none";
+      updateLeftSidebarModuleLabel();
+      updateEmptyPrompt();
+    }
+
+    function closeSidebarDesktop() {
+      sidebarEl.classList.add("collapsed");
+      sidebarEl.classList.remove("open");
+      document.body.classList.remove("sidebar-open");
+      sidebarMaskEl.style.display = "none";
+      updateEmptyPrompt();
+    }
+
+    function handleMenuClick() {
+      if (isMobile()) {
+        openSidebarMobile();
+        return;
+      }
+      if (sidebarEl.classList.contains("collapsed")) {
+        openSidebarDesktop();
+      } else {
+        closeSidebarDesktop();
+      }
+    }
+
+    function handleSidebarCloseOrToggle() {
+      if (isMobile()) {
+        // 移动端：侧边栏作为弹窗，只做关闭
+        closeSidebarMobile();
+        return;
+      }
+      // 桌面端：点击侧边栏右上角按钮在“展开/收起”间切换
+      handleMenuClick();
+    }
+
+    menuBtnEl.addEventListener("click", handleMenuClick);
+    sidebarCloseEl.addEventListener("click", handleSidebarCloseOrToggle);
+    sidebarMaskEl.addEventListener("click", closeSidebarMobile);
+    loginCardEl.addEventListener("click", () => {
+      const user = getLoginUser();
+      if (!user) {
+        gotoLoginPage();
+        return;
+      }
+      window.location.href = "/static/personal_center.html";
+    });
+    loginCardEl.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const user = getLoginUser();
+        e.preventDefault();
+      if (!user) gotoLoginPage();
+      else window.location.href = "/static/personal_center.html";
+    });
+
+    function createNewSession() {
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      const session = {
+        id,
+        title: "新对话",
+        messages: [],
+        hasUserMessage: false, // 用户是否已发送过“第一句话”
+      };
+      currentSessionId = session.id;
+      draftSession = session; // 新会话先作为草稿，不计入历史
+      return session;
+    }
+
+    function startNewChat() {
+      const session = createNewSession();
+      // 新会话：像全新页面一样（不自动插入任何助手开场白）
+      messagesEl.innerHTML = "";
+      session.messages = [];
+      renderSidebarHistory();
+      renderMessagesFromSession();
+      updateEmptyPrompt();
+    }
+
+    // Demo：新建对话 = 清空消息区域（不影响后端）
+    btnNewChatEl.addEventListener("click", () => {
+      startNewChat();
+    });
+
+    btnClearEl.addEventListener("click", () => {
+      messagesEl.innerHTML = "";
+      const session = getCurrentSession();
+      if (session) {
+        session.messages = [];
+        session.title = "新对话";
+        session.hasUserMessage = false;
+      }
+      // 清空后如果仍未产生“第一句用户消息”，则该会话不应出现在历史记录中
+      if (session && sessions.some((s) => s.id === session.id) && !session.hasUserMessage) {
+        sessions = sessions.filter((s) => s.id !== session.id);
+        draftSession = session;
+      }
+      renderSidebarHistory();
+      renderMessagesFromSession();
+      updateEmptyPrompt();
+    });
+
+    // 右侧模块按钮：点击后展开右侧栏并（按你的要求）左侧强制收缩
+    if (rightSidebarEl && rightModuleContentEl) {
+      const rightModuleButtons = document.querySelectorAll(".right-module-btn");
+      rightModuleButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const moduleKey = btn.dataset.module || "";
+          lastClickedModuleKey = moduleKey || "";
+          // 点击大模块时：扫描该模块 QA，并预生成“模块 + 子模块”的动态卡片缓存
+          prefetchQaForModule(moduleKey);
+          // 先显示已有缓存（如果还没取回也不影响 UI）
+          renderDynamicModulesForKey(moduleKey);
+          expandRightSidebarAndCollapseLeft(moduleKey);
+        });
+      });
+    }
+
+    if (rightBackBtnEl) {
+      rightBackBtnEl.addEventListener("click", () => {
+        collapseRightSidebar();
+      });
+    }
+
+    // 右侧栏内部页面交互（学习帮助：页内跳转/返回）
+    if (rightModuleContentEl) {
+      rightModuleContentEl.addEventListener("click", (e) => {
+        const t = e.target;
+        const btn = t && t.closest ? t.closest("[data-right-page],[data-right-action]") : null;
+        if (!btn) return;
+
+        const action = btn.getAttribute("data-right-action");
+        if (action === "back") {
+          if (rightPageStack.length > 1) popRightPage();
+          renderRightModule();
+          return;
+        }
+        if (action === "use_action") {
+          if (activeDynamicCard && activeDynamicCard.action && inputEl) {
+            inputEl.value = String(activeDynamicCard.action);
+            inputEl.focus();
+          }
+          return;
+        }
+
+        const page = btn.getAttribute("data-right-page");
+        if (page) {
+          pushRightPage(page);
+          renderRightModule();
+        }
+      });
+    }
+
+    function updateEmptyPrompt() {
+      const isEmpty = messagesEl.children.length === 0;
+      const rightExpanded = document.body.classList.contains("right-expanded");
+      const leftExpanded = isLeftSidebarExpanded();
+      const bothSidebarsExpanded = !!rightExpanded && !!leftExpanded;
+      const shouldHide = isEmpty && bothSidebarsExpanded;
+      emptyPromptEl.style.display = isEmpty && !shouldHide ? "flex" : "none";
+      if (chatContainerEl) {
+        // 只有“真正空白页”才用 ChatGPT 居中输入布局；
+        // 当左右边栏都展开时，新页面也按“沉底输入”的聊天布局显示
+        const useEmptyLayout = !!isEmpty && !bothSidebarsExpanded;
+        chatContainerEl.classList.toggle("chat-empty", useEmptyLayout);
+      }
+    }
+
+    function appendMessage(role, text, messageId = null, messageIndex = null) {
       const row = document.createElement("div");
       row.className = "message-row " + role;
 
+      const body = document.createElement("div");
+      body.className = "message-body";
+
       const bubble = document.createElement("div");
       bubble.className = "message-bubble";
-      bubble.textContent = text;
+      // 用户输入有时会带入换行符（导致“你\n好”显示成竖排），这里统一折叠成空格
+      const safeText =
+        role === "user"
+          ? String(text || "").replace(/\r?\n/g, " ").replace(/\s{2,}/g, " ").trim()
+          : String(text || "");
+      bubble.textContent = safeText;
 
-      row.appendChild(bubble);
+      if (messageId) {
+        bubble.dataset.messageId = messageId;
+      }
+      if (typeof messageIndex === "number") {
+        bubble.dataset.messageIndex = String(messageIndex);
+      }
+
+      body.appendChild(bubble);
+
+      if (role === "assistant") {
+        const actions = document.createElement("div");
+        actions.className = "assistant-actions";
+
+        const svgRetry = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12a9 9 0 0 1-9 9c-2.8 0-5.2-1.2-6.9-3" />
+            <polyline points="3 17 3 21 7 21" />
+            <polyline points="3 7 3 3 7 3" />
+            <path d="M3 7a9 9 0 0 1 9-4 9 9 0 0 1 9 9" />
+          </svg>
+        `;
+
+        const svgCopy = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        `;
+
+        const retryBtn = document.createElement("button");
+        retryBtn.type = "button";
+        retryBtn.className = "assistant-mini-btn";
+        retryBtn.setAttribute("aria-label", "重新回复");
+        retryBtn.title = "重新回复";
+        retryBtn.innerHTML = svgRetry;
+        retryBtn.addEventListener("click", () => {
+          const prevUser = findPrevUserMessageForAssistant(row);
+          if (!prevUser || !prevUser.text) return;
+          const assistantMessageId = bubble.dataset.messageId || null;
+          const assistantMessageIndexRaw = bubble.dataset.messageIndex;
+          const assistantMessageIndex = assistantMessageIndexRaw ? Number(assistantMessageIndexRaw) : null;
+          retryAssistant(prevUser.text, assistantMessageId, assistantMessageIndex, bubble);
+        });
+
+        const copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.className = "assistant-mini-btn";
+        copyBtn.setAttribute("aria-label", "复制回答");
+        copyBtn.title = "复制回答";
+        copyBtn.innerHTML = svgCopy;
+        copyBtn.addEventListener("click", async () => {
+          const content = bubble.textContent || "";
+          try {
+            if (navigator.clipboard && window.isSecureContext) {
+              await navigator.clipboard.writeText(content);
+            } else {
+              const ta = document.createElement("textarea");
+              ta.value = content;
+              ta.style.position = "fixed";
+              ta.style.left = "-9999px";
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand("copy");
+              document.body.removeChild(ta);
+            }
+            copyBtn.classList.add("copied");
+            copyBtn.setAttribute("aria-label", "已复制");
+            copyBtn.title = "已复制";
+            setTimeout(() => {
+              copyBtn.classList.remove("copied");
+              copyBtn.setAttribute("aria-label", "复制回答");
+              copyBtn.title = "复制回答";
+            }, 900);
+          } catch (e) {
+            // 静默：复制失败则不影响回答显示
+          }
+        });
+
+        actions.appendChild(retryBtn);
+        actions.appendChild(copyBtn);
+        body.appendChild(actions);
+      }
+
+      row.appendChild(body);
       messagesEl.appendChild(row);
       messagesEl.scrollTop = messagesEl.scrollHeight;
+      return bubble;
     }
 
-    async function sendMessage() {
-      const text = inputEl.value.trim();
-      if (!text) return;
+    function cleanAssistantText(text) {
+      let t = String(text || "");
+      // 去掉 Markdown 粗体：**xxx** -> xxx
+      t = t.replace(/\*\*(.*?)\*\*/g, "$1");
+      // 去掉每行开头项目符号：* xxx / - xxx
+      t = t
+        .split("\n")
+        .map((line) => line.replace(/^\s*[\*\-]\s+/, ""))
+        .join("\n");
+      return t;
+    }
 
-      appendMessage("user", text);
-      inputEl.value = "";
-      inputEl.style.height = "44px";
+    function findPrevUserMessageForAssistant(assistantRowEl) {
+      const rows = Array.from(messagesEl.children);
+      const idx = rows.indexOf(assistantRowEl);
+      if (idx <= 0) return null;
+      for (let i = idx - 1; i >= 0; i--) {
+        const el = rows[i];
+        if (el && el.classList && el.classList.contains("user")) {
+          const bubble = el.querySelector(".message-bubble");
+          return {
+            text: (bubble && bubble.textContent) || "",
+            id: (bubble && bubble.dataset && bubble.dataset.messageId) || null,
+          };
+        }
+      }
+      return null;
+    }
 
-      sendBtn.disabled = true;
-      statusEl.textContent = "模型思考中...";
+    async function streamAssistantReply(promptText, assistantBubble, assistantMessageId, assistantMessageIndex, session) {
+      let assistantRaw = "";
+      let handledMeta = false;
+      isChatStreaming = true;
+      let gotFirstToken = false;
 
       try {
-        const res = await fetch("/api/chat", {
+        const res = await fetch("/api/chat_stream", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ message: text }),
+          body: JSON.stringify({ message: promptText }),
         });
 
-        if (!res.ok) {
-          throw new Error("HTTP " + res.status);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        if (!res.body) throw new Error("响应体为空，无法流式读取");
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let sseBuffer = "";
+        let done = false;
+
+        while (!done) {
+          const { value, done: readerDone } = await reader.read();
+          if (readerDone) break;
+          sseBuffer += decoder.decode(value, { stream: true });
+
+          // SSE 事件通常以空行分隔：\n\n
+          const parts = sseBuffer.split("\n\n");
+          sseBuffer = parts.pop(); // 保留最后一个未完整事件
+
+          for (const part of parts) {
+            const lines = part.split("\n");
+            for (const line of lines) {
+              if (!line.startsWith("data:")) continue;
+              const payload = line.slice(5).trim();
+              if (!payload) continue;
+
+              if (payload === "[DONE]") {
+                done = true;
+                break;
+              }
+
+              let delta = "";
+              let parsedAsJson = false;
+              try {
+                const obj = JSON.parse(payload);
+                parsedAsJson = true;
+                if (obj.error) throw new Error(obj.error);
+                // meta: QA 命中后触发右侧栏跳转 + 直接打开一个“以 q 原文为标题”的临时卡片
+                if (obj.meta && !handledMeta) {
+                  handledMeta = true;
+                  try {
+                    const meta = obj.meta || {};
+                    const moduleKey = meta.moduleKey ? String(meta.moduleKey) : "";
+                    const pageKey = meta.pageKey ? String(meta.pageKey) : "";
+                    if (moduleKey) {
+                      lastClickedModuleKey = moduleKey;
+                      prefetchQaForModule(moduleKey, promptText); // 用用户问题排序卡片
+                      // 用户正在看 AI 详情时：只后台更新，不打断当前详情视图
+                      if (dynamicViewMode !== "detail") {
+                        expandRightSidebarAndCollapseLeft(moduleKey);
+                        if (pageKey) {
+                          pushRightPage(pageKey);
+                          renderRightModule();
+                        }
+                      }
+                    }
+                  } catch (e) {}
+                }
+                delta = obj.delta || "";
+              } catch (e) {
+                if (!parsedAsJson) delta = payload;
+                else throw e;
+              }
+
+              if (delta) {
+                // 尽量模拟“逐字打字”：把增量拆成字符逐个追加
+                for (const ch of delta) {
+                  assistantRaw += ch;
+                  if (!gotFirstToken) gotFirstToken = true;
+                  assistantBubble.textContent = cleanAssistantText(assistantRaw);
+                  messagesEl.scrollTop = messagesEl.scrollHeight;
+                }
+              }
+            }
+            if (done) break;
+          }
         }
 
-        const data = await res.json();
-        appendMessage("assistant", data.reply || "(空回复)");
+        const finalText = cleanAssistantText(assistantRaw) || "(空回复)";
+        assistantBubble.textContent = finalText;
+
+        if (session) {
+          if (
+            typeof assistantMessageIndex === "number" &&
+            assistantMessageIndex >= 0 &&
+            assistantMessageIndex < session.messages.length
+          ) {
+            // 用数组下标覆盖旧回答，确保“重新回复”不会追加新回答
+            session.messages[assistantMessageIndex].text = finalText;
+            if (assistantMessageId) session.messages[assistantMessageIndex].id = assistantMessageId;
+          } else if (assistantMessageId) {
+            const idx = session.messages.findIndex((m) => m.id === assistantMessageId);
+            if (idx >= 0) session.messages[idx].text = finalText;
+            else session.messages.push({ role: "assistant", text: finalText, id: assistantMessageId });
+          } else {
+            session.messages.push({ role: "assistant", text: finalText });
+          }
+        }
+
+        return finalText;
       } catch (err) {
-        console.error(err);
-        appendMessage("assistant", "请求失败：" + err.message);
+        // 兜底：如果流式失败，退回到原来的 /api/chat 一次性接口
+        const res2 = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: promptText }),
+        });
+        if (!res2.ok) throw err;
+
+        const data = await res2.json();
+        const reply = data.reply || "(空回复)";
+        const finalText = cleanAssistantText(reply) || "(空回复)";
+        gotFirstToken = true;
+        assistantBubble.textContent = finalText;
+
+        if (session) {
+          if (
+            typeof assistantMessageIndex === "number" &&
+            assistantMessageIndex >= 0 &&
+            assistantMessageIndex < session.messages.length
+          ) {
+            session.messages[assistantMessageIndex].text = finalText;
+            if (assistantMessageId) session.messages[assistantMessageIndex].id = assistantMessageId;
+          } else if (assistantMessageId) {
+            const idx = session.messages.findIndex((m) => m.id === assistantMessageId);
+            if (idx >= 0) session.messages[idx].text = finalText;
+            else session.messages.push({ role: "assistant", text: finalText, id: assistantMessageId });
+          } else {
+            session.messages.push({ role: "assistant", text: finalText });
+          }
+        }
+
+        return finalText;
       } finally {
+        isChatStreaming = false;
+        flushPendingAfterChat();
+      }
+    }
+
+    async function retryAssistant(promptText, assistantMessageId, assistantMessageIndex, assistantBubble) {
+      if (isAwaitingAssistant) return;
+      isAwaitingAssistant = true;
+      const session = getCurrentSession();
+      sendBtn.disabled = true;
+      inputEl.disabled = true;
+      statusEl.textContent = "模型思考中...";
+
+      try {
+        if (assistantBubble) assistantBubble.textContent = "";
+        await streamAssistantReply(
+          promptText,
+          assistantBubble,
+          assistantMessageId,
+          assistantMessageIndex,
+          session
+        );
+      } finally {
+        isAwaitingAssistant = false;
         sendBtn.disabled = false;
+        inputEl.disabled = false;
+        statusEl.textContent = "就绪";
+      }
+    }
+
+    async function sendMessage() {
+      if (isAwaitingAssistant) return;
+      const text = inputEl.value.trim();
+      if (!text) return;
+      isAwaitingAssistant = true;
+
+      const session = getCurrentSession();
+
+      const userMessageId = createMessageId();
+
+      appendMessage("user", text, userMessageId);
+      if (session) {
+        session.messages.push({ role: "user", text, id: userMessageId });
+
+        // 如果这是“草稿新会话”的第一句用户消息：才加入历史并用 API 生成会话标题
+        if (draftSession && session.id === draftSession.id && !draftSession.hasUserMessage) {
+          draftSession.hasUserMessage = true;
+
+          // 先入历史，避免等待标题生成导致看不到记录
+          sessions.unshift(draftSession);
+          const newSessionId = draftSession.id;
+          draftSession = null; // 当前会话已入历史
+          renderSidebarHistory();
+
+          // 标题生成改为后台异步，避免阻塞“发送后立刻显示”
+          (async () => {
+          try {
+            const tr = await fetch("/api/session_title", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message: text }),
+            });
+              if (!tr.ok) throw new Error("title api not ok");
+              const td = await tr.json();
+              const title = td && td.title ? String(td.title).trim() : "";
+              if (!title) throw new Error("empty title");
+              const idx = sessions.findIndex((s) => s && s.id === newSessionId);
+              if (idx >= 0) {
+                sessions[idx].title = title;
+                renderSidebarHistory();
+            }
+          } catch (e) {
+            const fallback = text.length > 16 ? text.slice(0, 16) + "…" : text;
+              const idx = sessions.findIndex((s) => s && s.id === newSessionId);
+              if (idx >= 0) {
+                sessions[idx].title = fallback;
+            renderSidebarHistory();
+          }
+            }
+          })();
+        }
+      }
+
+      inputEl.value = "";
+      inputEl.style.height = "44px";
+      updateEmptyPrompt();
+
+      // 异步路由：不阻塞聊天回复。命中则自动展开右侧栏并跳转到对应板块/子板块。
+      (async () => {
+        try {
+          const rr = await fetch("/api/route_board", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+          if (!rr.ok) return;
+          const rd = await rr.json();
+          const moduleKey = rd && rd.moduleKey ? String(rd.moduleKey) : "";
+          const pageKey = rd && rd.pageKey ? String(rd.pageKey) : "";
+          const conf = rd && typeof rd.confidence === "number" ? rd.confidence : 0;
+          if (!moduleKey || conf < 0.55) return;
+
+          lastClickedModuleKey = moduleKey;
+          prefetchQaForModule(moduleKey, text); // 用用户问题排序卡片
+          // 如果用户正在查看 AI 详情：只后台更新，不打断当前详情视图
+          if (dynamicViewMode !== "detail") {
+            expandRightSidebarAndCollapseLeft(moduleKey);
+            if (pageKey) {
+              pushRightPage(pageKey);
+              renderRightModule();
+            }
+          }
+        } catch (e) {}
+      })();
+
+      // 即使右侧栏先展开、用户再提问：也用本次问题对当前模块的 AI 列表重新排序（以未改写内容排序）
+      (async () => {
+        try {
+          const rightExpanded = document.body.classList.contains("right-expanded");
+          const currentKey = String(lastClickedModuleKey || rightModuleKey || "").trim();
+          if (!rightExpanded || !currentKey) return;
+          prefetchQaForModule(currentKey, text);
+        } catch (e) {}
+      })();
+
+      sendBtn.disabled = true;
+      inputEl.disabled = true;
+      statusEl.textContent = "模型思考中...";
+
+      // 先创建一个空的助手回复气泡，流式增量持续写入它
+      const assistantMessageId = createMessageId();
+      const assistantBubble = appendMessage("assistant", "", assistantMessageId);
+      if (assistantBubble) {
+        assistantBubble.innerHTML = `<span class="chat-loading"><span class="chat-loading-spinner" aria-hidden="true"></span><span class="chat-loading-dots">正在思考</span></span>`;
+      }
+
+      try {
+        await streamAssistantReply(text, assistantBubble, assistantMessageId, null, session);
+      } finally {
+        isAwaitingAssistant = false;
+        sendBtn.disabled = false;
+        inputEl.disabled = false;
         statusEl.textContent = "就绪";
       }
     }
@@ -255,14 +4050,38 @@
     });
 
     inputEl.addEventListener("input", () => {
+      // 只有当用户真的输入了换行（Shift+Enter）时，才允许高度随内容增长
+      // 否则保持单行高度，避免短文本在窄屏下被 wrap 后看起来“强行换行”
+      if (!inputEl.value.includes("\n")) {
+        inputEl.style.height = "40px";
+        return;
+      }
       inputEl.style.height = "auto";
       inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + "px";
     });
 
-    // 初始问候语：大学生活助手
+    // 初始化：根据屏幕尺寸默认侧边栏展开/收起
+    (function initSidebar() {
+      if (isMobile()) {
+        sidebarEl.classList.add("collapsed");
+        document.body.classList.remove("sidebar-open");
+        sidebarMaskEl.style.display = "none";
+      } else {
+        sidebarEl.classList.remove("collapsed");
+        document.body.classList.add("sidebar-open");
+        sidebarMaskEl.style.display = "none";
+      }
+    })();
+
+    // 初始问候语：偏生活场景的问候
     window.addEventListener("DOMContentLoaded", () => {
-      const greeting = "你好，我是你的大学学习与生活助手，可以帮你查资料、写作业思路、规划时间等，有什么想问的？";
-      appendMessage("assistant", greeting);
+      renderLoginCard();
+      // 默认创建一个会话并显示欢迎语，保证历史侧边栏有内容
+      const session = createNewSession();
+      // 初始不展示任何默认欢迎语，让空状态提示自行显示
+      session.messages = [];
+      renderMessagesFromSession();
+      updateEmptyPrompt();
     });
   </script>
 </body>

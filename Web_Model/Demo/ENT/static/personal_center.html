@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>个人中心 - 西浦生活助手</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #eef2ff, #f9fafb);
+        color: #111827;
+        padding: 20px 0;
+      }
+
+      .wrap {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .title {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .top-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .btn {
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        color: #111827;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 10px 12px;
+        transition: background 0.15s ease, border-color 0.15s ease;
+      }
+
+      .btn:hover {
+        background: #f9fafb;
+        border-color: #c7d2fe;
+      }
+
+      .btn-primary {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 16px;
+      }
+
+      @media (max-width: 980px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 10px 25px -18px rgba(15, 23, 42, 0.35);
+      }
+
+      .card-title {
+        font-weight: 900;
+        font-size: 14px;
+        color: #111827;
+        margin-bottom: 12px;
+      }
+
+      .row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .profile-head {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        object-fit: cover;
+        flex: 0 0 auto;
+      }
+
+      .name {
+        font-weight: 900;
+        font-size: 16px;
+        line-height: 1.2;
+      }
+
+      .meta {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 4px;
+      }
+
+      .form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .form .full {
+        grid-column: 1 / -1;
+      }
+
+      @media (max-width: 640px) {
+        .form {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .field label {
+        display: block;
+        font-size: 12px;
+        color: #475569;
+        margin-bottom: 6px;
+        font-weight: 700;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select,
+      textarea {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+        padding: 10px 12px;
+        outline: none;
+        font-size: 14px;
+      }
+
+      textarea {
+        min-height: 92px;
+        resize: vertical;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
+      }
+
+      .help {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 8px;
+        line-height: 1.5;
+      }
+
+      .section-sep {
+        height: 1px;
+        background: #f1f5f9;
+        margin: 14px 0;
+      }
+
+      .pref-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .pref-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid #e5e7eb;
+        background: #f8fafc;
+      }
+
+      .pref-left {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .pref-title {
+        font-weight: 900;
+        font-size: 13px;
+      }
+
+      .pref-sub {
+        font-size: 12px;
+        color: #6b7280;
+      }
+
+      .toggle {
+        appearance: none;
+        width: 44px;
+        height: 26px;
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #e5e7eb;
+        position: relative;
+        cursor: pointer;
+        outline: none;
+      }
+
+      .toggle::after {
+        content: "";
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #ffffff;
+        position: absolute;
+        top: 50%;
+        left: 2px;
+        transform: translateY(-50%);
+        transition: left 0.15s ease, background 0.15s ease;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+      }
+
+      .toggle:checked {
+        background: rgba(37, 99, 235, 0.2);
+        border-color: rgba(37, 99, 235, 0.5);
+      }
+
+      .toggle:checked::after {
+        left: 20px;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 18px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: #111827;
+        color: #ffffff;
+        font-size: 13px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+
+      .toast.show {
+        opacity: 0.95;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="title">个人中心</div>
+        <div class="top-actions">
+          <button class="btn" type="button" id="backBtn">返回聊天</button>
+          <button class="btn btn-primary" type="button" id="saveBtn">保存</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">基础设置</div>
+
+          <div class="profile-head">
+            <img class="avatar" id="avatarEl" src="" alt="avatar" />
+            <div>
+              <div class="name" id="usernameEl">未登录</div>
+              <div class="meta" id="userMetaEl">—</div>
+            </div>
+          </div>
+
+          <div class="form">
+            <div class="field">
+              <label for="ageEl">年龄</label>
+              <input id="ageEl" type="number" min="10" max="120" placeholder="例如：19" />
+            </div>
+
+            <div class="field">
+              <label for="genderEl">性别</label>
+              <select id="genderEl">
+                <option value="">未填写</option>
+                <option value="male">男</option>
+                <option value="female">女</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label for="majorEl">专业</label>
+              <input id="majorEl" type="text" placeholder="例如：计算机科学（本科/硕士）" />
+            </div>
+
+            <div class="field">
+              <label for="levelEl">年级/学年</label>
+              <select id="levelEl">
+                <option value="">未选择</option>
+                <option value="1">一年级</option>
+                <option value="2">二年级</option>
+                <option value="3">三年级</option>
+                <option value="4">四年级</option>
+                <option value="5">研究生阶段</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="studyGoalEl">偏好方向</label>
+              <select id="studyGoalEl">
+                <option value="">未选择</option>
+                <option value="learning">学习帮助优先</option>
+                <option value="intern">实习就业优先</option>
+                <option value="campus">校园活动优先</option>
+                <option value="life">生活支持优先</option>
+                <option value="research">科研探索优先</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label for="bioEl">自我简介（可选）</label>
+              <textarea id="bioEl" placeholder="例如：刚入学，想找实用学习方法和选课建议。"></textarea>
+            </div>
+          </div>
+
+          <div class="help">这些信息仅保存在浏览器本地，不会上传到服务器。</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">个人中心常用内容</div>
+
+          <div class="section-sep"></div>
+
+          <div class="pref-list">
+            <div class="pref-item">
+              <div class="pref-left">
+                <div class="pref-title">消息通知</div>
+                <div class="pref-sub">回答完成、重要提醒时提示</div>
+              </div>
+              <input class="toggle" type="checkbox" id="notifyEl" />
+            </div>
+
+            <div class="pref-item">
+              <div class="pref-left">
+                <div class="pref-title">板块偏好</div>
+                <div class="pref-sub">决定助手更常用哪个方向回答</div>
+              </div>
+              <button class="btn" type="button" id="pickPrefBtn" style="padding:8px 10px;border-radius:12px;">
+                选择
+              </button>
+            </div>
+
+            <div class="pref-item">
+              <div class="pref-left">
+                <div class="pref-title">我的收藏</div>
+                <div class="pref-sub">这里放你保存的回答/链接</div>
+              </div>
+              <button class="btn" type="button" id="favoritesBtn" style="padding:8px 10px;border-radius:12px;">
+                查看
+              </button>
+            </div>
+
+            <div class="pref-item">
+              <div class="pref-left">
+                <div class="pref-title">学习计划</div>
+                <div class="pref-sub">记录阶段目标与待办</div>
+              </div>
+              <button class="btn" type="button" id="planBtn" style="padding:8px 10px;border-radius:12px;">
+                管理
+              </button>
+            </div>
+          </div>
+
+          <div class="section-sep"></div>
+
+          <button class="btn" type="button" id="clearLocalBtn">清除本地个人设置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toastEl">已保存</div>
+
+    <script>
+      const LOGIN_STORAGE_KEY = "xipu_life_assistant_user";
+      const PROFILE_STORAGE_KEY = "xipu_personal_center_profile";
+
+      const avatarEl = document.getElementById("avatarEl");
+      const usernameEl = document.getElementById("usernameEl");
+      const userMetaEl = document.getElementById("userMetaEl");
+      const ageEl = document.getElementById("ageEl");
+      const genderEl = document.getElementById("genderEl");
+      const majorEl = document.getElementById("majorEl");
+      const levelEl = document.getElementById("levelEl");
+      const studyGoalEl = document.getElementById("studyGoalEl");
+      const bioEl = document.getElementById("bioEl");
+      const notifyEl = document.getElementById("notifyEl");
+
+      const saveBtn = document.getElementById("saveBtn");
+      const backBtn = document.getElementById("backBtn");
+      const clearLocalBtn = document.getElementById("clearLocalBtn");
+      const toastEl = document.getElementById("toastEl");
+
+      function getLoginUser() {
+        try {
+          const raw = localStorage.getItem(LOGIN_STORAGE_KEY);
+          if (!raw) return null;
+          const data = JSON.parse(raw);
+          if (!data || !data.username) return null;
+          return data;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function loadProfile() {
+        try {
+          const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+          if (!raw) return {};
+          const data = JSON.parse(raw);
+          if (!data || typeof data !== "object") return {};
+          return data;
+        } catch (e) {
+          return {};
+        }
+      }
+
+      function saveProfile(data) {
+        localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(data || {}));
+      }
+
+      function showToast(text) {
+        toastEl.textContent = text || "已保存";
+        toastEl.classList.add("show");
+        setTimeout(() => toastEl.classList.remove("show"), 900);
+      }
+
+      function hydrate() {
+        const user = getLoginUser();
+        if (!user) {
+          window.location.href = "/static/login.html?redirect=/static/personal_center.html";
+          return;
+        }
+
+        const safeName = String(user.username || "");
+        const avatar = user.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+          safeName
+        )}`;
+
+        avatarEl.src = avatar;
+        usernameEl.textContent = safeName;
+        userMetaEl.textContent = "账户已登录";
+
+        const profile = loadProfile();
+        ageEl.value = profile.age ?? "";
+        genderEl.value = profile.gender ?? "";
+        majorEl.value = profile.major ?? "";
+        levelEl.value = profile.level ?? "";
+        studyGoalEl.value = profile.studyGoal ?? "";
+        bioEl.value = profile.bio ?? "";
+        notifyEl.checked = !!profile.notify;
+      }
+
+      saveBtn.addEventListener("click", () => {
+        const data = {
+          age: ageEl.value ? Number(ageEl.value) : "",
+          gender: genderEl.value,
+          major: majorEl.value.trim(),
+          level: levelEl.value,
+          studyGoal: studyGoalEl.value,
+          bio: bioEl.value.trim(),
+          notify: notifyEl.checked,
+        };
+        saveProfile(data);
+        showToast("个人设置已保存");
+      });
+
+      backBtn.addEventListener("click", () => {
+        window.location.href = "/";
+      });
+
+      clearLocalBtn.addEventListener("click", () => {
+        localStorage.removeItem(PROFILE_STORAGE_KEY);
+        hydrate();
+        showToast("已清除本地设置");
+      });
+
+      // 这些按钮目前只是 UI 占位，后续你想接功能再扩展
+      document.getElementById("pickPrefBtn").addEventListener("click", () => alert("板块偏好：先占位，后续再接功能。"));
+      document.getElementById("favoritesBtn").addEventListener("click", () => alert("我的收藏：先占位，后续再接功能。"));
+      document.getElementById("planBtn").addEventListener("click", () => alert("学习计划：先占位，后续再接功能。"));
+
+      window.addEventListener("DOMContentLoaded", hydrate);
+    </script>
+  </body>
+</html>
+
