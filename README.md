@@ -37,15 +37,17 @@ An intelligent conversational assistant for university students, featuring a res
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.11+
+- Git
 - DeepSeek API key ([Get one here](https://platform.deepseek.com))
 
 ### Installation
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/campusai.git
-cd campusai
+git clone https://github.com/Airlxis/ENT208Group17.git
+cd ENT208Group17
 
 # Create virtual environment
 python -m venv venv
@@ -68,6 +70,34 @@ uvicorn graph:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 Access the chat interface at `http://localhost:8000`
+
+### Environment Variables
+
+```bash
+# Required
+DEEPSEEK_API_KEY=your_actual_api_key_here
+
+# Optional: Campus network proxy
+HTTP_PROXY=http://proxy.university.edu:8080
+```
+
+### Verify Installation
+
+Open browser to:
+- Chat interface: `http://localhost:8000`
+- API docs: `http://localhost:8000/docs`
+
+Test with query: "library hours"
+
+### Troubleshooting
+
+| Problem | Likely Cause | Solution |
+|---------|-------------|----------|
+| `ModuleNotFoundError: No module named 'fastapi'` | Virtual environment not activated or dependencies not installed | Run `pip install -r requirements.txt` and ensure you see `(venv)` in your terminal prompt before starting the server |
+| `KeyError: 'DEEPSEEK_API_KEY'` or server fails to start | Environment variables not loaded | Check that `.env` file exists in project root (not `.env.example`) and contains `DEEPSEEK_API_KEY=sk-...`. Restart terminal after editing |
+| `Connection timeout` when asking questions | DeepSeek API blocked by campus firewall or missing proxy | Add `HTTP_PROXY=http://your-campus-proxy:port` to `.env` file, or switch to mobile hotspot to verify API connectivity |
+| Frontend loads but shows "Connection Error" | Backend not running or CORS misconfiguration | Verify backend is running on port 8000 with `uvicorn graph:app --host 0.0.0.0`. Check browser console for CORS errors—ensure you're accessing via `localhost:8000`, not `127.0.0.1:8000` |
+
 
 ---
 
