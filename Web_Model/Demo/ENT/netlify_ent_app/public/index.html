@@ -2,29 +2,9 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>本地 LLM 聊天</title>
+  <title>西浦生活助手</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    :root {
-      --brand-deep: #3f448f;
-      --brand-deeper: #34387f;
-      --brand-mid: #5f4fc8;
-      --brand-mid-2: #6a58d4;
-      --brand-mid-3: #5647bc;
-      --bg-1: #f7f4ff;
-      --bg-2: #ede8ff;
-      --bg-3: #e0daf8;
-      --card: #ffffff;
-      --line: #dfe3f1;
-      --text: #242545;
-      --muted: #726f99;
-      --soft: #f6f8fd;
-      --soft-2: #f1f4fc;
-      --active: #e9eefc;
-      --sidebar-bg: #ffffff;
-      --sidebar-border: #e5e8f4;
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
@@ -33,10 +13,8 @@
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(1200px 520px at 12% 8%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0) 56%),
-        linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-3));
-      color: var(--text);
+      background: linear-gradient(135deg, #eef2ff, #f9fafb);
+      color: #111827;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -89,8 +67,8 @@
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      border: 1px solid var(--line);
-      background: var(--card);
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
       cursor: pointer;
       display: none; /* 桌面端不显示，通过侧边栏右上角按钮控制展开/收起 */
       align-items: center;
@@ -100,8 +78,8 @@
     }
 
     .menu-btn:hover {
-      background: var(--soft);
-      border-color: #cfc4f0;
+      background: #f9fafb;
+      border-color: #d1d5db;
     }
 
     .hamburger {
@@ -115,7 +93,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: var(--text);
+      background: #111827;
       border-radius: 2px;
     }
 
@@ -133,7 +111,7 @@
 
     .header-subtitle {
       font-size: 12px;
-      color: var(--muted);
+      color: #6b7280;
     }
 
     .chat-container {
@@ -141,7 +119,7 @@
       margin-top: 8px;
       padding: 12px;
       border-radius: 16px;
-      background: var(--card);
+      background: #ffffff;
       box-shadow: 0 10px 15px -10px rgba(15, 23, 42, 0.25);
       display: flex;
       flex-direction: column;
@@ -190,7 +168,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: var(--muted);
+      color: #6b7280;
       text-align: center;
       padding: 24px 16px;
       gap: 10px;
@@ -199,13 +177,8 @@
 
     .empty-prompt-title {
       font-size: 20px;
-      color: var(--text);
+      color: #111827;
       font-weight: 650;
-    }
-
-    .empty-prompt-sub {
-      font-size: 12px;
-      color: var(--muted);
     }
 
     .messages {
@@ -248,9 +221,9 @@
     .assistant-mini-btn {
       height: 26px;
       border-radius: 999px;
-      border: 1px solid var(--line);
-      background: var(--card);
-      color: var(--text);
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      color: #111827;
       font-size: 12px;
       font-weight: 700;
       width: 28px;
@@ -277,8 +250,8 @@
     }
 
     .assistant-mini-btn:hover {
-      background: var(--soft);
-      border-color: #c8bceb;
+      background: #f9fafb;
+      border-color: #c7d2fe;
     }
 
     .assistant-mini-btn:disabled {
@@ -301,7 +274,7 @@
     }
 
     .message-row.user .message-bubble {
-      background: linear-gradient(135deg, #7c6ae0, #6a58d4);
+      background: #2563eb;
       color: #ffffff;
       border-bottom-right-radius: 4px;
       /* 用户消息不需要保留换行语义，避免短文本在窄宽度下被拆成多行/竖排 */
@@ -310,20 +283,8 @@
 
     .message-row.assistant .message-bubble {
       background: #f3f4f6;
-      color: var(--text);
+      color: #111827;
       border-bottom-left-radius: 4px;
-    }
-
-    .message-bubble a {
-      color: #335fc7;
-      text-decoration: underline !important;
-      text-underline-offset: 2px;
-      cursor: pointer;
-      word-break: break-all;
-    }
-
-    .message-bubble a:hover {
-      color: #274da7;
     }
 
     @media (max-width: 900px) {
@@ -333,7 +294,7 @@
     }
 
     .input-area {
-      border-top: 1px solid var(--line);
+      border-top: 1px solid #e5e7eb;
       padding-top: 12px;
       margin-top: 8px;
       display: flex;
@@ -356,7 +317,7 @@
       min-width: 200px;
       resize: none;
       border-radius: 14px;
-      border: 1px solid var(--line);
+      border: 1px solid #d1d5db;
       padding: 8px 12px;
       font-size: 14px;
       line-height: 1.4;
@@ -372,33 +333,11 @@
 
     #send {
       flex: 0 0 auto;
-      width: 38px;
-      height: 38px;
-      padding: 0;
-      border-radius: 50%;
-      background: var(--brand-mid);
-      color: #ffffff;
-      border: 1px solid transparent;
-    }
-
-    #send svg {
-      width: 18px;
-      height: 18px;
-      display: block;
-    }
-
-    #send:not(:disabled):hover {
-      background: var(--brand-mid-3);
-    }
-
-    #send:disabled {
-      background: #9ca3af;
-      border-color: #9ca3af;
     }
 
     textarea:focus {
-      border-color: var(--brand-mid);
-      box-shadow: 0 0 0 1px rgba(95, 79, 200, 0.22);
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
     }
 
     button {
@@ -406,7 +345,7 @@
       border: none;
       padding: 0 18px;
       height: 38px;
-      background: var(--brand-mid-2);
+      background: #2563eb;
       color: #ffffff;
       font-size: 14px;
       font-weight: 500;
@@ -423,12 +362,12 @@
     }
 
     button:not(:disabled):hover {
-      background: var(--brand-mid-3);
+      background: #1d4ed8;
     }
 
     .status {
       font-size: 12px;
-      color: var(--muted);
+      color: #6b7280;
       margin-left: 4px;
     }
 
@@ -449,8 +388,8 @@
       right: 0;
       width: 360px;
       height: 100vh;
-      background: var(--sidebar-bg);
-      border-left: 1px solid var(--sidebar-border);
+      background: #ffffff;
+      border-left: 2px solid #d1d5db;
       box-shadow: -2px 0 10px rgba(0, 0, 0, 0.04);
       z-index: 60;
       display: flex;
@@ -469,13 +408,9 @@
     .right-sidebar-title {
       font-weight: 700;
       font-size: 15px;
-      color: var(--text);
+      color: #111827;
       margin-bottom: 12px;
       padding: 2px 2px;
-      line-height: 1.3;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .right-sidebar-card {
@@ -505,8 +440,8 @@
 
     /* Right module page (expanded content) */
     .module-page {
-      background: var(--card);
-      border: 1px solid var(--line);
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
       border-radius: 16px;
       box-shadow: 0 10px 25px -18px rgba(15, 23, 42, 0.35);
       padding: 14px;
@@ -523,7 +458,7 @@
     .module-page-title {
       font-weight: 900;
       font-size: 14px;
-      color: var(--text);
+      color: #111827;
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -531,8 +466,8 @@
     }
 
     .module-inline-back {
-      border: 1px solid var(--line);
-      background: var(--card);
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
       border-radius: 12px;
       width: 38px;
       height: 34px;
@@ -542,12 +477,12 @@
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
-      color: var(--text); /* 确保返回图标不会变成白色 */
+      color: #111827; /* 确保返回图标不会变成白色 */
     }
 
     .module-inline-back:hover {
-      background: var(--soft);
-      border-color: #c8bceb;
+      background: #f9fafb;
+      border-color: #c7d2fe;
     }
 
     .module-inline-back svg {
@@ -561,7 +496,6 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      align-items: stretch;
     }
 
     @media (max-width: 1100px) {
@@ -571,22 +505,22 @@
     }
 
     .module-action-btn {
-      border: 1px solid var(--line);
-      background: #f9fbff;
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
       border-radius: 14px;
       padding: 12px;
       cursor: pointer;
       text-align: left;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 10px;
-      min-height: 72px;
+      min-height: 56px;
       transition: background 0.15s ease, border-color 0.15s ease, transform 0.06s ease;
     }
 
     .module-action-btn:hover {
-      background: var(--soft-2);
-      border-color: #c8bceb;
+      background: #eef2ff;
+      border-color: #c7d2fe;
     }
 
     .module-action-btn:active {
@@ -597,14 +531,13 @@
       width: 36px;
       height: 36px;
       border-radius: 12px;
-      background: var(--card);
-      border: 1px solid var(--line);
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
       display: flex;
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
-      color: var(--brand-mid);
-      margin-top: 1px;
+      color: #1d4ed8;
     }
 
     .module-action-icon svg {
@@ -616,45 +549,36 @@
     .module-action-text {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
       min-width: 0;
-      flex: 1 1 auto;
     }
 
     .module-action-title {
       font-weight: 900;
       font-size: 13px;
-      color: var(--text);
-      line-height: 1.35;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      -webkit-box-orient: vertical;
+      color: #111827;
+      white-space: nowrap;
       overflow: hidden;
-      min-height: 1.35em;
+      text-overflow: ellipsis;
     }
 
     .module-action-sub {
       font-size: 12px;
-      color: var(--muted);
-      line-height: 1.35;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      -webkit-box-orient: vertical;
+      color: #6b7280;
+      white-space: nowrap;
       overflow: hidden;
-      min-height: 1.35em;
+      text-overflow: ellipsis;
     }
 
     .module-section {
       margin-top: 10px;
       padding-top: 10px;
-      border-top: 1px solid #ece8ff;
+      border-top: 1px solid #f1f5f9;
     }
 
     .module-paragraph {
       font-size: 13px;
-      color: var(--text);
+      color: #111827;
       line-height: 1.6;
       margin-bottom: 10px;
     }
@@ -662,328 +586,19 @@
     .module-list {
       margin: 0;
       padding-left: 18px;
-      color: var(--text);
+      color: #111827;
       font-size: 13px;
       line-height: 1.6;
     }
 
-    .schedule-wrap {
-      display: grid;
-      gap: 12px;
-    }
-
-    .schedule-hint {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .schedule-board {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      overflow: hidden;
-      background: #fff;
-    }
-
-    .schedule-head-row,
-    .schedule-body-row {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 56px repeat(5, minmax(0, 1fr));
-    }
-
-    .schedule-head-row {
-      border-bottom: 1px solid #d7d9df;
-      background: #f4f5f7;
-    }
-
-    .schedule-body-row {
-      background: #fff;
-    }
-
-    .schedule-time-head {
-      border-right: 1px solid #d7d9df;
-      font-size: 12px;
-      font-weight: 800;
-      color: #445;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 58px;
-    }
-
-    .schedule-day-head {
-      border-right: 2px solid #b8c1d2;
-      min-height: 58px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 800;
-      color: #111827;
-    }
-
-    .schedule-time-body {
-      border-right: 1px solid #d7d9df;
-    }
-
-    .schedule-grid {
-      min-width: 0;
-      width: 100%;
-      display: grid;
-      grid-template-columns: 56px repeat(5, minmax(0, 1fr));
-      grid-template-rows: 58px auto;
-    }
-
-    .schedule-cell {
-      border-right: 1px solid #d7d9df;
-      border-bottom: 1px solid #d7d9df;
-      box-sizing: border-box;
-    }
-
-    .schedule-head {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 800;
-      background: #f4f5f7;
-    }
-
-    .schedule-head-day {
-      width: 100%;
-      display: grid;
-      gap: 2px;
-      justify-items: center;
-      padding-top: 2px;
-    }
-
-    .schedule-head-lanes {
-      width: calc(100% - 10px);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      font-size: 10px;
-      color: #6b7280;
-      font-weight: 700;
-    }
-
-    .schedule-head-lanes span {
-      text-align: center;
-      border: 1px solid #d5d9e6;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.92);
-      line-height: 1.2;
-      padding: 1px 0;
-    }
-
-    .schedule-head-time {
-      font-size: 12px;
-      color: #445;
-      font-weight: 700;
-    }
-
-    .schedule-time-col {
-      position: relative;
-      height: var(--schedule-height, 480px);
-      background:
-        repeating-linear-gradient(
-          to bottom,
-          transparent 0,
-          transparent 19px,
-          #e5e7ee 19px,
-          #e5e7ee 20px
-        );
-    }
-
-    .schedule-time-label {
-      position: absolute;
-      left: 6px;
-      transform: translateY(0);
-      font-size: 9px;
-      color: #4a4f5c;
-      line-height: 1;
-      background: #fff;
-      padding: 0 2px 0 0;
-      z-index: 3;
-    }
-
-    .schedule-day-col {
-      position: relative;
-      height: var(--schedule-height, 480px);
-      border-right: 2px solid #b8c1d2;
-      background:
-        repeating-linear-gradient(
-          to bottom,
-          transparent 0,
-          transparent 19px,
-          #e5e7ee 19px,
-          #e5e7ee 20px
-        );
-    }
-
-    .schedule-lane-divider {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 58%;
-      width: 0;
-      border-left: 1px dashed #e2e8f3;
-      pointer-events: none;
-    }
-
-    .schedule-lane-tag {
-      position: absolute;
-      top: 6px;
-      font-size: 10px;
-      color: #677084;
-      background: rgba(255, 255, 255, 0.92);
-      padding: 1px 5px;
-      border-radius: 999px;
-      border: 1px solid #d9dce8;
-      pointer-events: none;
-    }
-
-    .schedule-lane-tag.left {
-      left: 6px;
-    }
-
-    .schedule-lane-tag.right {
-      right: 6px;
-    }
-
-    .schedule-item {
-      position: absolute;
-      border-radius: 8px;
-      border: 1px solid rgba(92, 109, 160, 0.35);
-      box-shadow: 0 2px 10px rgba(24, 39, 75, 0.08);
-      padding: 4px 5px;
-      overflow: hidden;
-      font-size: 10px;
-      line-height: 1.25;
-      box-sizing: border-box;
-      z-index: 2;
-    }
-
-    .schedule-item.course {
-      color: #f8fbff;
-    }
-
-    .schedule-item.course.course-lec {
-      background: #6d28d9; /* purple for lecture */
-      border-color: rgba(88, 28, 135, 0.78);
-      color: #faf7ff;
-    }
-
-    .schedule-item.course.course-lab {
-      background: #c4b5fd; /* light purple for lab/practical */
-      border-color: rgba(124, 58, 237, 0.45);
-      color: #3b216b;
-    }
-
-    .schedule-item.activity {
-      background: transparent;
-      border: none;
-      box-shadow: none;
-      padding: 0;
-      perspective: 800px;
-      cursor: pointer;
-    }
-
-    .activity-flip {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transform-style: preserve-3d;
-      transition: transform 0.45s ease;
-    }
-
-    .schedule-item.activity.is-flipped .activity-flip {
-      transform: rotateY(180deg);
-    }
-
-    .activity-face {
-      position: absolute;
-      inset: 0;
-      border-radius: 8px;
-      border: 1px solid rgba(173, 115, 26, 0.35);
-      padding: 4px 5px;
-      box-sizing: border-box;
-      backface-visibility: hidden;
-      overflow: hidden;
-    }
-
-    .activity-face.front {
-      background: #ffe3b3;
-      color: #5a3a04;
-    }
-
-    .activity-face.back {
-      background: #ffd08a;
-      color: #4f3305;
-      transform: rotateY(180deg);
-    }
-
-    .schedule-item-title {
-      font-weight: 800;
-      margin-bottom: 2px;
-      line-height: 1.2;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      overflow: hidden;
-    }
-
-    .schedule-item-sub {
-      opacity: 0.9;
-      font-size: 9px;
-      line-height: 1.2;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      overflow: hidden;
-    }
-
-    .schedule-events-table {
-      width: 100%;
-      border-collapse: collapse;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      overflow: hidden;
-      font-size: 12px;
-      background: #fff;
-    }
-
-    .schedule-events-table th,
-    .schedule-events-table td {
-      border-bottom: 1px solid #eceef4;
-      border-right: 1px solid #eceef4;
-      padding: 8px 10px;
-      text-align: left;
-      vertical-align: top;
-      line-height: 1.45;
-    }
-
-    .schedule-events-table th {
-      background: #f4f6fa;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
     .right-back-btn {
       display: none;
-      border: 1px solid var(--line);
-      background: var(--card);
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
       border-radius: 12px;
       padding: 0;
       cursor: pointer;
-      color: var(--text);
+      color: #111827;
       transition: background 0.15s ease, border-color 0.15s ease;
       align-items: center;
       justify-content: center;
@@ -993,8 +608,8 @@
     }
 
     .right-back-btn:hover {
-      background: var(--soft);
-      border-color: #c8bceb;
+      background: #f9fafb;
+      border-color: #c7d2fe;
     }
 
     .right-sidebar.expanded .right-back-btn {
@@ -1026,7 +641,7 @@
       width: 16px;
       height: 16px;
       display: block;
-      color: var(--text);
+      color: #111827;
     }
 
     .right-module-buttons {
@@ -1060,45 +675,12 @@
       overflow-y: auto;
     }
 
-    .right-sidebar.no-dynamic .right-dynamic-modules {
-      display: none !important;
-    }
-
-    .right-sidebar.no-dynamic .right-module-content {
-      flex: 1 1 auto;
-      max-height: none;
-      min-height: 0;
-      overflow: auto;
-      padding-bottom: 10px;
-    }
-
-    .right-sidebar.no-dynamic .module-page {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .right-sidebar.no-dynamic .schedule-wrap {
-      min-height: 100%;
-      align-content: start;
-    }
-
-    .right-sidebar.no-dynamic .schedule-board {
-      flex: 0 0 auto;
-      height: calc(100dvh - 190px);
-      min-height: 440px;
-    }
-
-    .right-sidebar.no-dynamic .module-section {
-      margin-top: 12px;
-    }
-
     .right-dynamic-card {
       width: 100%;
       max-width: 100%;
       border-radius: 18px;
-      border: 1px solid var(--line);
-      background: var(--card);
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
       padding: 16px 16px;
       cursor: pointer;
       text-align: left;
@@ -1106,16 +688,16 @@
       transition: background 0.15s ease, border-color 0.15s ease, transform 0.06s ease;
       display: flex;
       gap: 12px;
-      align-items: flex-start;
+      align-items: center;
       flex-wrap: nowrap;
       min-width: 0;
       overflow: hidden; /* 防止图标/文字挤出卡片 */
-      min-height: 82px; /* 中英文长度不同也保持对齐 */
+      min-height: 64px; /* 上下更丰富 */
     }
 
     .right-dynamic-card:hover {
-      background: var(--soft);
-      border-color: #c8bceb;
+      background: #f8fafc;
+      border-color: #c7d2fe;
     }
 
     .right-dynamic-card:active {
@@ -1126,13 +708,13 @@
       width: 44px;
       height: 44px;
       border-radius: 14px;
-      border: 1px solid var(--line);
-      background: #f8f6ff;
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
       display: flex;
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
-      color: var(--brand-mid);
+      color: #1d4ed8;
     }
 
     .right-dynamic-card-icon svg {
@@ -1153,27 +735,22 @@
     .right-dynamic-card-title {
       font-weight: 900;
       font-size: 13px;
-      color: var(--text);
-      line-height: 1.35;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      color: #111827;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
       word-break: break-word;
-      min-height: 1.35em;
     }
 
     .right-dynamic-card-desc {
       font-size: 12px;
-      color: var(--muted);
-      line-height: 1.4;
+      color: #6b7280;
+      line-height: 1.5;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      min-height: 1.4em;
     }
 
     /* 让卡片比右侧栏稍窄一点，形成“留边”观感 */
@@ -1191,13 +768,13 @@
       width: calc(100% - 10px);
       margin: 0 auto;
       border-radius: 18px;
-      border: 1px solid var(--line);
-      background: var(--card);
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
       padding: 14px;
       display: flex;
       align-items: center;
       gap: 10px;
-      color: var(--muted);
+      color: #6b7280;
       font-size: 12px;
     }
 
@@ -1205,8 +782,8 @@
       width: calc(100% - 10px);
       margin: 0 auto;
       border-radius: 18px;
-      border: 1px solid var(--line);
-      background: var(--card);
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
       padding: 14px;
       overflow: hidden;
     }
@@ -1225,7 +802,7 @@
     .ai-detail-title {
       font-weight: 950;
       font-size: 17px;
-      color: var(--text);
+      color: #111827;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1234,14 +811,14 @@
     .ai-detail-desc {
       margin-top: 6px;
       font-size: 14px;
-      color: var(--muted);
+      color: #4b5563;
       line-height: 1.6;
     }
 
     .ai-detail-text {
       margin-top: 10px;
       font-size: 14px;
-      color: var(--text);
+      color: #111827;
       line-height: 1.75;
     }
 
@@ -1251,7 +828,7 @@
       display: grid;
       gap: 8px;
       font-size: 14px;
-      color: var(--text);
+      color: #111827;
       line-height: 1.75;
     }
 
@@ -1261,7 +838,7 @@
       display: grid;
       gap: 8px;
       font-size: 14px;
-      color: var(--text);
+      color: #111827;
       line-height: 1.75;
     }
 
@@ -1269,8 +846,8 @@
       width: 18px;
       height: 18px;
       border-radius: 999px;
-      border: 2px solid rgba(95, 79, 200, 0.18);
-      border-top-color: var(--brand-mid); /* 常见“圆环旋转”加载图标 */
+      border: 2px solid rgba(37, 99, 235, 0.18);
+      border-top-color: #2563eb; /* 常见“圆环旋转”加载图标 */
       animation: spin 0.8s linear infinite;
       flex: 0 0 auto;
     }
@@ -1284,7 +861,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      color: var(--muted);
+      color: #6b7280;
       font-size: 12px;
       line-height: 1.2;
       white-space: nowrap;
@@ -1294,8 +871,8 @@
       width: 14px;
       height: 14px;
       border-radius: 999px;
-      border: 2px solid rgba(114, 111, 153, 0.25);
-      border-top-color: var(--muted);
+      border: 2px solid rgba(107, 114, 128, 0.25);
+      border-top-color: #6b7280;
       animation: spin 0.8s linear infinite;
       flex: 0 0 auto;
     }
@@ -1319,32 +896,32 @@
     .right-module-btn {
       width: 100%;
       border-radius: 16px;
-      border: 1px solid var(--line);
-      background: #f9fbff;
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
       padding: 16px 16px;
       cursor: pointer;
       text-align: left;
       font-size: 14px;
-      color: var(--text);
+      color: #111827;
       font-weight: 750;
       transition: background 0.15s ease, border-color 0.15s ease;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 12px;
-      min-height: 70px; /* 中英文统一高度 */
+      min-height: 56px; /* 上下更高 */
     }
 
     .right-module-btn-icon {
       width: 40px;
       height: 40px;
       border-radius: 14px;
-      border: 1px solid var(--line);
-      background: var(--card);
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
-      color: var(--brand-mid);
+      color: #1d4ed8;
     }
 
     .right-module-btn-icon svg {
@@ -1356,49 +933,11 @@
     .right-module-btn-text {
       font-weight: 800;
       letter-spacing: -0.01em;
-      line-height: 1.35;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      min-height: 1.35em;
     }
 
     .right-module-btn:hover {
-      background: var(--soft-2);
-      border-color: #c8bceb;
-    }
-
-    /* 收起态：模块入口按钮做严格对齐（中英文一致） */
-    .right-sidebar:not(.expanded) .right-module-buttons {
-      gap: 10px;
-    }
-
-    .right-sidebar:not(.expanded) .right-module-btn {
-      min-height: 64px;
-      padding: 12px 14px;
-      display: grid;
-      grid-template-columns: 40px minmax(0, 1fr);
-      column-gap: 12px;
-      align-items: center;
-    }
-
-    .right-sidebar:not(.expanded) .right-module-btn-icon {
-      width: 40px;
-      height: 40px;
-      margin-top: 0;
-      justify-self: center;
-    }
-
-    .right-sidebar:not(.expanded) .right-module-btn-text {
-      display: block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.25;
-      min-height: auto;
-      width: 100%;
+      background: #eef2ff;
+      border-color: #c7d2fe;
     }
 
     @media (min-width: 901px) {
@@ -1418,7 +957,7 @@
         width: 100%;
         height: auto;
         border-left: none;
-        border-top: 2px solid var(--line);
+        border-top: 2px solid #d1d5db;
         box-shadow: none;
         padding: 12px;
       }
@@ -1431,7 +970,7 @@
     .sidebar-mask {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.16);
+      background: rgba(0,0,0,0.35);
       display: none;
       z-index: 50;
     }
@@ -1442,8 +981,8 @@
       left: 0;
       width: 312px;
       height: 100vh;
-      background: var(--sidebar-bg);
-      border-right: 1px solid var(--sidebar-border);
+      background: #ffffff;
+      border-right: 2px solid #d1d5db;
       box-shadow: 2px 0 10px rgba(0, 0, 0, 0.04);
       z-index: 60;
       display: flex;
@@ -1522,7 +1061,7 @@
     .sidebar-title {
       font-weight: 650;
       font-size: 14px;
-      color: var(--text);
+      color: #111827;
     }
 
     .sidebar-close {
@@ -1530,8 +1069,8 @@
       min-width: 20.58px;
       height: 28px;
       border-radius: 9px;
-      border: 1px solid var(--line);
-      background: var(--card);
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -1555,7 +1094,7 @@
       font-size: 14px;
       font-weight: 900;
       line-height: 1;
-      color: var(--text);
+      color: #111827;
       user-select: none;
       display: flex;
       align-items: center;
@@ -1595,21 +1134,21 @@
 
     .login-card {
       margin-top: 4px;
-      border: 1px solid var(--line);
+      border: 1px solid #e5e7eb;
       border-radius: 12px;
-      background: #f9fbff;
+      background: #f8fafc;
       padding: 10px;
       cursor: pointer;
     }
 
     .login-card:hover {
-      border-color: #c8bceb;
-      background: var(--soft-2);
+      border-color: #cbd5e1;
+      background: #f1f5f9;
     }
 
     .login-title {
       font-size: 12px;
-      color: var(--muted);
+      color: #64748b;
       margin-bottom: 6px;
     }
 
@@ -1631,7 +1170,7 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      border: 1px solid var(--line);
+      border: 1px solid #d1d5db;
       object-fit: cover;
       flex: 0 0 auto;
       background: #fff;
@@ -1639,7 +1178,7 @@
 
     .login-name {
       font-size: 13px;
-      color: var(--text);
+      color: #111827;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1648,15 +1187,15 @@
 
     .login-action {
       font-size: 12px;
-      color: var(--brand-mid);
+      color: #2563eb;
       flex: 0 0 auto;
     }
 
     .logout-btn {
       margin-left: auto;
-      border: 1px solid #d8d1f4;
-      background: #efebff;
-      color: var(--brand-mid);
+      border: 1px solid #dbeafe;
+      background: #eff6ff;
+      color: #1d4ed8;
       border-radius: 999px;
       font-size: 11px;
       height: 24px;
@@ -1673,18 +1212,18 @@
       cursor: pointer;
       text-align: left;
       font-size: 13px;
-      color: var(--text);
+      color: #111827;
     }
 
     .sidebar-item:hover {
-      background: var(--soft);
-      border-color: var(--line);
+      background: #f9fafb;
+      border-color: #e5e7eb;
     }
 
     .sidebar-hint {
       margin-top: 16px;
       font-size: 12px;
-      color: var(--muted);
+      color: #6b7280;
       line-height: 1.5;
     }
 
@@ -1704,21 +1243,21 @@
       cursor: pointer;
       text-align: left;
       font-size: 13px;
-      color: var(--text);
+      color: #111827;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .history-item:hover {
-      background: var(--soft);
-      border-color: var(--line);
+      background: #f9fafb;
+      border-color: #e5e7eb;
     }
 
     .history-item.active {
-      background: var(--active);
-      border-color: #c3b7ea;
-      color: #434f9e;
+      background: #eef2ff;
+      border-color: #c7d2fe;
+      color: #3730a3;
     }
 
     @media (max-width: 800px) {
@@ -1750,7 +1289,7 @@
   <div class="sidebar-mask" id="sidebarMask"></div>
   <aside class="sidebar" id="sidebar" aria-label="侧边栏">
     <div class="sidebar-header">
-      <div class="sidebar-title" id="leftSidebarModuleLabel">XJTLU生活助手</div>
+      <div class="sidebar-title" id="leftSidebarModuleLabel">西浦生活助手</div>
       <button class="sidebar-close" id="sidebarClose" aria-label="切换侧边栏">
         <span class="sidebar-toggle-icon" aria-hidden="true">
           <!-- Expanded: show "<<" ; Collapsed: show ">>" -->
@@ -1861,15 +1400,6 @@
           </span>
           <span class="right-module-btn-text">科研探索</span>
         </button>
-        <button class="right-module-btn" type="button" data-module="schedule">
-          <span class="right-module-btn-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-              <path d="M16 2v4M8 2v4M3 10h18"></path>
-            </svg>
-          </span>
-          <span class="right-module-btn-text">个人日程</span>
-        </button>
       </div>
     </div>
     <div id="rightModuleContent" class="right-module-content"></div>
@@ -1885,7 +1415,7 @@
             <span></span><span></span><span></span>
           </div>
         </button>
-        <div class="header-title">XJTLU生活助手</div>
+        <div class="header-title">西浦生活助手</div>
       </div>
       <div class="status" id="status">就绪</div>
     </header>
@@ -1894,7 +1424,7 @@
       <div id="messages" class="messages"></div>
       <div id="emptyPrompt" class="empty-prompt">
         <div class="empty-prompt-title">今天有什么可以帮到你？</div>
-        <div class="empty-prompt-sub">从“宿舍/校园卡/选课/报到/生活安排”里选一个问问我。</div>
+        <div style="font-size:12px;color:#6b7280;">从“宿舍/校园卡/选课/报到/生活安排”里选一个问问我。</div>
       </div>
 
       <div class="input-area">
@@ -1904,12 +1434,7 @@
           wrap="off"
           placeholder="请输入你的问题…"
         ></textarea>
-        <button id="send" type="button" aria-label="发送">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 18V6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M7 11L12 6L17 11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-        </button>
+        <button id="send">发送</button>
       </div>
     </main>
   </div>
@@ -1937,120 +1462,16 @@
     const rightDynamicModulesEl = document.getElementById("rightDynamicModules");
     const chatContainerEl = document.querySelector(".chat-container");
 
-    const PROFILE_STORAGE_KEY = "xipu_personal_center_profile";
-
-    function getAppLanguage() {
-      try {
-        const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
-        const data = raw ? JSON.parse(raw) : {};
-        return data && data.language === "en-US" ? "en-US" : "zh-CN";
-      } catch (e) {
-        return "zh-CN";
-      }
-    }
-
-    function isEnglishUi() {
-      return getAppLanguage() === "en-US";
-    }
-
-    const UI_TEXT = {
-      "zh-CN": {
-        appTitle: "XJTLU生活助手",
-        account: "账号",
-        newChat: "＋ 开始新对话",
-        clearChat: "🧹 清空对话",
-        history: "历史记录",
-        boardService: "板块服务",
-        ready: "就绪",
-        thinking: "模型思考中...",
-        thinkingShort: "正在思考",
-        emptyTitle: "今天有什么可以帮到你？",
-        emptySub: "从“宿舍/校园卡/选课/报到/生活安排”里选一个问问我。",
-        placeholder: "请输入你的问题…",
-        send: "发送",
-        guest: "未登录",
-        login: "点击登录",
-        logout: "退出",
-        newChatTitle: "新对话",
-        emptyReply: "(空回复)",
-        loadingRecommendations: "正在加载推荐内容…",
-        noDetails: "（暂无详情）",
-        generatingDetails: "正在生成更详细的内容，请稍等…",
-        recommendation: "推荐内容",
-        fillSuggestion: "把这条建议填入输入框",
-        back: "返回",
-        retry: "重新回复",
-        copy: "复制回答",
-        copied: "已复制",
-        modules: {
-          study: "学习帮助",
-          intern: "实习就业",
-          campus: "校园活动",
-          life: "生活支持",
-          research: "科研探索",
-          schedule: "个人日程",
-        },
-      },
-      "en-US": {
-        appTitle: "XJTLU Life Assistant",
-        account: "Account",
-        newChat: "+ New chat",
-        clearChat: "Clear chat",
-        history: "History",
-        boardService: "Boards",
-        ready: "Ready",
-        thinking: "Thinking...",
-        thinkingShort: "Thinking",
-        emptyTitle: "What can I help with today?",
-        emptySub: "Ask about dorms, campus cards, course selection, registration, or daily life.",
-        placeholder: "Type your question...",
-        send: "Send",
-        guest: "Not signed in",
-        login: "Sign in",
-        logout: "Sign out",
-        newChatTitle: "New chat",
-        emptyReply: "(empty reply)",
-        loadingRecommendations: "Loading recommendations...",
-        noDetails: "(No details yet)",
-        generatingDetails: "Generating more detailed content...",
-        recommendation: "Recommendation",
-        fillSuggestion: "Use this suggestion in input",
-        back: "Back",
-        retry: "Regenerate",
-        copy: "Copy answer",
-        copied: "Copied",
-        modules: {
-          study: "Learning Support",
-          intern: "Internships and Jobs",
-          campus: "Campus Activities",
-          life: "Life Support",
-          research: "Research Exploration",
-          schedule: "Personal Schedule",
-        },
-      },
-    };
-
-    function t(key) {
-      const lang = getAppLanguage();
-      return (UI_TEXT[lang] && UI_TEXT[lang][key]) || UI_TEXT["zh-CN"][key] || key;
-    }
-
-    const MODULE_NAME_MAP_ZH = {
+    const MODULE_NAME_MAP = {
       study: "学习帮助",
       intern: "实习就业",
       campus: "校园活动",
       life: "生活支持",
       research: "科研探索",
-      schedule: "个人日程",
     };
 
-    function getModuleName(moduleKey) {
-      const lang = getAppLanguage();
-      return (UI_TEXT[lang].modules && UI_TEXT[lang].modules[moduleKey]) || MODULE_NAME_MAP_ZH[moduleKey] || t("appTitle");
-    }
-
-    const LEFT_SIDEBAR_TITLE = "XJTLU生活助手";
-    let currentModuleName = t("appTitle");
+    const LEFT_SIDEBAR_TITLE = "西浦生活助手";
+    let currentModuleName = LEFT_SIDEBAR_TITLE;
     let rightModuleKey = "";
     let rightPageStack = [];
     let dynamicModulesByKey = {
@@ -2059,7 +1480,6 @@
       campus: [],
       life: [],
       research: [],
-      schedule: [],
     };
 
     // 预生成缓存：大模块点击时一次性把“模块 + 子模块”的 QA 卡片都取回来
@@ -2084,36 +1504,7 @@
     function updateLeftSidebarModuleLabel() {
       if (!leftSidebarModuleLabelEl) return;
       // 左侧栏标题固定，不跟随右侧模块变化
-      leftSidebarModuleLabelEl.textContent = t("appTitle");
-    }
-
-    function applyStaticLanguage() {
-      document.documentElement.lang = getAppLanguage();
-      document.title = t("appTitle");
-      updateLeftSidebarModuleLabel();
-      const headerTitle = document.querySelector(".header-title");
-      if (headerTitle) headerTitle.textContent = t("appTitle");
-      const loginTitle = document.querySelector(".login-title");
-      if (loginTitle) loginTitle.textContent = t("account");
-      if (btnNewChatEl) btnNewChatEl.textContent = t("newChat");
-      if (btnClearEl) btnClearEl.textContent = t("clearChat");
-      const sidebarHint = document.querySelector(".sidebar-hint");
-      if (sidebarHint) sidebarHint.textContent = t("history");
-      if (rightSidebarTitleEl && !rightModuleKey) rightSidebarTitleEl.textContent = t("boardService");
-      if (statusEl && (statusEl.textContent === "就绪" || statusEl.textContent === "Ready")) {
-        statusEl.textContent = t("ready");
-      }
-      const emptyTitle = document.querySelector(".empty-prompt-title");
-      if (emptyTitle) emptyTitle.textContent = t("emptyTitle");
-      const emptySub = emptyPromptEl ? emptyPromptEl.querySelector("div:nth-child(2)") : null;
-      if (emptySub) emptySub.textContent = t("emptySub");
-      if (inputEl) inputEl.placeholder = t("placeholder");
-      if (sendBtn) sendBtn.setAttribute("aria-label", t("send"));
-      document.querySelectorAll(".right-module-btn").forEach((btn) => {
-        const key = btn.dataset.module || "";
-        const label = btn.querySelector(".right-module-btn-text");
-        if (label) label.textContent = getModuleName(key);
-      });
+      leftSidebarModuleLabelEl.textContent = LEFT_SIDEBAR_TITLE;
     }
 
     function setRightPageStack(stack) {
@@ -2238,100 +1629,20 @@
     }
 
     function renderModulePage({ title, showInlineBack, bodyHtml }) {
-      function localizeRightText(input) {
-        const s = String(input || "");
-        if (!isEnglishUi() || !s) return s;
-        const dict = {
-          "学习帮助": "Learning Support",
-          "实习就业": "Internships and Jobs",
-          "校园活动": "Campus Activities",
-          "生活支持": "Life Support",
-          "科研探索": "Research Exploration",
-          "我的学习": "My Learning",
-          "课程学习": "Course Learning",
-          "英语教育": "English Learning",
-          "学习计划": "Study Plan",
-          "论文与写作": "Academic Writing",
-          "学习方法": "Study Methods",
-          "今日任务": "Today's Tasks",
-          "复盘模板": "Review Template",
-          "微积分 / 数学分析": "Calculus / Mathematical Analysis",
-          "概率统计": "Probability and Statistics",
-          "编程基础（Python/C）": "Programming Fundamentals (Python/C)",
-          "编程基础": "Programming Fundamentals",
-          "经济学原理（微/宏）": "Principles of Economics (Micro/Macro)",
-          "经济学原理": "Principles of Economics",
-          "单词与语法": "Vocabulary and Grammar",
-          "阅读": "Reading",
-          "写作": "Writing",
-          "口语与听力": "Speaking and Listening",
-          "极限与连续": "Limits and Continuity",
-          "泰勒展开与级数": "Taylor Expansion and Series",
-          "简历与作品集": "Resume and Portfolio",
-          "面试训练": "Interview Training",
-          "投递与内推": "Applications and Referrals",
-          "30 天冲刺计划": "30-Day Sprint Plan",
-          "社团选择与加入": "Club Selection and Joining",
-          "活动规划": "Event Planning",
-          "志愿与公益": "Volunteering",
-          "学生组织与领导力": "Student Leadership",
-          "宿舍与搬入": "Dormitory and Move-in",
-          "健康与作息": "Health and Routine",
-          "饮食与省钱": "Food and Budget",
-          "突发情况": "Emergency Situations",
-          "选题与方向": "Topic and Direction",
-          "论文阅读": "Paper Reading",
-          "实验与方法": "Experiments and Methods",
-          "科研写作": "Research Writing",
-          "目标/进度/本周待办与复盘": "Goals/progress/weekly tasks and review",
-          "预习/复习/作业/考试复盘": "Preview/review/homework/exam review",
-          "听说读写与雅思托福规划": "Listening, speaking, reading, writing, and IELTS/TOEFL plans",
-          "周计划/番茄钟/复习节奏": "Weekly plan/Pomodoro/review rhythm",
-          "结构/引用/润色与反馈": "Structure/citations/polish/feedback",
-          "高效记忆、做题与复盘模板": "Efficient memory, practice, and review templates",
-          "模板、项目描述、量化成果": "Templates, project descriptions, measurable outcomes",
-          "自我介绍、常见题、STAR": "Self-introduction, common questions, STAR",
-          "岗位筛选、投递节奏、跟进话术": "Role filtering, application rhythm, follow-up scripts",
-          "一周一迭代：简历-项目-面试": "Weekly iteration: resume-project-interview",
-          "匹配兴趣、面试、破冰": "Interest matching, interviews, ice-breaking",
-          "从想法到落地：流程与分工": "From idea to execution: process and role split",
-          "时间记录、材料准备、叙事": "Time logs, materials, and storytelling",
-          "竞选、项目管理、复盘": "Campaigning, project management, review",
-          "清单、布置、室友相处": "Checklist, setup, roommate coordination",
-          "睡眠、饮食、情绪压力": "Sleep, diet, stress",
-          "预算、外卖/食堂策略": "Budget, delivery/cafeteria strategy",
-          "丢卡、报修、时间冲突": "Lost card, repair requests, schedule conflicts",
-          "从兴趣到可做：问题拆解": "From interest to feasible topics: problem breakdown",
-          "读法、笔记模板、复现路线": "Reading method, note templates, reproducibility path",
-          "变量、对照、指标、复现": "Variables, controls, metrics, reproducibility",
-          "摘要/引言/方法/结果/讨论": "Abstract/introduction/method/results/discussion",
-          "先选一门课（我按常见课程给你做了更真实的学习路径与资料清单）。": "Choose a course first (I prepared realistic study paths and resource lists).",
-          "先选一个方向（我会给你更细的训练安排与可执行任务）。": "Choose one direction first (I will provide detailed training plans and actionable tasks).",
-          "把你的一周拆成可执行的学习块（学习-复盘-休息）。": "Split your week into executable study blocks (study-review-rest).",
-          "把这条建议填入输入框": "Use this suggestion in input",
-        };
-        const keys = Object.keys(dict).sort((a, b) => b.length - a.length);
-        let out = s;
-        for (const k of keys) out = out.split(k).join(dict[k]);
-        return out;
-      }
-
-      const displayTitle = localizeRightText(title);
-      const displayBody = localizeRightText(bodyHtml || "");
       const backBtnHtml = showInlineBack
-        ? `<button class="module-inline-back" type="button" data-right-action="back" aria-label="${t("back")}" title="${t("back")}">${svgIcon(
+        ? `<button class="module-inline-back" type="button" data-right-action="back" aria-label="返回上一级" title="返回">${svgIcon(
             "arrow-left"
           )}</button>`
         : `<span style="width:38px;flex:0 0 auto;"></span>`;
 
       return `
-        <div class="module-page" role="region" aria-label="${String(displayTitle || "")}">
+        <div class="module-page" role="region" aria-label="${String(title || "")}">
           <div class="module-page-topbar">
             ${backBtnHtml}
-            <div class="module-page-title">${String(displayTitle || "")}</div>
+            <div class="module-page-title">${String(title || "")}</div>
             <span style="width:38px;flex:0 0 auto;"></span>
           </div>
-          ${displayBody}
+          ${bodyHtml || ""}
         </div>
       `;
     }
@@ -2805,581 +2116,6 @@
       return renderModulePage({ title: "学习方法", showInlineBack: true, bodyHtml });
     }
 
-    const SCHEDULE_DAY_KEYS = ["mon", "tue", "wed", "thu", "fri"];
-    const PERSONAL_COURSE_ITEMS = [
-      { day: "thu", name: "DTS206TC Lab", location: "TC-D-3001", teacher: "G. Ren", start: "09:00", end: "10:50" },
-      { day: "tue", name: "DTS209TC Lec", location: "TC-FG-2001", teacher: "P. Lefevre", start: "11:00", end: "12:50" },
-      { day: "tue", name: "DTS206TC Lec", location: "TC-FG-2001", teacher: "C. Wang", start: "14:00", end: "15:50" },
-      { day: "wed", name: "DTS208TC Lab", location: "TC-G-2020", teacher: "Y. Zhao", start: "14:00", end: "15:50" },
-      { day: "tue", name: "DTS208TC Lec", location: "TC-FG-2001", teacher: "Y. Zhao", start: "16:00", end: "17:50" },
-      { day: "wed", name: "DTS209TC Lab", location: "TC-E-3037", teacher: "J. Liu", start: "16:00", end: "17:50" },
-      { day: "thu", name: "ENT208TC Prac", location: "TC-C-4019", teacher: "B. Marculecu", start: "15:00", end: "18:50" },
-    ];
-    const CAMPUS_ACTIVITY_ITEMS = [
-      { day: "mon", name: "Career Talk", intro: "校友分享秋招策略和简历修改建议。", time: "09:30-11:40" },
-      { day: "mon", name: "Debate Club", intro: "英文辩论训练，现场分组做快速对抗。", time: "16:30-18:50" },
-      { day: "tue", name: "Badminton Club", intro: "社团新学期训练日，适合新成员体验。", time: "09:10-11:30" },
-      { day: "tue", name: "CV Clinic", intro: "职业中心简历门诊，提供一对一修改。", time: "15:20-17:40" },
-      { day: "wed", name: "Hackathon Meetup", intro: "组队交流选题，现场分工讨论。", time: "10:00-12:20" },
-      { day: "wed", name: "Board Game Night", intro: "学生会轻松社交夜，欢迎跨专业参与。", time: "16:00-18:20" },
-      { day: "thu", name: "Volunteer Briefing", intro: "周末公益活动说明会和任务分配。", time: "09:30-11:50" },
-      { day: "thu", name: "Choir Rehearsal", intro: "合唱团排练，含新声部试唱环节。", time: "14:30-16:50" },
-      { day: "fri", name: "Research Seminar", intro: "导师组内部汇报，欢迎旁听提问。", time: "10:10-12:30" },
-      { day: "fri", name: "Football Session", intro: "晚间友谊赛训练，按水平分组。", time: "15:30-17:50" },
-      { day: "sat", name: "City Walk", intro: "校园国际生联谊徒步，放松社交。", time: "10:00-12:20" },
-      { day: "sat", name: "Photography Workshop", intro: "街拍实践课，讲构图和后期基础。", time: "15:00-17:20" },
-      { day: "sun", name: "Movie Night", intro: "学院放映夜，活动后自由交流。", time: "09:40-12:00" },
-      { day: "sun", name: "Reading Circle", intro: "周阅读会，分享本周一本书的要点。", time: "14:40-17:00" },
-    ];
-
-    const CAMPUS_ACTIVITY_ITEMS_CLEAN = [
-      { day: "mon", name: "Career Talk", intro: "Alumni share internship stories and hiring tips.", time: "09:30-12:00" },
-      { day: "mon", name: "Debate Club", intro: "Weekly public speaking drills and team debate practice.", time: "16:10-18:40" },
-      { day: "tue", name: "CV Clinic", intro: "Peer and tutor feedback on resumes and portfolio drafts.", time: "12:20-15:00" },
-      { day: "wed", name: "Hackathon Meetup", intro: "Team matching and product brainstorming for weekend build.", time: "13:00-15:30" },
-      { day: "thu", name: "Volunteer Briefing", intro: "Coordination meeting for campus service and outreach tasks.", time: "09:40-12:10" },
-      { day: "thu", name: "Choir Rehearsal", intro: "Section rehearsal for spring concert set list.", time: "14:20-17:00" },
-      { day: "fri", name: "Research Seminar", intro: "Guest speaker session with open Q and A.", time: "10:00-12:30" },
-    ];
-    const SCHEDULE_ACTIVITY_STORAGE_KEY = "xipu_schedule_activity_items_v1";
-    const SCHEDULE_RANGE_START_MIN = 9 * 60;
-    const SCHEDULE_RANGE_END_MIN = 19 * 60;
-    let scheduleActivityItems = _loadScheduleActivityItems();
-
-    function _dayOrderIndex(day) {
-      return Math.max(0, SCHEDULE_DAY_KEYS.indexOf(String(day || "").toLowerCase()));
-    }
-
-    function _cloneDefaultScheduleActivities() {
-      return CAMPUS_ACTIVITY_ITEMS_CLEAN.map((x) => ({ ...x }));
-    }
-
-    function _sortScheduleActivityItems(list) {
-      return (Array.isArray(list) ? list : []).sort((a, b) => {
-        const da = _dayOrderIndex(a.day);
-        const db = _dayOrderIndex(b.day);
-        if (da !== db) return da - db;
-        const [ast] = String(a.time || "").split("-");
-        const [bst] = String(b.time || "").split("-");
-        return _toMinutes(ast) - _toMinutes(bst);
-      });
-    }
-
-    function _normalizeActivityDayToken(text) {
-      const s = String(text || "").trim().toLowerCase();
-      if (!s) return "";
-      const map = {
-        mon: "mon",
-        monday: "mon",
-        tue: "tue",
-        tues: "tue",
-        tuesday: "tue",
-        wed: "wed",
-        wednesday: "wed",
-        thu: "thu",
-        thur: "thu",
-        thurs: "thu",
-        thursday: "thu",
-        fri: "fri",
-        friday: "fri",
-        "周一": "mon",
-        "星期一": "mon",
-        "礼拜一": "mon",
-        "周二": "tue",
-        "星期二": "tue",
-        "礼拜二": "tue",
-        "周三": "wed",
-        "星期三": "wed",
-        "礼拜三": "wed",
-        "周四": "thu",
-        "星期四": "thu",
-        "礼拜四": "thu",
-        "周五": "fri",
-        "星期五": "fri",
-        "礼拜五": "fri",
-      };
-      return map[s] || "";
-    }
-
-    function _parseHmToken(raw) {
-      const t = String(raw || "").trim().replace(/\s+/g, "").replace(/：/g, ":").replace(/\./g, ":");
-      if (!t) return "";
-      let h = null;
-      let m = null;
-      let mt = t.match(/^(\d{1,2})点(?:(\d{1,2})分?)?$/);
-      if (mt) {
-        h = Number(mt[1]);
-        m = mt[2] != null ? Number(mt[2]) : 0;
-      } else {
-        mt = t.match(/^(\d{1,2})(?::(\d{1,2}))?$/);
-        if (!mt) return "";
-        h = Number(mt[1]);
-        m = mt[2] != null ? Number(mt[2]) : 0;
-      }
-      if (!Number.isFinite(h) || !Number.isFinite(m)) return "";
-      if (h < 0 || h > 23 || m < 0 || m > 59) return "";
-      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-    }
-
-    function _extractWeekdayKey(text) {
-      const s = String(text || "");
-      const zh = s.match(/(?:周|星期|礼拜)\s*([一二三四五六日天1234567])/);
-      if (zh) {
-        const token = zh[1];
-        if (token === "六" || token === "6") return { day: "sat", unsupported: true };
-        if (token === "日" || token === "天" || token === "7") return { day: "sun", unsupported: true };
-        const m = { 一: "mon", "1": "mon", 二: "tue", "2": "tue", 三: "wed", "3": "wed", 四: "thu", "4": "thu", 五: "fri", "5": "fri" };
-        const d = m[token] || "";
-        return { day: d, unsupported: false };
-      }
-      const en = s.match(/\b(mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/i);
-      if (en) {
-        const d = _normalizeActivityDayToken(en[1]);
-        const unsupported = d !== "mon" && d !== "tue" && d !== "wed" && d !== "thu" && d !== "fri";
-        return { day: d, unsupported };
-      }
-      return { day: "", unsupported: false };
-    }
-
-    function _extractTimeRange(text) {
-      const s = String(text || "");
-      const m = s.match(/(\d{1,2}(?:[:：.]\d{1,2}|点(?:\d{1,2})?(?:分)?)?)\s*(?:到|至|~|～|-|—|–)\s*(\d{1,2}(?:[:：.]\d{1,2}|点(?:\d{1,2})?(?:分)?)?)/);
-      if (!m) return { start: "", end: "", raw: "" };
-      const start = _parseHmToken(m[1]);
-      const end = _parseHmToken(m[2]);
-      return { start, end, raw: m[0] || "" };
-    }
-
-    function _extractActivityName(text, timeRangeRaw) {
-      const s = String(text || "");
-      const explicit = s.match(/(?:加|新增|添加|安排|创建|add|create|schedule)(?:个|一个)?(?:活动|event)?[:：\s]*([^\n，。,；;]+)/i);
-      if (explicit && explicit[1]) {
-        const v = explicit[1].trim();
-        if (v) return v;
-      }
-      let t = s;
-      if (timeRangeRaw) t = t.replace(timeRangeRaw, " ");
-      t = t
-        .replace(/(?:周|星期|礼拜)\s*[一二三四五六日天1234567]/g, " ")
-        .replace(/\b(mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/gi, " ")
-        .replace(/(?:加|新增|添加|安排|创建|活动|日程|行程|event|schedule|add|create|帮我|请|一下|一个|个)/gi, " ")
-        .replace(/(?:简介|介绍|说明|备注|intro|description)\s*[:：].*$/i, " ")
-        .replace(/[，,。；;]+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-      return t;
-    }
-
-    function _extractActivityIntro(text) {
-      const s = String(text || "");
-      const m = s.match(/(?:简介|介绍|说明|备注|intro|description)\s*[:：]\s*([^\n]+)/i);
-      return m && m[1] ? m[1].trim() : "";
-    }
-
-    function _loadScheduleActivityItems() {
-      try {
-        const raw = localStorage.getItem(SCHEDULE_ACTIVITY_STORAGE_KEY);
-        if (!raw) return _cloneDefaultScheduleActivities();
-        const arr = JSON.parse(raw);
-        if (!Array.isArray(arr)) return _cloneDefaultScheduleActivities();
-        const normalized = arr
-          .map((x) => {
-            const day = _normalizeActivityDayToken(x && x.day);
-            const [st, ed] = String((x && x.time) || "").split("-");
-            const start = _parseHmToken(st);
-            const end = _parseHmToken(ed);
-            const name = String((x && x.name) || "").trim();
-            const intro = String((x && x.intro) || "").trim();
-            if (!day || !name || !start || !end) return null;
-            if (!_isWithinScheduleRange(start, end, SCHEDULE_RANGE_START_MIN, SCHEDULE_RANGE_END_MIN)) return null;
-            return { day, name, intro, time: `${start}-${end}` };
-          })
-          .filter(Boolean);
-        return normalized.length ? _sortScheduleActivityItems(normalized) : _cloneDefaultScheduleActivities();
-      } catch (e) {
-        return _cloneDefaultScheduleActivities();
-      }
-    }
-
-    function _saveScheduleActivityItems() {
-      try {
-        localStorage.setItem(SCHEDULE_ACTIVITY_STORAGE_KEY, JSON.stringify(scheduleActivityItems));
-      } catch (e) {}
-    }
-
-    function tryHandleScheduleAddCommand(inputText, session) {
-      const text = String(inputText || "").trim();
-      if (!text) return false;
-      const hasAddVerb = /(?:加|新增|添加|安排|创建|add|create|schedule)/i.test(text);
-      const hasScheduleHint = /(?:活动|event|日程|行程|schedule)/i.test(text);
-      const dayInfo = _extractWeekdayKey(text);
-      const range = _extractTimeRange(text);
-      if (!dayInfo.day || !range.start || !range.end || !(hasAddVerb || hasScheduleHint)) return false;
-
-      let reply = "";
-      if (dayInfo.unsupported || !SCHEDULE_DAY_KEYS.includes(dayInfo.day)) {
-        reply = isEnglishUi()
-          ? "I can only add activities from Monday to Friday right now."
-          : "目前只能添加周一到周五的活动。";
-      } else if (!_isWithinScheduleRange(range.start, range.end, SCHEDULE_RANGE_START_MIN, SCHEDULE_RANGE_END_MIN)) {
-        reply = isEnglishUi()
-          ? "Time must be within 09:00-19:00 and end time must be later than start time."
-          : "时间需在 09:00-19:00 之间，且结束时间要晚于开始时间。";
-      } else {
-        const name = _extractActivityName(text, range.raw);
-        if (!name) {
-          reply = isEnglishUi()
-            ? "I caught the day and time. Please add an activity name, for example: Tue 12:30-15:00 add CV Clinic."
-            : "我识别到周几和时间了，但还缺活动名称。示例：周二12:30到15:00加CV诊断。";
-        } else {
-          const intro = _extractActivityIntro(text) || (isEnglishUi() ? "Added from chat command." : "通过对话指令新增。");
-          const item = { day: dayInfo.day, name: name.slice(0, 60), intro: intro.slice(0, 120), time: `${range.start}-${range.end}` };
-          scheduleActivityItems = _sortScheduleActivityItems([...(scheduleActivityItems || []), item]);
-          _saveScheduleActivityItems();
-          if (rightModuleKey === "schedule" && rightModuleContentEl) renderRightModule();
-          const weekday = _eventWeekdayLabel(dayInfo.day, _scheduleLang());
-          reply = isEnglishUi()
-            ? `Added: ${item.name} on ${weekday} ${item.time}.`
-            : `已添加：${item.name}（${weekday} ${item.time}）。`;
-        }
-      }
-
-      const assistantMessageId = createMessageId();
-      appendMessage("assistant", reply, assistantMessageId);
-      if (session) session.messages.push({ role: "assistant", text: reply, id: assistantMessageId });
-      return true;
-    }
-
-    function _scheduleLang() {
-      const en = isEnglishUi();
-      return {
-        en,
-        title: en ? "Personal Schedule" : "个人日程",
-        hint: en
-          ? "Left lane: your classes. Right lane: this week's campus activities (tap a card to flip and read the summary)."
-          : "左侧列是个人课表，右侧列是本周校园活动（点击活动卡片可翻转查看简介）。",
-        time: en ? "Time" : "时间",
-        classLane: en ? "Class" : "课表",
-        activityLane: en ? "Activity" : "活动",
-        tableTitle: en ? "Campus Activity Log (Sample)" : "校园活动记录表（示例）",
-        tableCols: en ? ["Name", "Brief Intro", "Time", "Weekday"] : ["名称", "简短介绍", "时间", "周几"],
-        days: en
-          ? { mon: "MON", tue: "TUE", wed: "WED", thu: "THU", fri: "FRI", sat: "SAT", sun: "SUN" }
-          : { mon: "周一", tue: "周二", wed: "周三", thu: "周四", fri: "周五", sat: "周六", sun: "周日" },
-      };
-    }
-
-    function _toMinutes(hm) {
-      const m = String(hm || "").match(/^(\d{1,2}):(\d{2})$/);
-      if (!m) return 0;
-      return Number(m[1]) * 60 + Number(m[2]);
-    }
-
-    function _eventWeekdayLabel(day, langObj) {
-      return (langObj.days && langObj.days[day]) || day;
-    }
-
-    function _isWithinScheduleRange(startHm, endHm, rangeStartMin, rangeEndMin) {
-      const s = _toMinutes(startHm);
-      const e = _toMinutes(endHm);
-      if (!s || !e) return false;
-      if (e <= s) return false;
-      return s >= rangeStartMin && e <= rangeEndMin;
-    }
-
-    function renderPersonalSchedulePage() {
-      const L = _scheduleLang();
-      const startMin = 9 * 60;
-      const endMin = 19 * 60;
-      const pxPerHour = 40;
-      const pxPerMinute = pxPerHour / 60;
-      const totalPx = Math.round((endMin - startMin) * pxPerMinute);
-      const timeLabels = [];
-      for (let m = startMin; m <= endMin; m += 60) {
-        const hh = String(Math.floor(m / 60)).padStart(2, "0");
-        const mm = String(m % 60).padStart(2, "0");
-        const top = Math.round((m - startMin) * pxPerMinute + 3);
-        timeLabels.push({ text: `${hh}:${mm}`, top });
-      }
-
-      const byDayCourses = Object.fromEntries(SCHEDULE_DAY_KEYS.map((d) => [d, []]));
-      PERSONAL_COURSE_ITEMS.forEach((x) => {
-        if (!_isWithinScheduleRange(x.start, x.end, startMin, endMin)) return;
-        if (byDayCourses[x.day]) byDayCourses[x.day].push(x);
-      });
-
-      const byDayActs = Object.fromEntries(SCHEDULE_DAY_KEYS.map((d) => [d, []]));
-      scheduleActivityItems.forEach((x) => {
-        const [st, ed] = String(x.time || "").split("-");
-        if (!_isWithinScheduleRange(st, ed, startMin, endMin)) return;
-        if (byDayActs[x.day]) byDayActs[x.day].push(x);
-      });
-
-      const headColsHtml = SCHEDULE_DAY_KEYS.map((day) => {
-        return `
-          <div class="schedule-day-head">
-            <div class="schedule-head-day">
-              <div>${L.days[day]}</div>
-              <div class="schedule-head-lanes">
-                <span>${L.classLane}</span>
-                <span>${L.activityLane}</span>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      const bodyColsHtml = SCHEDULE_DAY_KEYS.map((day) => {
-        const courseHtml = byDayCourses[day]
-          .map((it) => {
-            const top = Math.max(0, Math.round((_toMinutes(it.start) - startMin) * pxPerMinute));
-            const height = Math.max(28, Math.round((_toMinutes(it.end) - _toMinutes(it.start)) * pxPerMinute));
-            const nm = String(it.name || "").toLowerCase();
-            const colorClass = /lec/.test(nm) ? "course-lec" : /lab|prac/.test(nm) ? "course-lab" : "course-lab";
-            return `
-              <div class="schedule-item course ${colorClass}" style="left:4px;width:calc(58% - 8px);top:${top}px;height:${height}px;">
-                <div class="schedule-item-title">${_escapeHtml(it.name)}</div>
-                <div class="schedule-item-sub">${_escapeHtml(it.teacher || "")}</div>
-                <div class="schedule-item-sub">${_escapeHtml(it.location || "")}</div>
-                <div class="schedule-item-sub">${_escapeHtml(it.start)} - ${_escapeHtml(it.end)}</div>
-              </div>
-            `;
-          })
-          .join("");
-
-        const actHtml = byDayActs[day]
-          .map((it, idx) => {
-            const [st, ed] = String(it.time || "").split("-");
-            const top = Math.max(0, Math.round((_toMinutes(st || "09:00") - startMin) * pxPerMinute));
-            const height = Math.max(28, Math.round((_toMinutes(ed || "10:00") - _toMinutes(st || "09:00")) * pxPerMinute));
-            const aid = `${day}-${idx}`;
-            return `
-              <div class="schedule-item activity" data-flip-activity="${aid}" style="left:calc(58% + 4px);width:calc(42% - 8px);top:${top}px;height:${height}px;">
-                <div class="activity-flip">
-                  <div class="activity-face front">
-                    <div class="schedule-item-title">${_escapeHtml(it.name)}</div>
-                    <div class="schedule-item-sub">${_escapeHtml(it.time)}</div>
-                  </div>
-                  <div class="activity-face back">
-                    <div class="schedule-item-title">${_escapeHtml(it.name)}</div>
-                    <div class="schedule-item-sub">${_escapeHtml(it.intro)}</div>
-                  </div>
-                </div>
-              </div>
-            `;
-          })
-          .join("");
-
-        return `
-          <div class="schedule-day-col">
-            <div class="schedule-lane-divider"></div>
-            ${courseHtml}
-            ${actHtml}
-          </div>
-        `;
-      }).join("");
-
-      const timeBodyHtml = `
-        <div class="schedule-time-body schedule-time-col">
-          ${timeLabels.map((x) => `<div class="schedule-time-label" style="top:${x.top}px;">${x.text}</div>`).join("")}
-        </div>
-      `;
-
-      const weekdayActivities = scheduleActivityItems.filter((x) => {
-        if (!SCHEDULE_DAY_KEYS.includes(String(x.day || "").toLowerCase())) return false;
-        const [st, ed] = String(x.time || "").split("-");
-        return _isWithinScheduleRange(st, ed, startMin, endMin);
-      });
-      const tableRows = weekdayActivities.map((x) => {
-        const weekday = _eventWeekdayLabel(x.day, L);
-        return `
-          <tr>
-            <td>${_escapeHtml(x.name)}</td>
-            <td>${_escapeHtml(x.intro)}</td>
-            <td>${_escapeHtml(x.time)}</td>
-            <td>${_escapeHtml(weekday)}</td>
-          </tr>
-        `;
-      }).join("");
-
-      const bodyHtml = `
-        <div class="schedule-wrap">
-          <div class="schedule-board" style="--schedule-height:${totalPx}px;">
-            <div class="schedule-head-row">
-              <div class="schedule-time-head">${L.time}</div>
-              ${headColsHtml}
-            </div>
-            <div class="schedule-body-row">
-              ${timeBodyHtml}
-              ${bodyColsHtml}
-            </div>
-          </div>
-          <div class="module-section">
-            <div class="schedule-hint">${_escapeHtml(L.hint)}</div>
-            <div class="module-paragraph"><b>${_escapeHtml(L.tableTitle)}</b></div>
-            <table class="schedule-events-table">
-              <thead>
-                <tr>
-                  <th>${_escapeHtml(L.tableCols[0])}</th>
-                  <th>${_escapeHtml(L.tableCols[1])}</th>
-                  <th>${_escapeHtml(L.tableCols[2])}</th>
-                  <th>${_escapeHtml(L.tableCols[3])}</th>
-                </tr>
-              </thead>
-              <tbody>${tableRows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-      return renderModulePage({ title: L.title, showInlineBack: false, bodyHtml });
-    }
-
-    function renderRightModuleEn(page) {
-      const mk = rightModuleKey;
-      const homePage = mk ? `${mk}_home` : null;
-      const p = page || homePage;
-
-      if (mk === "schedule") {
-        return renderPersonalSchedulePage();
-      }
-
-      if (mk === "intern") {
-        if (!p || p === "intern_home") {
-          return renderModulePage({
-            title: "Internships and Jobs",
-            showInlineBack: false,
-            bodyHtml: `
-              <div class="module-grid" aria-label="Internship and job modules">
-                <button class="module-action-btn" type="button" data-right-page="intern_resume">
-                  <div class="module-action-icon">${svgIcon("briefcase")}</div>
-                  <div class="module-action-text"><div class="module-action-title">Resume and Portfolio</div><div class="module-action-sub">Template, project bullets, measurable impact</div></div>
-                </button>
-                <button class="module-action-btn" type="button" data-right-page="intern_interview">
-                  <div class="module-action-icon">${svgIcon("target")}</div>
-                  <div class="module-action-text"><div class="module-action-title">Interview Training</div><div class="module-action-sub">Self-intro, common questions, STAR</div></div>
-                </button>
-                <button class="module-action-btn" type="button" data-right-page="intern_network">
-                  <div class="module-action-icon">${svgIcon("map")}</div>
-                  <div class="module-action-text"><div class="module-action-title">Applications and Referrals</div><div class="module-action-sub">Role filtering, cadence, follow-up scripts</div></div>
-                </button>
-                <button class="module-action-btn" type="button" data-right-page="intern_plan">
-                  <div class="module-action-icon">${svgIcon("calendar")}</div>
-                  <div class="module-action-text"><div class="module-action-title">30-Day Sprint Plan</div><div class="module-action-sub">Weekly iteration: resume, project, interview</div></div>
-                </button>
-              </div>
-            `,
-          });
-        }
-        const map = {
-          intern_resume: ["Resume and Portfolio", "Keep one page with clear impact metrics.", "Use: context -> your action -> measurable result.", "Paste your current resume and I can rewrite it role-by-role."],
-          intern_interview: ["Interview Training", "Use a 1-minute self-intro: who you are, what you built, what role you want.", "Prepare STAR stories for teamwork, pressure, and conflict.", "Tell me target role and I will run a mock interview."],
-          intern_network: ["Applications and Referrals", "Filter by hard requirements first, then growth value.", "Follow up after 5-7 days with one concise highlight.", "Use referral messages with role + resume + 2 role-fit points."],
-          intern_plan: ["30-Day Sprint Plan", "Week 1: role positioning + resume baseline.", "Week 2: project iteration + targeted applications.", "Week 3: interview drills + continued applications.", "Week 4: gap fixing + strategy adjustment."],
-        };
-        return renderModulePage({
-          title: (map[p] || map.intern_resume)[0],
-          showInlineBack: true,
-          bodyHtml: `<ul class="module-list">${(map[p] || map.intern_resume).slice(1).map((x) => `<li>${x}</li>`).join("")}</ul>`,
-        });
-      }
-
-      if (mk === "campus") {
-        if (!p || p === "campus_home") {
-          return renderModulePage({
-            title: "Campus Activities",
-            showInlineBack: false,
-            bodyHtml: `
-              <div class="module-grid" aria-label="Campus activity modules">
-                <button class="module-action-btn" type="button" data-right-page="campus_club"><div class="module-action-icon">${svgIcon("school")}</div><div class="module-action-text"><div class="module-action-title">Clubs</div><div class="module-action-sub">Selection, interview, onboarding</div></div></button>
-                <button class="module-action-btn" type="button" data-right-page="campus_event"><div class="module-action-icon">${svgIcon("calendar")}</div><div class="module-action-text"><div class="module-action-title">Event Planning</div><div class="module-action-sub">From idea to execution</div></div></button>
-                <button class="module-action-btn" type="button" data-right-page="campus_volunteer"><div class="module-action-icon">${svgIcon("heart")}</div><div class="module-action-text"><div class="module-action-title">Volunteering</div><div class="module-action-sub">Records, materials, impact story</div></div></button>
-                <button class="module-action-btn" type="button" data-right-page="campus_leadership"><div class="module-action-icon">${svgIcon("target")}</div><div class="module-action-text"><div class="module-action-title">Leadership</div><div class="module-action-sub">Campaigning, delivery, review</div></div></button>
-              </div>
-            `,
-          });
-        }
-        const map = {
-          campus_club: ["Club Selection and Joining", "Pick by sustained interest, expected gain, and weekly time budget.", "Prepare concrete examples for interviews: what you did and what changed.", "Choose 1-2 clubs you can consistently commit to."],
-          campus_event: ["Event Planning", "Define goal and audience first.", "Lock venue, budget, role split, and signup flow early.", "Prepare fallback plans for attendance and equipment risk."],
-          campus_volunteer: ["Volunteering", "Track what you did, for whom, and measurable outcomes.", "Focus on impact quality, not only hours.", "Keep evidence for resumes and future applications."],
-          campus_leadership: ["Student Leadership", "Break goals into weekly deliverables.", "Run short weekly syncs and unblock quickly.", "Do post-event review within 24 hours."],
-        };
-        return renderModulePage({
-          title: (map[p] || map.campus_club)[0],
-          showInlineBack: true,
-          bodyHtml: `<ul class="module-list">${(map[p] || map.campus_club).slice(1).map((x) => `<li>${x}</li>`).join("")}</ul>`,
-        });
-      }
-
-      if (mk === "life") {
-        if (!p || p === "life_home") {
-          return renderModulePage({
-            title: "Life Support",
-            showInlineBack: false,
-            bodyHtml: `
-              <div class="module-grid" aria-label="Life support modules">
-                <button class="module-action-btn" type="button" data-right-page="life_dorm"><div class="module-action-icon">${svgIcon("map")}</div><div class="module-action-text"><div class="module-action-title">Dormitory</div><div class="module-action-sub">Move-in checklist and roommate rules</div></div></button>
-                <button class="module-action-btn" type="button" data-right-page="life_health"><div class="module-action-icon">${svgIcon("heart")}</div><div class="module-action-text"><div class="module-action-title">Health and Routine</div><div class="module-action-sub">Sleep, focus, and stress management</div></div></button>
-                <button class="module-action-btn" type="button" data-right-page="life_food"><div class="module-action-icon">${svgIcon("target")}</div><div class="module-action-text"><div class="module-action-title">Food and Budget</div><div class="module-action-sub">Meal planning and spending control</div></div></button>
-                <button class="module-action-btn" type="button" data-right-page="life_emergency"><div class="module-action-icon">${svgIcon("briefcase")}</div><div class="module-action-text"><div class="module-action-title">Emergencies</div><div class="module-action-sub">Lost card, repair, schedule conflicts</div></div></button>
-              </div>
-            `,
-          });
-        }
-        const map = {
-          life_dorm: ["Dormitory and Move-in", "Prepare essentials: bedding, storage, study tools, hygiene items.", "Agree early on roommate rules: schedule, cleanliness, shared items.", "Keep a simple maintenance and replacement checklist."],
-          life_health: ["Health and Routine", "Stabilize wake-up time first, then sleep time.", "Use focused blocks (45 min) plus short breaks.", "Externalize tasks to reduce stress overload."],
-          life_food: ["Food and Budget", "Set a weekly meal budget by category.", "Use stable, low-cost meal combos on regular days.", "Reserve delivery for high-pressure days only."],
-          life_emergency: ["Emergency Situations", "Lost card: freeze, replace, then rebind services.", "Repair requests: submit photo + clear issue details + available time.", "Schedule conflicts: notify early and propose alternatives."],
-        };
-        return renderModulePage({
-          title: (map[p] || map.life_dorm)[0],
-          showInlineBack: true,
-          bodyHtml: `<ul class="module-list">${(map[p] || map.life_dorm).slice(1).map((x) => `<li>${x}</li>`).join("")}</ul>`,
-        });
-      }
-
-      if (mk === "research") {
-        if (!p || p === "research_home") {
-          return renderModulePage({
-            title: "Research Exploration",
-            showInlineBack: false,
-            bodyHtml: `
-              <div class="module-grid" aria-label="Research modules">
-                <button class="module-action-btn" type="button" data-right-page="research_topic"><div class="module-action-icon">${svgIcon("flask")}</div><div class="module-action-text"><div class="module-action-title">Topic and Direction</div><div class="module-action-sub">From interest to feasible problem</div></div></button>
-                <button class="module-action-btn" type="button" data-right-page="research_paper"><div class="module-action-icon">${svgIcon("book")}</div><div class="module-action-text"><div class="module-action-title">Paper Reading</div><div class="module-action-sub">Method, notes, reproducibility</div></div></button>
-                <button class="module-action-btn" type="button" data-right-page="research_method"><div class="module-action-icon">${svgIcon("target")}</div><div class="module-action-text"><div class="module-action-title">Experiments and Methods</div><div class="module-action-sub">Variables, controls, metrics</div></div></button>
-                <button class="module-action-btn" type="button" data-right-page="research_writing"><div class="module-action-icon">${svgIcon("pen")}</div><div class="module-action-text"><div class="module-action-title">Research Writing</div><div class="module-action-sub">Abstract, method, results, discussion</div></div></button>
-              </div>
-            `,
-          });
-        }
-        const map = {
-          research_topic: ["Topic and Direction", "Define one concrete research question.", "Pick method path: data, experiment, theory, or system.", "Set 4-8 week deliverables you can actually complete."],
-          research_paper: ["Paper Reading", "Read abstract, key figures, and conclusion first.", "Then inspect assumptions, method, and experiments.", "Keep reproducibility notes while reading."],
-          research_method: ["Experiments and Methods", "Define metrics beyond accuracy when needed.", "Use fair baselines and ablation studies.", "Track version, seed, hyperparameters, and environment."],
-          research_writing: ["Research Writing", "Use intro-gap-contribution structure.", "Make methods and results reproducible.", "State limitations and next steps explicitly."],
-        };
-        return renderModulePage({
-          title: (map[p] || map.research_topic)[0],
-          showInlineBack: true,
-          bodyHtml: `<ul class="module-list">${(map[p] || map.research_topic).slice(1).map((x) => `<li>${x}</li>`).join("")}</ul>`,
-        });
-      }
-
-      return renderModulePage({
-        title: t("boardService"),
-        showInlineBack: false,
-        bodyHtml: `<div class="module-paragraph">Select a board to view details.</div>`,
-      });
-    }
-
-    function setDynamicPanelEnabled(enabled) {
-      if (!rightSidebarEl) return;
-      rightSidebarEl.classList.toggle("no-dynamic", !enabled);
-      if (!enabled && rightDynamicModulesEl) rightDynamicModulesEl.innerHTML = "";
-    }
-
     function renderRightModule() {
       if (!rightModuleContentEl) return;
       const page = currentRightPage();
@@ -3388,28 +2124,18 @@
       if (!page || /_home$/.test(String(page))) activeDynamicKey = rightModuleKey;
       else activeDynamicKey = String(page);
 
-      // 英文模式统一走英文右栏渲染（详情页除外，详情页走动态卡片内容）
-      const dynamicEnabled = rightModuleKey !== "schedule";
-      setDynamicPanelEnabled(dynamicEnabled);
-
-      if (isEnglishUi() && page !== "dyn_detail" && rightModuleKey !== "study") {
-        rightModuleContentEl.innerHTML = renderRightModuleEn(page);
-        if (dynamicEnabled) renderDynamicModulesForKey(getBestDynamicKey());
-        return;
-      }
-
       // 动态详情页（任意模块通用）
       if (page === "dyn_detail" && activeDynamicCard) {
         const detailsText = String(activeDynamicCard.details || "").trim();
         const bodyHtml = `
-          <div class="module-paragraph">${detailsText ? _escapeAndLinkify(detailsText).replace(/\n/g, "<br>") : t("noDetails")}</div>
+          <div class="module-paragraph">${detailsText ? _escapeAndLinkify(detailsText).replace(/\n/g, "<br>") : "（暂无详情）"}</div>
           ${
             activeDynamicCard.action
               ? `<div class="module-section">
                    <button class="module-action-btn" type="button" data-right-action="use_action">
                      <div class="module-action-icon">${svgIcon("pen")}</div>
                      <div class="module-action-text">
-                       <div class="module-action-title">${t("fillSuggestion")}</div>
+                       <div class="module-action-title">把这条建议填入输入框</div>
                        <div class="module-action-sub">${_escapeHtml(String(activeDynamicCard.action)).slice(0, 40)}${
                   String(activeDynamicCard.action).length > 40 ? "…" : ""
                 }</div>
@@ -3420,7 +2146,7 @@
           }
         `;
         rightModuleContentEl.innerHTML = renderModulePage({
-          title: activeDynamicCard.title || t("recommendation"),
+          title: activeDynamicCard.title || "推荐内容",
           showInlineBack: true,
           bodyHtml,
         });
@@ -3451,11 +2177,6 @@
         // AI 推荐内容在右侧栏下方区域渲染（不在页面内容里重复插入）
         // 子模块为空时回退到大模块列表，避免 AI 框“消失”
         renderDynamicModulesForKey(getBestDynamicKey());
-        return;
-      }
-
-      if (rightModuleKey === "schedule") {
-        rightModuleContentEl.innerHTML = renderPersonalSchedulePage();
         return;
       }
       if (rightModuleKey === "intern") {
@@ -3915,66 +2636,21 @@
         .replace(/'/g, "&#39;");
     }
 
-    function _linkifyRawUrlsInPlainText(text) {
+    function _escapeAndLinkify(text) {
       const s = String(text || "");
-      // 不使用 \b，避免在全角括号/中文标点前后出现漏匹配
-      const re = /https?:\/\/[^\s<>"']+/gi;
+      const re = /\bhttps?:\/\/[^\s<>"']+/gi;
       let out = "";
       let last = 0;
       let m = null;
       while ((m = re.exec(s))) {
-        let url = String(m[0] || "");
-        // Strip trailing punctuation/brackets commonly produced by prose/markdown.
-        // Example: "...（https://a.b/c）" -> "...（https://a.b/c）" (括号保留在外层，URL 本体可点)
-        url = url.replace(/[)\]}>》】）』」,，。；;:：!?！？]+$/g, "");
+        const url = String(m[0] || "");
         out += _escapeHtml(s.slice(last, m.index));
         const safeHref = url.replace(/[\u0000-\u001F\u007F]/g, "");
         out += `<a href="${_escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer">${_escapeHtml(url)}</a>`;
-        // Advance by the *original* matched length (not trimmed length),
-        // so we don't accidentally re-render a trailing char.
-        last = m.index + String(m[0] || "").length;
+        last = m.index + url.length;
       }
       out += _escapeHtml(s.slice(last));
       return out;
-    }
-
-    function _escapeAndLinkify(text) {
-      const s = String(text || "");
-      // Support markdown-style links too: [text](https://...)
-      const mdRe = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/gi;
-      let out = "";
-      let last = 0;
-      let m = null;
-      while ((m = mdRe.exec(s))) {
-        const label = String(m[1] || "").trim() || String(m[2] || "");
-        const url = String(m[2] || "").trim();
-        out += _linkifyRawUrlsInPlainText(s.slice(last, m.index));
-        const safeHref = url.replace(/[\u0000-\u001F\u007F]/g, "");
-        out += `<a href="${_escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer">${_escapeHtml(label)}</a>`;
-        last = m.index + String(m[0] || "").length;
-      }
-      out += _linkifyRawUrlsInPlainText(s.slice(last));
-      return out;
-    }
-
-    const DEFAULT_ONLINE_SERVICE_URL = "https://www.xjtlu.edu.cn/zh/it-services/e-bridge-intro";
-
-    function _containsUrl(text) {
-      return /\bhttps?:\/\/[^\s<>"']+/i.test(String(text || ""));
-    }
-
-    function _needsOnlineServiceLink(text) {
-      const s = String(text || "").toLowerCase();
-      if (!s) return false;
-      return /(在线|线上|网上|官网|网站|网址|链接|入口|平台|系统|e-bridge|ebridge|学习超市|learning mall|portal)/i.test(s);
-    }
-
-    function _ensureOnlineServiceLink(text) {
-      const s = String(text || "").trim();
-      if (!s) return s;
-      if (_containsUrl(s)) return s;
-      if (!_needsOnlineServiceLink(s)) return s;
-      return `${s}\n\n相关入口：${DEFAULT_ONLINE_SERVICE_URL}`;
     }
 
     function toDeclarativeTitle(rawTitle) {
@@ -4097,9 +2773,8 @@
       }
 
       // cache hit (short TTL)
-      const lang = getAppLanguage();
       const cached = dynamicRewriteCacheByKey && dynamicRewriteCacheByKey[k];
-      if (cached && cached.list && cached.lang === lang && Date.now() - (cached.ts || 0) < DYNAMIC_REWRITE_TTL_MS) {
+      if (cached && cached.list && Date.now() - (cached.ts || 0) < DYNAMIC_REWRITE_TTL_MS) {
         const rewritten = cached.list;
         rewritten.__rewritten = true;
         dynamicModulesPrefetch[k] = rewritten;
@@ -4121,7 +2796,7 @@
           const res = await fetch("/api/rewrite_dynamic_list", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contextKey: k, items: payload, language: getAppLanguage() }),
+            body: JSON.stringify({ contextKey: k, items: payload }),
           });
           if (!res.ok) return;
           const data = await res.json();
@@ -4133,7 +2808,7 @@
             return { ...c, title: r.title || c.title, desc: r.desc || c.desc, icon: r.icon || c.icon };
           });
           rewritten.__rewritten = true;
-          dynamicRewriteCacheByKey[k] = { ts: Date.now(), lang, list: rewritten };
+          dynamicRewriteCacheByKey[k] = { ts: Date.now(), list: rewritten };
           dynamicModulesPrefetch[k] = rewritten;
           dynamicModulesByKey[k] = rewritten;
           if (dynamicViewMode !== "detail" && rightDynamicModulesEl && (activeDynamicKey === k || lastClickedModuleKey === k)) {
@@ -4181,7 +2856,7 @@
       rightDynamicModulesEl.innerHTML = `
         <div class="right-dynamic-loading" role="status" aria-live="polite">
           <div class="right-dynamic-spinner" aria-hidden="true"></div>
-          <div>${t("loadingRecommendations")}</div>
+          <div>正在加载推荐内容…</div>
         </div>
       `;
     }
@@ -4266,7 +2941,6 @@
             submoduleKeys: getSubmoduleKeysForModule(key),
             max_cards: 8,
             queryText: q,
-            language: getAppLanguage(),
           }),
         });
         if (!res.ok) return;
@@ -4387,7 +3061,7 @@
         const ctxKey = String(activeDynamicKey || lastClickedModuleKey || "");
         const qKey = String(card.action || card.title || "").trim();
         const aKey = String(card.details || "").trim();
-        const detailKey = `${getAppLanguage()}||${ctxKey}||${qKey}||${aKey.slice(0, 120)}`;
+        const detailKey = `${ctxKey}||${qKey}||${aKey.slice(0, 120)}`;
 
         // short cache: repeated opens don't re-generate
         const cached = dynamicDetailCacheByKey && dynamicDetailCacheByKey[detailKey];
@@ -4408,7 +3082,7 @@
           const detailsHtml =
             lines.length >= 2
               ? `<ol class="ai-detail-olist">${lines.map((x) => `<li>${_escapeAndLinkify(stripLeadingNumbering(x))}</li>`).join("")}</ol>`
-              : `<div class="ai-detail-text">${detailsText ? _escapeAndLinkify(detailsText).replace(/\n/g, "<br>") : t("noDetails")}</div>`;
+              : `<div class="ai-detail-text">${detailsText ? _escapeAndLinkify(detailsText).replace(/\n/g, "<br>") : "（暂无详情）"}</div>`;
           rightDynamicModulesEl.innerHTML = `
             <div class="ai-detail">
               <div class="ai-detail-top">
@@ -4436,7 +3110,7 @@
               </button>
               <div class="ai-detail-head">
                 <div class="ai-detail-title">${preTitle}</div>
-                <div class="ai-detail-desc">${t("generatingDetails")}</div>
+                <div class="ai-detail-desc">正在生成更详细的内容，请稍等…</div>
               </div>
             </div>
             <div class="right-dynamic-loading" style="margin-top:10px;">
@@ -4459,12 +3133,11 @@
                 contextKey: activeDynamicKey || lastClickedModuleKey || "",
                 q: card.action || card.title || "",
                 a: card.details || "",
-                language: getAppLanguage(),
                 icon: card.icon || "book",
               }),
             });
             const data = res.ok ? await res.json() : null;
-            const title = _escapeHtml(toDeclarativeTitle((data && data.title) || card.title || t("recommendation")));
+            const title = _escapeHtml(toDeclarativeTitle((data && data.title) || card.title || "推荐内容"));
             const desc = _escapeHtml((data && data.desc) || card.desc || "");
             const detailsText = String((data && data.details) || card.details || "").trim();
 
@@ -4515,7 +3188,7 @@
                   .join("")}</ol>`;
               } else {
                 detailsHtml = `<div class="ai-detail-text">${
-                  detailsText ? _escapeAndLinkify(detailsText).replace(/\n/g, "<br>") : t("noDetails")
+                  detailsText ? _escapeAndLinkify(detailsText).replace(/\n/g, "<br>") : "（暂无详情）"
                 }</div>`;
               }
             }
@@ -4548,7 +3221,7 @@
                     <div class="ai-detail-title">${title}</div>
                   </div>
                 </div>
-                <div class="ai-detail-text">${details ? _escapeAndLinkify(details).replace(/\n/g, "<br>") : t("noDetails")}</div>
+                <div class="ai-detail-text">${details ? _escapeAndLinkify(details).replace(/\n/g, "<br>") : "（暂无详情）"}</div>
               </div>
             `;
           }
@@ -4618,7 +3291,7 @@
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "history-item" + (s.id === currentSessionId ? " active" : "");
-        btn.textContent = s.title || t("newChatTitle");
+        btn.textContent = s.title || "新对话";
         btn.addEventListener("click", () => setActiveSession(s.id));
         historyListEl.appendChild(btn);
       });
@@ -4655,7 +3328,7 @@
       rightSidebarEl.classList.add("expanded");
       document.body.classList.add("right-expanded");
 
-      currentModuleName = getModuleName(moduleKey);
+      currentModuleName = MODULE_NAME_MAP[moduleKey] || LEFT_SIDEBAR_TITLE;
       // 左侧栏标题不跟随右侧模块变化
       if (rightSidebarTitleEl) rightSidebarTitleEl.textContent = currentModuleName;
       rightModuleKey = moduleKey || "";
@@ -4670,8 +3343,6 @@
           ? "life_home"
           : rightModuleKey === "research"
           ? "research_home"
-          : rightModuleKey === "schedule"
-          ? "schedule_home"
           : "",
       ]);
       renderRightModule();
@@ -4695,10 +3366,9 @@
     function collapseRightSidebar() {
       if (!rightSidebarEl) return;
       rightSidebarEl.classList.remove("expanded");
-      rightSidebarEl.classList.remove("no-dynamic");
       document.body.classList.remove("right-expanded");
       if (rightModuleContentEl) rightModuleContentEl.innerHTML = "";
-      if (rightSidebarTitleEl) rightSidebarTitleEl.textContent = t("boardService");
+      if (rightSidebarTitleEl) rightSidebarTitleEl.textContent = "板块服务";
       rightModuleKey = "";
       setRightPageStack([]);
       // 回到“未选择模块”态：不展示 AI 生成卡片（下次点击模块再生成/渲染）
@@ -4728,9 +3398,9 @@
         loginContentEl.innerHTML = `
           <div class="login-user">
             <img class="login-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=Guest" alt="guest">
-            <div class="login-name">${t("guest")}</div>
+            <div class="login-name">未登录</div>
           </div>
-          <div class="login-action">${t("login")}</div>
+          <div class="login-action">点击登录</div>
         `;
         return;
       }
@@ -4742,7 +3412,7 @@
           <img class="login-avatar" src="${avatar}" alt="avatar">
           <div class="login-name">${safeName}</div>
         </div>
-        <button class="logout-btn" id="logoutBtn" type="button">${t("logout")}</button>
+        <button class="logout-btn" id="logoutBtn" type="button">退出</button>
       `;
       const logoutBtn = document.getElementById("logoutBtn");
       if (logoutBtn) {
@@ -4835,7 +3505,7 @@
       const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       const session = {
         id,
-        title: t("newChatTitle"),
+        title: "新对话",
         messages: [],
         hasUserMessage: false, // 用户是否已发送过“第一句话”
       };
@@ -4864,7 +3534,7 @@
       const session = getCurrentSession();
       if (session) {
         session.messages = [];
-        session.title = t("newChatTitle");
+        session.title = "新对话";
         session.hasUserMessage = false;
       }
       // 清空后如果仍未产生“第一句用户消息”，则该会话不应出现在历史记录中
@@ -4885,13 +3555,9 @@
           const moduleKey = btn.dataset.module || "";
           lastClickedModuleKey = moduleKey || "";
           // 点击大模块时：扫描该模块 QA，并预生成“模块 + 子模块”的动态卡片缓存
-          if (moduleKey !== "schedule") {
-            prefetchQaForModule(moduleKey);
-            // 先显示已有缓存（如果还没取回也不影响 UI）
-            renderDynamicModulesForKey(moduleKey);
-          } else if (rightDynamicModulesEl) {
-            rightDynamicModulesEl.innerHTML = "";
-          }
+          prefetchQaForModule(moduleKey);
+          // 先显示已有缓存（如果还没取回也不影响 UI）
+          renderDynamicModulesForKey(moduleKey);
           expandRightSidebarAndCollapseLeft(moduleKey);
         });
       });
@@ -4907,11 +3573,6 @@
     if (rightModuleContentEl) {
       rightModuleContentEl.addEventListener("click", (e) => {
         const t = e.target;
-        const flipCard = t && t.closest ? t.closest("[data-flip-activity]") : null;
-        if (flipCard) {
-          flipCard.classList.toggle("is-flipped");
-          return;
-        }
         const btn = t && t.closest ? t.closest("[data-right-page],[data-right-action]") : null;
         if (!btn) return;
 
@@ -4966,12 +3627,7 @@
         role === "user"
           ? String(text || "").replace(/\r?\n/g, " ").replace(/\s{2,}/g, " ").trim()
           : String(text || "");
-      if (role === "assistant") {
-        const finalAssistantText = _ensureOnlineServiceLink(safeText);
-        bubble.innerHTML = _escapeAndLinkify(finalAssistantText).replace(/\n/g, "<br>");
-      } else {
-        bubble.textContent = safeText;
-      }
+      bubble.textContent = safeText;
 
       if (messageId) {
         bubble.dataset.messageId = messageId;
@@ -5005,8 +3661,8 @@
         const retryBtn = document.createElement("button");
         retryBtn.type = "button";
         retryBtn.className = "assistant-mini-btn";
-        retryBtn.setAttribute("aria-label", t("retry"));
-        retryBtn.title = t("retry");
+        retryBtn.setAttribute("aria-label", "重新回复");
+        retryBtn.title = "重新回复";
         retryBtn.innerHTML = svgRetry;
         retryBtn.addEventListener("click", () => {
           const prevUser = findPrevUserMessageForAssistant(row);
@@ -5020,8 +3676,8 @@
         const copyBtn = document.createElement("button");
         copyBtn.type = "button";
         copyBtn.className = "assistant-mini-btn";
-        copyBtn.setAttribute("aria-label", t("copy"));
-        copyBtn.title = t("copy");
+        copyBtn.setAttribute("aria-label", "复制回答");
+        copyBtn.title = "复制回答";
         copyBtn.innerHTML = svgCopy;
         copyBtn.addEventListener("click", async () => {
           const content = bubble.textContent || "";
@@ -5039,12 +3695,12 @@
               document.body.removeChild(ta);
             }
             copyBtn.classList.add("copied");
-            copyBtn.setAttribute("aria-label", t("copied"));
-            copyBtn.title = t("copied");
+            copyBtn.setAttribute("aria-label", "已复制");
+            copyBtn.title = "已复制";
             setTimeout(() => {
               copyBtn.classList.remove("copied");
-              copyBtn.setAttribute("aria-label", t("copy"));
-              copyBtn.title = t("copy");
+              copyBtn.setAttribute("aria-label", "复制回答");
+              copyBtn.title = "复制回答";
             }, 900);
           } catch (e) {
             // 静默：复制失败则不影响回答显示
@@ -5103,7 +3759,7 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ message: promptText, language: getAppLanguage() }),
+          body: JSON.stringify({ message: promptText }),
         });
 
         if (!res.ok) throw new Error("HTTP " + res.status);
@@ -5173,8 +3829,7 @@
                 for (const ch of delta) {
                   assistantRaw += ch;
                   if (!gotFirstToken) gotFirstToken = true;
-                  const cleaned = cleanAssistantText(assistantRaw);
-                  assistantBubble.innerHTML = _escapeAndLinkify(cleaned).replace(/\n/g, "<br>");
+                  assistantBubble.textContent = cleanAssistantText(assistantRaw);
                   messagesEl.scrollTop = messagesEl.scrollHeight;
                 }
               }
@@ -5183,8 +3838,8 @@
           }
         }
 
-        const finalText = _ensureOnlineServiceLink(cleanAssistantText(assistantRaw) || t("emptyReply"));
-        assistantBubble.innerHTML = _escapeAndLinkify(finalText).replace(/\n/g, "<br>");
+        const finalText = cleanAssistantText(assistantRaw) || "(空回复)";
+        assistantBubble.textContent = finalText;
 
         if (session) {
           if (
@@ -5210,15 +3865,15 @@
         const res2 = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: promptText, language: getAppLanguage() }),
+          body: JSON.stringify({ message: promptText }),
         });
         if (!res2.ok) throw err;
 
         const data = await res2.json();
-        const reply = data.reply || t("emptyReply");
-        const finalText = _ensureOnlineServiceLink(cleanAssistantText(reply) || t("emptyReply"));
+        const reply = data.reply || "(空回复)";
+        const finalText = cleanAssistantText(reply) || "(空回复)";
         gotFirstToken = true;
-        assistantBubble.innerHTML = _escapeAndLinkify(finalText).replace(/\n/g, "<br>");
+        assistantBubble.textContent = finalText;
 
         if (session) {
           if (
@@ -5250,7 +3905,7 @@
       const session = getCurrentSession();
       sendBtn.disabled = true;
       inputEl.disabled = true;
-      statusEl.textContent = t("thinking");
+      statusEl.textContent = "模型思考中...";
 
       try {
         if (assistantBubble) assistantBubble.textContent = "";
@@ -5265,7 +3920,7 @@
         isAwaitingAssistant = false;
         sendBtn.disabled = false;
         inputEl.disabled = false;
-        statusEl.textContent = t("ready");
+        statusEl.textContent = "就绪";
       }
     }
 
@@ -5299,7 +3954,7 @@
             const tr = await fetch("/api/session_title", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ message: text, language: getAppLanguage() }),
+              body: JSON.stringify({ message: text }),
             });
               if (!tr.ok) throw new Error("title api not ok");
               const td = await tr.json();
@@ -5325,11 +3980,6 @@
       inputEl.value = "";
       inputEl.style.height = "44px";
       updateEmptyPrompt();
-      if (tryHandleScheduleAddCommand(text, session)) {
-        isAwaitingAssistant = false;
-        statusEl.textContent = t("ready");
-        return;
-      }
 
       // 异步路由：不阻塞聊天回复。命中则自动展开右侧栏并跳转到对应板块/子板块。
       (async () => {
@@ -5337,7 +3987,7 @@
           const rr = await fetch("/api/route_board", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, language: getAppLanguage() }),
+            body: JSON.stringify({ text }),
           });
           if (!rr.ok) return;
           const rd = await rr.json();
@@ -5371,13 +4021,13 @@
 
       sendBtn.disabled = true;
       inputEl.disabled = true;
-      statusEl.textContent = t("thinking");
+      statusEl.textContent = "模型思考中...";
 
       // 先创建一个空的助手回复气泡，流式增量持续写入它
       const assistantMessageId = createMessageId();
       const assistantBubble = appendMessage("assistant", "", assistantMessageId);
       if (assistantBubble) {
-        assistantBubble.innerHTML = `<span class="chat-loading"><span class="chat-loading-spinner" aria-hidden="true"></span><span class="chat-loading-dots">${t("thinkingShort")}</span></span>`;
+        assistantBubble.innerHTML = `<span class="chat-loading"><span class="chat-loading-spinner" aria-hidden="true"></span><span class="chat-loading-dots">正在思考</span></span>`;
       }
 
       try {
@@ -5386,7 +4036,7 @@
         isAwaitingAssistant = false;
         sendBtn.disabled = false;
         inputEl.disabled = false;
-        statusEl.textContent = t("ready");
+        statusEl.textContent = "就绪";
       }
     }
 
@@ -5425,7 +4075,6 @@
 
     // 初始问候语：偏生活场景的问候
     window.addEventListener("DOMContentLoaded", () => {
-      applyStaticLanguage();
       renderLoginCard();
       // 默认创建一个会话并显示欢迎语，保证历史侧边栏有内容
       const session = createNewSession();

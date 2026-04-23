@@ -1,0 +1,46 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  included_files = ["netlify/functions/data/*.json"]
+
+[[redirects]]
+  from = "/api/runtime_policy"
+  to = "/.netlify/functions/runtime_policy"
+  status = 200
+
+[[redirects]]
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
+  status = 200
+
+[[redirects]]
+  from = "/api/chat_stream"
+  to = "/.netlify/functions/chat_stream"
+  status = 200
+
+[[redirects]]
+  from = "/api/session_title"
+  to = "/.netlify/functions/session_title"
+  status = 200
+
+[[redirects]]
+  from = "/api/route_board"
+  to = "/.netlify/functions/route_board"
+  status = 200
+
+[[redirects]]
+  from = "/api/module_qa_scan"
+  to = "/.netlify/functions/module_qa_scan"
+  status = 200
+
+[[redirects]]
+  from = "/api/rewrite_dynamic_card"
+  to = "/.netlify/functions/rewrite_dynamic_card"
+  status = 200
+
+[[redirects]]
+  from = "/api/rewrite_dynamic_list"
+  to = "/.netlify/functions/rewrite_dynamic_list"
+  status = 200

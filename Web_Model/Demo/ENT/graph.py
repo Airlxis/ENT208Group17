@@ -51,6 +51,7 @@ def _qa_terminal_log(msg: str) -> None:
 
 class ChatRequest(BaseModel):
     message: str
+    language: str = "zh-CN"
 
 
 class ChatResponse(BaseModel):
@@ -59,6 +60,7 @@ class ChatResponse(BaseModel):
 
 class TitleRequest(BaseModel):
     message: str
+    language: str = "zh-CN"
 
 
 class TitleResponse(BaseModel):
@@ -69,6 +71,7 @@ class ModuleScanRequest(BaseModel):
     submoduleKeys: list[str] = []
     max_cards: int = 8
     queryText: str = ""
+    language: str = "zh-CN"
 
 
 def _tokenize_mixed(text: str) -> list[str]:
@@ -194,6 +197,145 @@ class DynamicCard(BaseModel):
     details: str = ""
 
 
+def _normalize_language(language: str | None) -> str:
+    lang = (language or "zh-CN").strip().lower()
+    if lang.startswith("en"):
+        return "en-US"
+    return "zh-CN"
+
+
+def _has_cjk(text: str | None) -> bool:
+    s = str(text or "")
+    return bool(re.search(r"[\u3400-\u9fff]", s))
+
+
+def _enforce_english_list(items: list[dict], context_key: str = "") -> list[dict]:
+    """
+    Ensure list card copy is English-only.
+    If any CJK remains, ask model to translate/adapt as strict JSON.
+    """
+    if not items:
+        return items
+    if not any(_has_cjk(str(it.get("title", "")) + " " + str(it.get("desc", ""))) for it in items):
+        return items
+    try:
+        payload = [{"title": str(it.get("title", "")).strip(), "desc": str(it.get("desc", "")).strip()} for it in items]
+        prompt = (
+            "You are an English UI copy editor for campus assistant cards.\n"
+            "Translate/adapt every item into concise natural English.\n"
+            "Hard rules:\n"
+            "- Output strict JSON array only, same length as input.\n"
+            "- Each item must be: {\"title\":\"...\",\"desc\":\"...\"}\n"
+            "- Do not output any Chinese text.\n"
+            "- Keep meaning and specificity.\n"
+        )
+        result = model.invoke(
+            [
+                SystemMessage(content=prompt),
+                HumanMessage(content=f"contextKey: {context_key}\ninput: {json.dumps(payload, ensure_ascii=False)}"),
+            ]
+        )
+        raw = result.content if hasattr(result, "content") else str(result)
+        raw = raw.strip()
+        m = re.search(r"\[[\s\S]*\]", raw)
+        if m:
+            raw = m.group(0)
+        data = json.loads(raw)
+        if not isinstance(data, list):
+            return items
+        out = []
+        for i, it in enumerate(items):
+            row = data[i] if i < len(data) and isinstance(data[i], dict) else {}
+            title = str(row.get("title", it.get("title", ""))).strip() or str(it.get("title", ""))
+            desc = str(row.get("desc", it.get("desc", ""))).strip() or str(it.get("desc", ""))
+            if _has_cjk(title) or not title:
+                title = "Recommended Information"
+            if _has_cjk(desc) or not desc:
+                desc = "Key information for this topic."
+            out.append(
+                {
+                    "title": title,
+                    "desc": desc,
+                    "icon": str(it.get("icon", "book")).strip() or "book",
+                }
+            )
+        return out
+    except Exception:
+        return [
+            {
+                "title": "Recommended Information",
+                "desc": "Key information for this topic.",
+                "icon": str(it.get("icon", "book")).strip() or "book",
+            }
+            for it in items
+        ]
+
+
+def _enforce_english_detail(title: str, desc: str, details: str, context_key: str = "") -> tuple[str, str, str]:
+    """
+    Ensure detail card fields are English-only.
+    """
+    if not (_has_cjk(title) or _has_cjk(desc) or _has_cjk(details)):
+        return title, desc, details
+    try:
+        prompt = (
+            "You are an English UI copy editor for a campus assistant detail card.\n"
+            "Translate/adapt all fields into concise natural English.\n"
+            "Hard rules:\n"
+            "- Output strict JSON only: {\"title\":\"...\",\"desc\":\"...\",\"details\":[\"...\",\"...\"]}\n"
+            "- details must have 4-8 bullet points in English.\n"
+            "- Do not output any Chinese text.\n"
+        )
+        src = {"title": title, "desc": desc, "details": details}
+        result = model.invoke(
+            [
+                SystemMessage(content=prompt),
+                HumanMessage(content=f"contextKey: {context_key}\ninput: {json.dumps(src, ensure_ascii=False)}"),
+            ]
+        )
+        raw = result.content if hasattr(result, "content") else str(result)
+        raw = raw.strip()
+        m = re.search(r"\{[\s\S]*\}", raw)
+        if m:
+            raw = m.group(0)
+        data = json.loads(raw)
+        nt = str(data.get("title", "")).strip() or title
+        nd = str(data.get("desc", "")).strip() or desc
+        det = data.get("details", [])
+        if isinstance(det, list):
+            nlines = [str(x).strip() for x in det if str(x).strip()]
+            ndd = "\n".join(nlines) if nlines else details
+        else:
+            ndd = str(det or "").strip() or details
+        if _has_cjk(nt) or not nt:
+            nt = "Recommended Information"
+        if _has_cjk(nd) or not nd:
+            nd = "Key information for this topic."
+        if _has_cjk(ndd) or not ndd:
+            ndd = (
+                "Check the official portal for the latest policy.\n"
+                "Prepare required documents before submitting.\n"
+                "Follow deadlines and keep confirmation records."
+            )
+        return nt, nd, ndd
+    except Exception:
+        return (
+            "Recommended Information",
+            "Key information for this topic.",
+            "Check the official portal for the latest policy.\nPrepare required documents before submitting.\nFollow deadlines and keep confirmation records.",
+        )
+
+
+def _language_instruction(language: str | None) -> str:
+    if _normalize_language(language) == "en-US":
+        return (
+            "\n\nLanguage requirement: answer entirely in natural, concise English. "
+            "Translate and adapt any Chinese reference material into English. "
+            "Do not include Chinese text unless the user explicitly asks for it."
+        )
+    return "\n\n语言要求：全部使用自然、简洁的简体中文回答。"
+
+
 class ModuleScanResponse(BaseModel):
     moduleKey: str
     cards: list[DynamicCard]
@@ -204,18 +346,125 @@ class ModuleScanResponse(BaseModel):
 # ✅ 创建模型（DeepSeek）
 model = ChatDeepSeek(model="deepseek-chat")
 
-# ✅ 西浦学生助手系统提示词
+# ✅ XJTLU学生助手系统提示词
+FALLBACK_ENTRY_URL = "https://www.xjtlu.edu.cn/zh/it-services/e-bridge-intro"
+
 SYSTEM_PROMPT = (
-    "你是“西浦生活助手”，一名面向西交利物浦大学（XJTLU）学生的智能助手，"
-    "主要帮助新生和在校生解决与西浦学习、生活相关的问题。"
+    "你是“XJTLU生活助手”，一名面向西交利物浦大学（XJTLU）学生的智能助手，"
+    "主要帮助新生和在校生解决与XJTLU学习、生活相关的问题。"
     "严禁使用表情符号、颜文字、特殊符号（例如✅❌⭐️•等），不要输出任何 emoji。\n"
     "回答要求：\n"
     "1）使用自然、简洁的简体中文，礼貌热情，不要写成公文或宣传稿；\n"
-    "2）优先从西浦学生的视角给出具体、可执行的建议，例如时间规划、课程学习方法、校园资源使用、新生适应等；\n"
+    "2）优先从XJTLU学生的视角给出具体、可执行的建议，例如时间规划、课程学习方法、校园资源使用、新生适应等；\n"
     "3）对不确定的校内规定或可能变动的信息，要提醒“具体以学校官方最新通知为准”；\n"
     "4）可以适当鼓励和共情，但不要夸张，也不要频繁重复类似“很高兴为你服务”之类客套话。"
     "5）使用用户的同种语言来回答。"
+    "6）如果回答中涉及外部网站或线上订阅/线上资源/官方入口等需要访问的内容：\n"
+    "- 请基于语义和办理意图来判断，不要仅凭是否出现某个关键词；\n"
+    "- 如果你知道对应的具体网址：必须在回答中输出完整的 `https://...` 超链接，使用纯文本 URL 形式输出（不要使用 `[文字](URL)` 的 Markdown 链接写法）；\n"
+    "- 如果你不确定具体网址：统一使用默认入口链接 `https://www.xjtlu.edu.cn/zh/it-services/e-bridge-intro` 作为回退参考；\n"
+    "- 默认链接只在“不确定具体网址”的场景使用。"
 )
+
+
+def _fallback_entry_delta_if_needed(reply: str, user_question: str = "") -> str:
+    """
+    Return a delta string to append when:
+    - the reply mentions online access/portal/reservation/subscription-like content
+    - but no http(s) URL is present in the reply.
+    """
+    if not reply:
+        return ""
+    if re.search(r"https?://", str(reply), flags=re.IGNORECASE):
+        return ""
+
+    text = f"{str(user_question or '')}\n{str(reply or '')}"
+    triggers = [
+        "官网",
+        "入口",
+        "链接",
+        "网站",
+        "系统",
+        "平台",
+        "在线",
+        "线上",
+        "订阅",
+        "预约",
+        "报名",
+        "登录",
+        "注册",
+        "提交",
+        "e-bridge",
+        "eBridge",
+        "e-Bridge",
+        "线上预约",
+        "在线办理",
+    ]
+    if any(t in text for t in triggers):
+        return "\n\n" + FALLBACK_ENTRY_URL
+    return ""
+
+
+def _llm_should_attach_entry_link(reply: str, language: str | None = "zh-CN") -> Optional[bool]:
+    """
+    Ask the model to semantically decide whether this reply requires an online-entry URL.
+    Returns True/False; returns None on failure.
+    """
+    text = str(reply or "").strip()
+    if not text:
+        return False
+    if re.search(r"https?://", text, flags=re.IGNORECASE):
+        return False
+
+    if _normalize_language(language) == "en-US":
+        judge_prompt = (
+            "You are a strict classifier. "
+            "Given an assistant reply, decide whether the reply requires users to visit an online page/system/portal "
+            "to proceed (for example: online application, online booking, web portal, official website entry, e-Bridge, Learning Mall). "
+            "Decide by semantics and user intent, not only keywords.\n"
+            "Output only YES or NO."
+        )
+    else:
+        judge_prompt = (
+            "你是一个严格二分类器。给定助手回复，判断该回复是否需要用户去线上页面/系统/门户网站继续操作"
+            "（例如：在线申请、线上预约、网站入口、官网系统、e-Bridge、学习超市）。"
+            "请基于语义和办理意图判断，不要只看关键词。\n"
+            "只输出：YES 或 NO。"
+        )
+
+    try:
+        result = model.invoke(
+            [
+                SystemMessage(content=judge_prompt),
+                HumanMessage(content=text[:2200]),
+            ]
+        )
+        raw = (result.content if hasattr(result, "content") else str(result) or "").strip().upper()
+        if raw.startswith("YES"):
+            return True
+        if raw.startswith("NO"):
+            return False
+        return None
+    except Exception:
+        return None
+
+
+def _ensure_entry_link_if_needed(reply: str, language: str | None = "zh-CN", user_question: str = "") -> str:
+    # 1) semantic decision by model (primary)
+    llm_decision = _llm_should_attach_entry_link(
+        f"用户问题：{str(user_question or '').strip()}\n助手回答：{str(reply or '').strip()}",
+        language=language,
+    )
+    if llm_decision is True:
+        return str(reply).rstrip() + "\n\n" + FALLBACK_ENTRY_URL
+    if llm_decision is False:
+        return reply
+
+    # 2) heuristic fallback (safety net when model judge fails)
+    delta = _fallback_entry_delta_if_needed(reply, user_question=user_question)
+    if not delta:
+        return reply
+    return str(reply).rstrip() + delta
 
 
 def _strip_emojis_and_symbols(s: str) -> str:
@@ -237,7 +486,7 @@ def _strip_emojis_and_symbols(s: str) -> str:
 _URL_RE = re.compile(r"(https?://[^\s<>\]\)\"']+)", re.IGNORECASE)
 
 
-def _append_link_briefs(text: str, max_links: int = 6) -> str:
+def _append_link_briefs(text: str, max_links: int = 6, language: str = "zh-CN") -> str:
     """
     If `text` contains URL(s), append a short "相关链接" section with brief hints.
     """
@@ -245,7 +494,7 @@ def _append_link_briefs(text: str, max_links: int = 6) -> str:
     if not t:
         return ""
     # avoid repeated appends (idempotent enough)
-    if "相关链接" in t and "http" in t:
+    if ("相关链接" in t or "Related links" in t) and "http" in t:
         return t
     urls = _URL_RE.findall(t)
     if not urls:
@@ -277,7 +526,8 @@ def _append_link_briefs(text: str, max_links: int = 6) -> str:
         except Exception:
             return "相关页面"
 
-    lines = ["", "", "相关链接（可点击打开）："]
+    heading = "Related links (click to open):" if _normalize_language(language) == "en-US" else "相关链接（可点击打开）："
+    lines = ["", "", heading]
     for u in uniq:
         lines.append(f"- {u}（{_brief(u)}）")
     return (t + "\n" + "\n".join(lines)).strip()
@@ -440,7 +690,7 @@ def _resolve_qa_file_by_key(key: str) -> Optional[str]:
     return None
 
 
-def _qa_pairs_to_cards(pairs: list[dict], max_cards: int) -> list[DynamicCard]:
+def _qa_pairs_to_cards(pairs: list[dict], max_cards: int, language: str = "zh-CN", context_key: str = "") -> list[DynamicCard]:
     cards: list[DynamicCard] = []
     if not pairs:
         return cards
@@ -484,9 +734,21 @@ def _qa_pairs_to_cards(pairs: list[dict], max_cards: int) -> list[DynamicCard]:
                 desc=desc,
                 icon=icon,
                 action=q,
-                details=_append_link_briefs(a),
+                details=_append_link_briefs(a, language=language),
             )
         )
+    if _normalize_language(language) == "en-US" and cards:
+        normalized = _enforce_english_list(
+            [{"title": c.title, "desc": c.desc, "icon": c.icon} for c in cards],
+            context_key=context_key,
+        )
+        for i, c in enumerate(cards):
+            if i >= len(normalized):
+                break
+            row = normalized[i] if isinstance(normalized[i], dict) else {}
+            c.title = str(row.get("title", c.title)).strip() or c.title
+            c.desc = str(row.get("desc", c.desc)).strip() or c.desc
+            c.icon = str(row.get("icon", c.icon)).strip() or c.icon
     return cards
 
 
@@ -585,7 +847,7 @@ def _top_module_refs(module_key: str, query: str, k: int = 2) -> list[dict]:
     return out
 
 
-def _global_hits_to_cards(question: str, max_cards: int) -> list[DynamicCard]:
+def _global_hits_to_cards(question: str, max_cards: int, language: str = "zh-CN") -> list[DynamicCard]:
     hits = qa_best_matches(question, k=max(1, int(max_cards or 1)), cutoff=0.72)
     cards: list[DynamicCard] = []
     for h in hits:
@@ -598,7 +860,7 @@ def _global_hits_to_cards(question: str, max_cards: int) -> list[DynamicCard]:
         icon = "book"
         if any(k in text for k in ["简历", "resume", "面试", "interview", "投递", "offer", "实习"]):
             icon = "briefcase"
-        elif any(k in text for k in ["活动", "社团", "志愿", "讲座", "比赛", "校园"]):
+        elif any(k in text for k in ["活动", "社团", "志愿", "讲座", "比赛", "校园", "迎新", "报到", "注册"]):
             icon = "calendar"
         elif any(k in text for k in ["宿舍", "报修", "饮食", "吃饭", "医疗", "emergency", "生活"]):
             icon = "home"
@@ -609,8 +871,21 @@ def _global_hits_to_cards(question: str, max_cards: int) -> list[DynamicCard]:
         # desc: first key info line
         lines = [ln.strip() for ln in a.splitlines() if ln.strip()]
         desc = (lines[0] if lines else "")[:80].rstrip() + ("…" if len(lines[0]) > 80 else "") if lines else ""
-        cards.append(DynamicCard(title=q, desc=desc, icon=icon, action=q, details=_append_link_briefs(a)))
-    return cards[: max(0, int(max_cards or 0))]
+        cards.append(DynamicCard(title=q, desc=desc, icon=icon, action=q, details=_append_link_briefs(a, language=language)))
+    cards = cards[: max(0, int(max_cards or 0))]
+    if _normalize_language(language) == "en-US" and cards:
+        normalized = _enforce_english_list(
+            [{"title": c.title, "desc": c.desc, "icon": c.icon} for c in cards],
+            context_key="global",
+        )
+        for i, c in enumerate(cards):
+            if i >= len(normalized):
+                break
+            row = normalized[i] if isinstance(normalized[i], dict) else {}
+            c.title = str(row.get("title", c.title)).strip() or c.title
+            c.desc = str(row.get("desc", c.desc)).strip() or c.desc
+            c.icon = str(row.get("icon", c.icon)).strip() or c.icon
+    return cards
 
 
 def _best_module_qa_match(question: str, cutoff: float = 0.70) -> Optional[dict]:
@@ -622,7 +897,7 @@ def _best_module_qa_match(question: str, cutoff: float = 0.70) -> Optional[dict]
     if not qn:
         return None
     # normalize: drop school name tokens so "新生报到流程是什么" can match
-    qn_norm = re.sub(r"(西交利物浦|西浦|XJTLU|xjtlu)", "", qn, flags=re.IGNORECASE).strip()
+    qn_norm = re.sub(r"(西交利物浦|\u897f\u6d66|XJTLU|xjtlu)", "", qn, flags=re.IGNORECASE).strip()
     if not qn_norm:
         qn_norm = qn
 
@@ -671,7 +946,7 @@ def _best_module_qa_match(question: str, cutoff: float = 0.70) -> Optional[dict]
             continue
         # difflib ratio search
         # normalize candidates similarly
-        qs_norm = [re.sub(r"(西交利物浦|西浦|XJTLU|xjtlu)", "", x, flags=re.IGNORECASE).strip() for x in qs]
+        qs_norm = [re.sub(r"(西交利物浦|\u897f\u6d66|XJTLU|xjtlu)", "", x, flags=re.IGNORECASE).strip() for x in qs]
         candidates = difflib.get_close_matches(qn_norm, qs_norm, n=1, cutoff=cutoff)
         if not candidates:
             continue
@@ -783,7 +1058,7 @@ async def chat(req: ChatRequest):
             _qa_terminal_log("QA MISS (chat) global_refs=0")
 
         # 2) 统一走模型，由模型结合 QA 参考与提问来组织回答
-        system_prompt = SYSTEM_PROMPT
+        system_prompt = SYSTEM_PROMPT + _language_instruction(req.language)
         if global_refs:
             system_prompt += (
                 "\n\n下面是与用户问题相关的多条内部参考信息。请你综合这些信息回答：\n"
@@ -813,6 +1088,7 @@ async def chat(req: ChatRequest):
             reply = "\n".join(cleaned_lines)
 
         reply = _strip_emojis_and_symbols(reply)
+        reply = _ensure_entry_link_if_needed(reply, language=req.language, user_question=req.message)
 
         return ChatResponse(reply=reply)
     except Exception as e:
@@ -866,7 +1142,7 @@ async def chat_stream(req: ChatRequest):
                 logger.info("QA MISS (chat_stream) global_refs=0")
                 _qa_terminal_log("QA MISS (chat_stream) global_refs=0")
 
-            system_prompt = SYSTEM_PROMPT
+            system_prompt = SYSTEM_PROMPT + _language_instruction(req.language)
             if module_hit and module_hit.get("moduleKey"):
                 # 先把 meta 发给前端：用于自动跳转右侧栏（不再直达详情卡片）
                 yield f"data: {json.dumps({'meta': {'moduleKey': module_hit.get('moduleKey'), 'pageKey': module_hit.get('pageKey')}}, ensure_ascii=False)}\n\n"
@@ -957,11 +1233,18 @@ async def chat_stream(req: ChatRequest):
                 result = model.invoke(messages)
                 reply = result.content if hasattr(result, "content") else str(result)
                 reply = _strip_emojis_and_symbols(reply)
+                reply = _ensure_entry_link_if_needed(reply, language=req.language, user_question=req.message)
                 for ch in reply:
                     produced_any = True
                     accumulated += ch
                     yield f"data: {json.dumps({'delta': ch}, ensure_ascii=False)}\n\n"
                     await asyncio.sleep(0.008)
+
+            # Safety-net: if streaming produced text but no URL appeared,
+            # append the fallback entry link based on trigger keywords.
+            extra_delta = _fallback_entry_delta_if_needed(accumulated)
+            if extra_delta:
+                yield f"data: {json.dumps({'delta': extra_delta}, ensure_ascii=False)}\n\n"
 
             yield "data: [DONE]\n\n"
         except Exception as e:
@@ -984,11 +1267,18 @@ async def session_title(req: TitleRequest):
     基于用户的“第一句话”生成一个会话标题（用于左侧历史列表）。
     """
     try:
-        title_prompt = (
-            "你是一个会话标题生成器。"
-            "根据用户的第一句话，用不超过 16 个中文字符生成一个简洁标题。"
-            "只输出标题文本本身，不要输出任何额外解释、编号或符号（不要加引号、不要加星号）。"
-        )
+        if _normalize_language(req.language) == "en-US":
+            title_prompt = (
+                "You are a conversation title generator. "
+                "Generate a concise English title from the user's first message, no more than 6 words. "
+                "Output only the title text, with no explanation, numbering, quotes, or asterisks."
+            )
+        else:
+            title_prompt = (
+                "你是一个会话标题生成器。"
+                "根据用户的第一句话，用不超过 16 个中文字符生成一个简洁标题。"
+                "只输出标题文本本身，不要输出任何额外解释、编号或符号（不要加引号、不要加星号）。"
+            )
         messages = [
             SystemMessage(content=title_prompt),
             HumanMessage(content=req.message),
@@ -1003,15 +1293,19 @@ async def session_title(req: TitleRequest):
         raw = raw.splitlines()[0].strip() if raw else raw
         if not raw:
             raise ValueError("empty title")
-        if len(raw) > 16:
+        if _normalize_language(req.language) == "en-US" and len(raw.split()) > 6:
+            raw = " ".join(raw.split()[:6]).rstrip()
+        elif len(raw) > 16:
             raw = raw[:16].rstrip()
         return TitleResponse(title=raw)
     except Exception:
         # 兜底：直接截断用户第一句话
         t = (req.message or "").strip()
         if not t:
-            t = "新对话"
-        if len(t) > 16:
+            t = "New chat" if _normalize_language(req.language) == "en-US" else "新对话"
+        if _normalize_language(req.language) == "en-US" and len(t.split()) > 6:
+            t = " ".join(t.split()[:6]).rstrip()
+        elif len(t) > 16:
             t = t[:16].rstrip() + "…"
         return TitleResponse(title=t)
 
@@ -1045,7 +1339,7 @@ async def module_qa_scan(req: ModuleScanRequest):
     query_text = (req.queryText or "").strip()
 
     # global hits from the overall QA table (used to pin top results)
-    global_hits = _global_hits_to_cards(query_text, max_cards=max_cards) if query_text else []
+    global_hits = _global_hits_to_cards(query_text, max_cards=max_cards, language=req.language) if query_text else []
     if query_text:
         if global_hits:
             logger.info(
@@ -1064,7 +1358,12 @@ async def module_qa_scan(req: ModuleScanRequest):
 
     module_path = _resolve_qa_file_by_key(module_key)
     module_pairs = _load_qa_from_path(module_path) if module_path else []
-    module_cards = _qa_pairs_to_cards(module_pairs, max_cards=max_cards)
+    module_cards = _qa_pairs_to_cards(
+        module_pairs,
+        max_cards=max_cards,
+        language=req.language,
+        context_key=module_key,
+    )
     if query_text:
         module_cards = _score_cards_for_query(module_cards, query_text)
         if module_cards:
@@ -1086,7 +1385,12 @@ async def module_qa_scan(req: ModuleScanRequest):
             continue
         spath = _resolve_qa_file_by_key(skey)
         spairs = _load_qa_from_path(spath) if spath else []
-        cards = _qa_pairs_to_cards(spairs, max_cards=max_cards)
+        cards = _qa_pairs_to_cards(
+            spairs,
+            max_cards=max_cards,
+            language=req.language,
+            context_key=skey,
+        )
         submodules[skey] = _score_cards_for_query(cards, query_text) if query_text else cards
 
     return ModuleScanResponse(moduleKey=module_key, cards=module_cards, submodules=submodules, globalHits=global_hits)
@@ -1097,6 +1401,7 @@ class RewriteCardRequest(BaseModel):
     q: str
     a: str
     icon: Optional[str] = None
+    language: str = "zh-CN"
 
 
 class RewriteCardResponse(BaseModel):
@@ -1120,21 +1425,38 @@ async def rewrite_dynamic_card(req: RewriteCardRequest):
         raise HTTPException(status_code=400, detail="q and a required")
 
     try:
-        prompt = (
-            "你是校园生活助手的“推荐内容改写器”。请把 QA 命中改写成适合 UI 展示的内容。\n"
-            "要求：礼貌但简洁，全部用陈述句。\n"
-            "强约束：\n"
-            "- 不要复制 q 原句；不要出现“问/答/Q/A/？”；不要输出方括号列表原样。\n"
-            "- title：陈述句标题，必须包含明确主语（例如“学校/新生/宿舍/校园卡/海外暑研申请人”等），尽量主谓宾明确、信息完整（不限制字数，但要简洁）。\n"
-            "- desc：1 句，具体描述。\n"
-            "- details：4~8 条要点。\n"
-            "  - 如果是流程/步骤类，请按顺序输出，每条都能独立执行，并体现编号顺序。\n"
-            "  - 每条尽量具体（材料/步骤/截止/入口/注意事项）。\n"
-            "- 只输出严格 JSON：{\"title\":\"...\",\"desc\":\"...\",\"details\":[\"...\",\"...\"]}\n"
-        )
+        if _normalize_language(req.language) == "en-US":
+            prompt = (
+                "You are a campus-life assistant content rewriter. Rewrite the QA hit for UI display.\n"
+                "Requirements: polite, concise, declarative English.\n"
+                "Hard rules:\n"
+                "- Do not copy the q text; do not output Q/A labels or raw bracket lists.\n"
+                "- Translate and adapt any Chinese source text into English.\n"
+                "- title: a declarative title with a clear subject, concise but complete.\n"
+                "- desc: one specific sentence.\n"
+                "- details: 4 to 8 actionable bullet points. If it is a process, keep the order clear.\n"
+                "- Output strict JSON only: {\"title\":\"...\",\"desc\":\"...\",\"details\":[\"...\",\"...\"]}\n"
+            )
+        else:
+            prompt = (
+                "你是校园生活助手的“推荐内容改写器”。请把 QA 命中改写成适合 UI 展示的内容。\n"
+                "要求：礼貌但简洁，全部用陈述句。\n"
+                "强约束：\n"
+                "- 不要复制 q 原句；不要出现“问/答/Q/A/？”；不要输出方括号列表原样。\n"
+                "- title：陈述句标题，必须包含明确主语（例如“学校/新生/宿舍/校园卡/海外暑研申请人”等），尽量主谓宾明确、信息完整（不限制字数，但要简洁）。\n"
+                "- desc：1 句，具体描述。\n"
+                "- details：4~8 条要点。\n"
+                "  - 如果是流程/步骤类，请按顺序输出，每条都能独立执行，并体现编号顺序。\n"
+                "  - 每条尽量具体（材料/步骤/截止/入口/注意事项）。\n"
+                "- 只输出严格 JSON：{\"title\":\"...\",\"desc\":\"...\",\"details\":[\"...\",\"...\"]}\n"
+            )
+        if _normalize_language(req.language) == "en-US":
+            human_content = f"contextKey: {context_key}\nq: {q}\na: {a}"
+        else:
+            human_content = f"场景key：{context_key}\nq：{q}\na：{a}"
         messages = [
             SystemMessage(content=prompt),
-            HumanMessage(content=f"场景key：{context_key}\nq：{q}\na：{a}"),
+            HumanMessage(content=human_content),
         ]
         result = model.invoke(messages)
         raw = result.content if hasattr(result, "content") else str(result)
@@ -1158,15 +1480,21 @@ async def rewrite_dynamic_card(req: RewriteCardRequest):
         if not details:
             details = a.strip()
 
+        if _normalize_language(req.language) == "en-US":
+            title, desc, details = _enforce_english_detail(title, desc, details, context_key=context_key)
+
         # Ensure links from original QA are preserved and briefly listed
-        details = _append_link_briefs(details)
+        details = _append_link_briefs(details, language=req.language)
 
         return RewriteCardResponse(title=title, desc=desc, details=details, icon=icon)
     except Exception:
         # fallback: keep deterministic content but remove question marks
         title = q.replace("？", "").replace("?", "").strip()
         desc = (a.splitlines()[0] if a else "").strip()
-        details = _append_link_briefs(a.strip())
+        details_src = a.strip()
+        if _normalize_language(req.language) == "en-US":
+            title, desc, details_src = _enforce_english_detail(title, desc, details_src, context_key=context_key)
+        details = _append_link_briefs(details_src, language=req.language)
         return RewriteCardResponse(title=title, desc=desc, details=details, icon=icon)
 
 
@@ -1179,6 +1507,7 @@ class RewriteListItem(BaseModel):
 class RewriteListRequest(BaseModel):
     contextKey: str
     items: list[RewriteListItem]
+    language: str = "zh-CN"
 
 
 class RewriteListItemOut(BaseModel):
@@ -1204,36 +1533,37 @@ async def rewrite_dynamic_list(req: RewriteListRequest):
     # Cap list size for latency/cost control
     items = items[:12]
 
-    def _heuristic_title(q_raw: str, a_raw: str) -> str:
+    def _heuristic_title(q_raw: str, a_raw: str, language: str = "zh-CN") -> str:
         q0 = (q_raw or "").strip()
         a0 = (a_raw or "").strip()
         ql = q0.lower()
+        is_en = _normalize_language(language) == "en-US"
         # 字段型：时间/地点/入口/费用等
-        if re.search(r"(几号|什么时候|何时|时间|日期|几点|开学|报到)", q0):
-            if "报到" in q0:
-                return "新生报到时间"
-            if "开学" in q0:
-                return "学校开学时间"
-            return "相关时间信息"
-        if re.search(r"(截止|ddl)", q0, re.IGNORECASE):
-            return "申请截止时间"
-        if re.search(r"(地点|地址|在哪|哪里|位置)", q0):
-            return "相关办理地点"
-        if re.search(r"(费用|多少钱|价格|收费)", q0):
-            return "相关费用信息"
-        if re.search(r"(电话|联系方式|邮箱|联系)", q0):
-            return "相关联系方式"
-        if re.search(r"(入口|链接|网站|官网|平台|系统)", q0):
-            return "相关办理入口"
+        if re.search(r"(几号|什么时候|何时|时间|日期|几点|开学|报到|when|date|time|start|begin|semester|enroll|registration)", q0, re.IGNORECASE):
+            if ("报到" in q0) or re.search(r"(registration|enroll|check[\-\s]?in)", q0, re.IGNORECASE):
+                return "New Student Registration Time" if is_en else "新生报到时间"
+            if ("开学" in q0) or re.search(r"(semester|term|class starts?|start date)", q0, re.IGNORECASE):
+                return "Semester Start Time" if is_en else "学校开学时间"
+            return "Key Timeline Information" if is_en else "相关时间信息"
+        if re.search(r"(截止|ddl|deadline|due)", q0, re.IGNORECASE):
+            return "Application Deadline" if is_en else "申请截止时间"
+        if re.search(r"(地点|地址|在哪|哪里|位置|where|location|address|office)", q0, re.IGNORECASE):
+            return "Service Location" if is_en else "相关办理地点"
+        if re.search(r"(费用|多少钱|价格|收费|fee|cost|price|payment)", q0, re.IGNORECASE):
+            return "Fees and Costs" if is_en else "相关费用信息"
+        if re.search(r"(电话|联系方式|邮箱|联系|contact|email|phone)", q0, re.IGNORECASE):
+            return "Contact Information" if is_en else "相关联系方式"
+        if re.search(r"(入口|链接|网站|官网|平台|系统|link|portal|website|site|system)", q0, re.IGNORECASE):
+            return "Official Access Link" if is_en else "相关办理入口"
         # 主题型：提炼关键词
         if "暑研" in q0 or "暑期科研" in q0 or "summer research" in ql:
-            return "海外暑研申请要点"
+            return "Overseas Summer Research Application" if is_en else "海外暑研申请要点"
         if "校园卡" in q0:
-            return "校园卡办理与补办要点"
+            return "Campus Card Application and Replacement" if is_en else "校园卡办理与补办要点"
         if "宿舍" in q0:
-            return "宿舍办理要点"
+            return "Dormitory Service Essentials" if is_en else "宿舍办理要点"
         if "选课" in q0:
-            return "选课操作要点"
+            return "Course Registration Essentials" if is_en else "选课操作要点"
         # 兜底：取答案首行前若干字
         first = (a0.splitlines()[0] if a0 else "").strip()
         first = re.sub(r"^[\-\*\d\.\)\s]+", "", first)
@@ -1242,28 +1572,47 @@ async def rewrite_dynamic_list(req: RewriteListRequest):
             if len(first) > 40:
                 return first[:40].rstrip("，。；;") + "…"
             return first.rstrip("，。；;")
-        return "推荐内容"
+        return "Recommended Information" if is_en else "推荐内容"
 
     try:
-        prompt = (
-            "你是校园生活助手的“推荐列表文案改写器”。\n"
-            "输入是若干条 QA 命中（q 问句 + a 答案）。请把每条改写成适合卡片列表展示的文案。\n"
-            "总体风格：礼貌但极简、信息密度高、全部用陈述句。\n"
-            "强约束：\n"
-            "- 严禁疑问句：不要出现“？/?/吗/呢/是否/能否/可以吗/怎么/如何/请问”。\n"
-            "- 不要把 q 原句直接改写/同义复述；不要出现“问/答/Q/A”。\n"
-            "- title：必须包含明确主语（例如“学校/新生/宿舍/校园卡/海外暑研申请人”等）。\n"
-            "- title：优先输出“事实字段型标题”，直接点题（例：学校开学时间、新生报到时间、宿舍办理地点、校园卡补办入口、海外暑研申请材料）。\n"
-            "  - 允许使用“指南/流程/清单”，但必须是“提炼后的陈述句标题”，不能是“把问句去掉问号再加后缀”。\n"
-            "- desc：1 句摘要，尽量包含最关键的 1~2 个信息（时间/地点/入口/材料/截止/费用等）。\n"
-            "- 只输出严格 JSON 数组，长度必须与输入一致：[{\"title\":\"...\",\"desc\":\"...\"}, ...]\n"
-            "- 不要输出任何额外文字。"
-        )
+        if _normalize_language(req.language) == "en-US":
+            prompt = (
+                "You are a campus-life assistant card-list copy rewriter.\n"
+                "Input contains QA hits. Rewrite each item for compact card-list display.\n"
+                "Style: polite, very concise, high information density, declarative English.\n"
+                "Hard rules:\n"
+                "- Translate and adapt any Chinese source text into English.\n"
+                "- Do not copy the question text; do not output Q/A labels.\n"
+                "- title: clear subject, factual and specific.\n"
+                "- desc: one-sentence summary with the most important time/place/link/material/deadline/cost when available.\n"
+                "- Output a strict JSON array with the same length as input: [{\"title\":\"...\",\"desc\":\"...\"}, ...]\n"
+                "- Do not output extra text."
+            )
+        else:
+            prompt = (
+                "你是校园生活助手的“推荐列表文案改写器”。\n"
+                "输入是若干条 QA 命中（q 问句 + a 答案）。请把每条改写成适合卡片列表展示的文案。\n"
+                "总体风格：礼貌但极简、信息密度高、全部用陈述句。\n"
+                "强约束：\n"
+                "- 严禁疑问句：不要出现“？/?/吗/呢/是否/能否/可以吗/怎么/如何/请问”。\n"
+                "- 不要把 q 原句直接改写/同义复述；不要出现“问/答/Q/A”。\n"
+                "- title：必须包含明确主语（例如“学校/新生/宿舍/校园卡/海外暑研申请人”等）。\n"
+                "- title：优先输出“事实字段型标题”，直接点题（例：学校开学时间、新生报到时间、宿舍办理地点、校园卡补办入口、海外暑研申请材料）。\n"
+                "  - 允许使用“指南/流程/清单”，但必须是“提炼后的陈述句标题”，不能是“把问句去掉问号再加后缀”。\n"
+                "- desc：1 句摘要，尽量包含最关键的 1~2 个信息（时间/地点/入口/材料/截止/费用等）。\n"
+                "- 只输出严格 JSON 数组，长度必须与输入一致：[{\"title\":\"...\",\"desc\":\"...\"}, ...]\n"
+                "- 不要输出任何额外文字。"
+            )
         payload = [{"q": (it.q or "").strip(), "a": (it.a or "").strip()} for it in items]
+        human_payload = (
+            f"contextKey: {context_key}\ninput: {json.dumps(payload, ensure_ascii=False)}"
+            if _normalize_language(req.language) == "en-US"
+            else f"场景key：{context_key}\n输入：{json.dumps(payload, ensure_ascii=False)}"
+        )
         result = model.invoke(
             [
                 SystemMessage(content=prompt),
-                HumanMessage(content=f"场景key：{context_key}\n输入：{json.dumps(payload, ensure_ascii=False)}"),
+                HumanMessage(content=human_payload),
             ]
         )
         raw = result.content if hasattr(result, "content") else str(result)
@@ -1285,7 +1634,7 @@ async def rewrite_dynamic_list(req: RewriteListRequest):
             q_raw = (it.q or "").strip()
             a_raw = (it.a or "").strip()
             if not title:
-                title = _heuristic_title(q_raw, a_raw)
+                title = _heuristic_title(q_raw, a_raw, req.language)
             if not desc:
                 desc = ((a_raw.splitlines()[0] if a_raw else "")).strip()
             title = title.replace("？", "").replace("?", "").strip()
@@ -1294,21 +1643,40 @@ async def rewrite_dynamic_list(req: RewriteListRequest):
             q_slim = re.sub(r"\s+", "", q_raw.replace("？", "").replace("?", ""))
             t_slim = re.sub(r"\s+", "", title)
             if q_slim and (t_slim == q_slim or q_slim in t_slim or t_slim in q_slim):
-                title = _heuristic_title(q_raw, a_raw)
+                title = _heuristic_title(q_raw, a_raw, req.language)
 
             # 对字段型问法，避免结尾乱加“指南/攻略/教程”（流程可保留）
-            if re.search(r"(几号|什么时候|何时|时间|日期|几点|开学|报到|截止|地点|地址|在哪|电话|联系方式|费用|多少钱)", q_raw):
-                title = re.sub(r"(指南|攻略|教程)$", "", title).strip()
-                if re.search(r"(开学)", q_raw) and ("时间" not in title):
-                    title = "学校开学时间"
-                elif re.search(r"(报到)", q_raw) and ("时间" not in title):
-                    title = "新生报到时间"
-                elif re.search(r"(截止)", q_raw) and ("截止" not in title):
-                    title = "申请截止时间"
-                elif re.search(r"(地点|地址|在哪)", q_raw) and ("地点" not in title and "地址" not in title):
-                    title = "相关办理地点"
+            is_en = _normalize_language(req.language) == "en-US"
+            if re.search(
+                r"(几号|什么时候|何时|时间|日期|几点|开学|报到|截止|地点|地址|在哪|电话|联系方式|费用|多少钱|when|date|time|deadline|where|location|contact|fee|cost)",
+                q_raw,
+                re.IGNORECASE,
+            ):
+                title = re.sub(r"(指南|攻略|教程|guide|tips?|tutorial)$", "", title, flags=re.IGNORECASE).strip()
+                if re.search(r"(开学|semester|term|class starts?|start date)", q_raw, re.IGNORECASE) and (("时间" not in title) if not is_en else ("time" not in title.lower() and "date" not in title.lower())):
+                    title = "Semester Start Time" if is_en else "学校开学时间"
+                elif re.search(r"(报到|registration|enroll|check[\-\s]?in)", q_raw, re.IGNORECASE) and (("时间" not in title) if not is_en else ("time" not in title.lower() and "date" not in title.lower())):
+                    title = "New Student Registration Time" if is_en else "新生报到时间"
+                elif re.search(r"(截止|ddl|deadline|due)", q_raw, re.IGNORECASE) and (("截止" not in title) if not is_en else ("deadline" not in title.lower() and "due" not in title.lower())):
+                    title = "Application Deadline" if is_en else "申请截止时间"
+                elif re.search(r"(地点|地址|在哪|where|location|address)", q_raw, re.IGNORECASE):
+                    if (("地点" not in title and "地址" not in title) if not is_en else ("location" not in title.lower() and "address" not in title.lower())):
+                        title = "Service Location" if is_en else "相关办理地点"
             out.append(RewriteListItemOut(title=title, desc=desc, icon=base_icon))
 
+        if _normalize_language(req.language) == "en-US":
+            normalized = _enforce_english_list(
+                [{"title": x.title, "desc": x.desc, "icon": x.icon} for x in out],
+                context_key=context_key,
+            )
+            out = [
+                RewriteListItemOut(
+                    title=str((it or {}).get("title", "")).strip() or out[i].title,
+                    desc=str((it or {}).get("desc", "")).strip() or out[i].desc,
+                    icon=str((it or {}).get("icon", out[i].icon)).strip() or out[i].icon,
+                )
+                for i, it in enumerate(normalized[: len(out)])
+            ] + out[len(normalized) :]
         return RewriteListResponse(items=out)
 
     except Exception:
@@ -1317,14 +1685,28 @@ async def rewrite_dynamic_list(req: RewriteListRequest):
             base_icon = (it.icon or "book").strip() or "book"
             q_raw = (it.q or "").strip()
             a_raw = (it.a or "").strip()
-            title = _heuristic_title(q_raw, a_raw)
+            title = _heuristic_title(q_raw, a_raw, req.language)
             desc = ((a_raw.splitlines()[0] if a_raw else "")).strip()
             out.append(RewriteListItemOut(title=title, desc=desc, icon=base_icon))
+        if _normalize_language(req.language) == "en-US":
+            normalized = _enforce_english_list(
+                [{"title": x.title, "desc": x.desc, "icon": x.icon} for x in out],
+                context_key=context_key,
+            )
+            out = [
+                RewriteListItemOut(
+                    title=str((it or {}).get("title", "")).strip() or out[i].title,
+                    desc=str((it or {}).get("desc", "")).strip() or out[i].desc,
+                    icon=str((it or {}).get("icon", out[i].icon)).strip() or out[i].icon,
+                )
+                for i, it in enumerate(normalized[: len(out)])
+            ] + out[len(normalized) :]
         return RewriteListResponse(items=out)
 
 
 class RouteBoardRequest(BaseModel):
     text: str
+    language: str = "zh-CN"
 
 
 class RouteBoardResponse(BaseModel):
