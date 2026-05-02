@@ -1,3 +1,7 @@
+import apiCommon from "./api_common.js";
+
+const { buildModelMessages } = apiCommon;
+
 const encoder = new TextEncoder();
 
 function encodeSse(data) {
@@ -48,29 +52,27 @@ function getPreferredModelConfig() {
   return null;
 }
 
-function buildPrompt() {
-  return [
-    "你是“西浦生活助手”，一名面向西交利物浦大学（XJTLU）学生的智能助手，主要帮助新生和在校生解决与西浦学习、生活相关的问题。",
-    "严禁使用表情符号、颜文字、特殊符号，不要输出任何 emoji。",
-    "回答要求：使用自然、简洁的简体中文，优先从西浦学生视角给出具体、可执行的建议。",
-    "对不确定的校内规定或可能变动的信息，要提醒“具体以学校官方最新通知为准”。",
-    "使用用户的同种语言来回答。"
-  ].join("\n");
-}
-
-async function streamFallback(controller, message) {
-  const reply = [
-    `已收到你的问题：${message}`,
-    "",
-    "当前未配置或暂时无法使用云端模型，因此返回本地兜底回复。具体以学校官方最新通知为准。"
-  ].join("\n");
+async function streamFallback(controller, message, language = "zh-CN") {
+  const en = String(language || "").toLowerCase().startsWith("en");
+  const reply = en
+    ? [
+      `I received your question: ${message}`,
+      "",
+      "The cloud model is currently unavailable, so I can only return this local fallback message.",
+      "For university rules or time-sensitive details, please follow the latest official XJTLU notice."
+    ].join("\n")
+    : [
+      `已收到你的问题：${message}`,
+      "",
+      "当前未配置或暂时无法使用云端模型，因此返回本地兜底回复。具体以学校官方最新通知为准。"
+    ].join("\n");
   for (const ch of Array.from(reply)) {
     controller.enqueue(encodeSse({ delta: ch }));
     await sleep(12);
   }
 }
 
-async function streamModel(controller, message, config) {
+async function streamModel(controller, message, config, language, context) {
   const resp = await fetch(`${config.baseUrl.replace(/\/+$/g, "")}/chat/completions`, {
     method: "POST",
     headers: {
@@ -79,10 +81,7 @@ async function streamModel(controller, message, config) {
     },
     body: JSON.stringify({
       model: config.model,
-      messages: [
-        { role: "system", content: buildPrompt() },
-        { role: "user", content: message }
-      ],
+      messages: buildModelMessages({ message, language, context }),
       temperature: 0.4,
       stream: true
     })
@@ -136,9 +135,13 @@ export default async function handler(req) {
   }
 
   let message = "";
+  let language = "zh-CN";
+  let context = [];
   try {
     const body = await req.json();
     message = String(body.message || "").trim();
+    language = String(body.language || "zh-CN");
+    context = Array.isArray(body.context) ? body.context : [];
   } catch (e) {
     message = "";
   }
@@ -154,11 +157,11 @@ export default async function handler(req) {
     async start(controller) {
       try {
         const config = getPreferredModelConfig();
-        if (config) await streamModel(controller, message, config);
-        else await streamFallback(controller, message);
+        if (config) await streamModel(controller, message, config, language, context);
+        else await streamFallback(controller, message, language);
       } catch (e) {
         try {
-          await streamFallback(controller, message);
+          await streamFallback(controller, message, language);
         } catch (fallbackError) {
           controller.enqueue(encodeSse({ error: fallbackError?.message || e?.message || "服务异常" }));
         }

@@ -26,6 +26,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/parse_schedule_command"
+  to = "/.netlify/functions/parse_schedule_command"
+  status = 200
+
+[[redirects]]
   from = "/api/route_board"
   to = "/.netlify/functions/route_board"
   status = 200

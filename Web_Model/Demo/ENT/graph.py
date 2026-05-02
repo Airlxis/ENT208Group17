@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from langchain_deepseek import ChatDeepSeek
 from langgraph.prebuilt import create_react_agent
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from pydantic import BaseModel
 
 # 加载环境变量
@@ -52,10 +52,27 @@ def _qa_terminal_log(msg: str) -> None:
 class ChatRequest(BaseModel):
     message: str
     language: str = "zh-CN"
+    context: list[dict] = []
 
 
 class ChatResponse(BaseModel):
     reply: str
+
+
+class ScheduleCommandParseRequest(BaseModel):
+    text: str
+    language: str = "zh-CN"
+    context: list[dict] = []
+    schedule: dict = {}
+
+
+class ScheduleCommandParseResponse(BaseModel):
+    handled: bool = False
+    action: Optional[str] = None
+    target: Optional[str] = None
+    matchName: str = ""
+    item: Optional[dict] = None
+    confidence: float = 0.0
 
 
 class TitleRequest(BaseModel):
@@ -329,11 +346,34 @@ def _enforce_english_detail(title: str, desc: str, details: str, context_key: st
 def _language_instruction(language: str | None) -> str:
     if _normalize_language(language) == "en-US":
         return (
-            "\n\nLanguage requirement: answer entirely in natural, concise English. "
+            "\n\nLanguage requirement: answer entirely in natural, clear English with enough detail to be useful. "
             "Translate and adapt any Chinese reference material into English. "
             "Do not include Chinese text unless the user explicitly asks for it."
         )
-    return "\n\n语言要求：全部使用自然、简洁的简体中文回答。"
+    return "\n\n语言要求：全部使用自然、清晰、信息足够的简体中文回答，不要为了简短而省略关键步骤。"
+
+
+def _context_messages(context: list[dict] | None, max_items: int = 3) -> list:
+    """
+    Convert the browser's lightweight recent-chat context into LangChain messages.
+    This is intentionally small: the current app is still mostly single-turn, but
+    the model gets the last few simple turns for references such as names.
+    """
+    out = []
+    items = context if isinstance(context, list) else []
+    for item in items[-max(0, int(max_items or 0)) :]:
+        if not isinstance(item, dict):
+            continue
+        role = str(item.get("role", "")).strip().lower()
+        text = str(item.get("text", "")).strip()
+        if not text:
+            continue
+        text = text[:600]
+        if role == "assistant":
+            out.append(AIMessage(content=text))
+        else:
+            out.append(HumanMessage(content=text))
+    return out
 
 
 class ModuleScanResponse(BaseModel):
@@ -352,13 +392,16 @@ FALLBACK_ENTRY_URL = "https://www.xjtlu.edu.cn/zh/it-services/e-bridge-intro"
 SYSTEM_PROMPT = (
     "你是“XJTLU生活助手”，一名面向西交利物浦大学（XJTLU）学生的智能助手，"
     "主要帮助新生和在校生解决与XJTLU学习、生活相关的问题。"
+    "简单上下文：用户通常是在本地网页里使用右侧“板块服务”和聊天框。"
+    "当用户提到个人日程、课程表、课表或日程修改时，语境是个人日程板块，不是校园活动板块。"
+    "回答要结合当前问题给出可执行的下一步，不要只给一句过度压缩的结论。\n"
     "严禁使用表情符号、颜文字、特殊符号（例如✅❌⭐️•等），不要输出任何 emoji。\n"
     "回答要求：\n"
-    "1）使用自然、简洁的简体中文，礼貌热情，不要写成公文或宣传稿；\n"
+    "1）使用自然、清晰、适度展开的简体中文，礼貌热情，不要写成公文或宣传稿；\n"
     "2）优先从XJTLU学生的视角给出具体、可执行的建议，例如时间规划、课程学习方法、校园资源使用、新生适应等；\n"
     "3）对不确定的校内规定或可能变动的信息，要提醒“具体以学校官方最新通知为准”；\n"
-    "4）可以适当鼓励和共情，但不要夸张，也不要频繁重复类似“很高兴为你服务”之类客套话。"
-    "5）使用用户的同种语言来回答。"
+    "4）可以适当鼓励和共情，但不要夸张，也不要频繁重复类似“很高兴为你服务”之类客套话；\n"
+    "5）使用用户的同种语言来回答。\n"
     "6）如果回答中涉及外部网站或线上订阅/线上资源/官方入口等需要访问的内容：\n"
     "- 请基于语义和办理意图来判断，不要仅凭是否出现某个关键词；\n"
     "- 如果你知道对应的具体网址：必须在回答中输出完整的 `https://...` 超链接，使用纯文本 URL 形式输出（不要使用 `[文字](URL)` 的 Markdown 链接写法）；\n"
@@ -987,6 +1030,256 @@ def _best_module_qa_match(question: str, cutoff: float = 0.70) -> Optional[dict]
 
     return best
 
+
+_SCHEDULE_DAY_MAP = {
+    "一": "mon",
+    "1": "mon",
+    "二": "tue",
+    "2": "tue",
+    "三": "wed",
+    "3": "wed",
+    "四": "thu",
+    "4": "thu",
+    "五": "fri",
+    "5": "fri",
+    "mon": "mon",
+    "monday": "mon",
+    "tue": "tue",
+    "tues": "tue",
+    "tuesday": "tue",
+    "wed": "wed",
+    "wednesday": "wed",
+    "thu": "thu",
+    "thur": "thu",
+    "thurs": "thu",
+    "thursday": "thu",
+    "fri": "fri",
+    "friday": "fri",
+}
+
+
+def _parse_schedule_day(text: str) -> tuple[str, bool]:
+    s = str(text or "")
+    zh = re.search(r"(?:周|星期|礼拜)\s*([一二三四五六日天1234567])", s)
+    if zh:
+        token = zh.group(1)
+        if token in ("六", "6", "日", "天", "7"):
+            return ("sat" if token in ("六", "6") else "sun", True)
+        return (_SCHEDULE_DAY_MAP.get(token, ""), False)
+    en = re.search(r"\b(mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b", s, re.I)
+    if en:
+        token = en.group(1).lower()
+        if token.startswith("sat"):
+            return ("sat", True)
+        if token.startswith("sun"):
+            return ("sun", True)
+        if token.startswith("mon"):
+            return ("mon", False)
+        if token.startswith("tue"):
+            return ("tue", False)
+        if token.startswith("wed"):
+            return ("wed", False)
+        if token.startswith("thu"):
+            return ("thu", False)
+        if token.startswith("fri"):
+            return ("fri", False)
+    return ("", False)
+
+
+def _parse_schedule_hm(raw: str) -> str:
+    t = str(raw or "").strip().replace("：", ":").replace(".", ":").replace(" ", "")
+    if not t:
+        return ""
+    m = re.match(r"^(\d{1,2})点(?:(\d{1,2})分?)?$", t)
+    if not m:
+        m = re.match(r"^(\d{1,2})(?::(\d{1,2}))?$", t)
+    if not m:
+        return ""
+    h = int(m.group(1))
+    minute = int(m.group(2) or 0)
+    if h < 0 or h > 23 or minute < 0 or minute > 59:
+        return ""
+    return f"{h:02d}:{minute:02d}"
+
+
+def _parse_schedule_time_range(text: str) -> tuple[str, str, str]:
+    s = str(text or "")
+    m = re.search(
+        r"(\d{1,2}(?:[:：.]\d{1,2}|点(?:\d{1,2})?(?:分)?)?)\s*(?:到|至|~|～|-|—|–|to)\s*(\d{1,2}(?:[:：.]\d{1,2}|点(?:\d{1,2})?(?:分)?)?)",
+        s,
+        re.I,
+    )
+    if not m:
+        return ("", "", "")
+    return (_parse_schedule_hm(m.group(1)), _parse_schedule_hm(m.group(2)), m.group(0))
+
+
+def _detect_schedule_action(text: str) -> str:
+    s = str(text or "")
+    if re.search(r"(删除|删掉|移除|取消|remove|delete|cancel)", s, re.I):
+        return "delete"
+    if re.search(r"(修改|调整|改到|改成|改为|变更|更新|reschedule|change|move|update)", s, re.I):
+        return "update"
+    if re.search(r"(加|新增|添加|安排|创建|加入|add|create|schedule|安排到)", s, re.I):
+        return "add"
+    return ""
+
+
+def _detect_schedule_target(text: str) -> str:
+    s = str(text or "")
+    if re.search(r"(课程表|课表|课程|上课|lecture|class|course|timetable|老师|教师|教室|room|teacher|lec|lab|prac)", s, re.I):
+        return "course"
+    if re.search(r"(活动|行程|事项|会议|event|activity|meeting|appointment)", s, re.I):
+        return "activity"
+    return ""
+
+
+def _is_personal_schedule_intent(text: str) -> bool:
+    s = str(text or "")
+    action = _detect_schedule_action(s)
+    target = _detect_schedule_target(s)
+    day, _unsupported = _parse_schedule_day(s)
+    start, _end, _raw = _parse_schedule_time_range(s)
+    if re.search(
+        r"(个人日程|我的日程|日程表|日程修改|修改日程|课程表|课表|个人课表|我的课表|personal schedule|my schedule|course schedule|class schedule|timetable)",
+        s,
+        re.I,
+    ):
+        return True
+    return bool(action and target and (day or start or re.search(r"(日程|schedule|calendar)", s, re.I)))
+
+
+def _context_has_schedule_reference(context: list[dict] | None) -> bool:
+    items = context if isinstance(context, list) else []
+    text = "\n".join(str(x.get("text", "")) for x in items if isinstance(x, dict))
+    return bool(
+        re.search(
+            r"(已添加|已修改|Added|Updated).{0,20}(课程|活动|class|activity)|个人日程|课程表|课表|Personal Schedule",
+            text,
+            re.I,
+        )
+    )
+
+
+def _is_contextual_schedule_intent(text: str, context: list[dict] | None) -> bool:
+    s = str(text or "").strip()
+    if not s or not _context_has_schedule_reference(context):
+        return False
+    return bool(re.search(r"(删除|删掉|移除|取消|修改|调整|改了|删了|delete|remove|cancel|change|update)", s, re.I))
+
+
+def _clean_schedule_noise(text: str, kind: str = "activity", raw_time: str = "") -> str:
+    t = str(text or "")
+    if raw_time:
+        t = t.replace(raw_time, " ")
+    t = re.sub(r"(?:周|星期|礼拜)\s*[一二三四五六日天1234567]", " ", t)
+    t = re.sub(r"\b(mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b", " ", t, flags=re.I)
+    t = re.sub(r"(?:地点|教室|位置|location|room)\s*[:：]?\s*[A-Za-z0-9_\- ]{2,40}", " ", t, flags=re.I)
+    t = re.sub(r"(?:老师|教师|授课人|teacher|lecturer)\s*[:：]?\s*[^，,。；;\n]{1,40}", " ", t, flags=re.I)
+    t = re.sub(r"(?:简介|介绍|说明|备注|intro|description)\s*[:：].*$", " ", t, flags=re.I)
+    t = re.sub(
+        r"(?:个人日程|我的日程|日程表|日程|行程|课程表|课表|个人课表|我的课表|calendar|personal schedule|my schedule|course schedule|class schedule|timetable)",
+        " ",
+        t,
+        flags=re.I,
+    )
+    t = re.sub(r"(?:帮我|请|一下|一个|一条|一门|一节|个|门|节)", " ", t, flags=re.I)
+    t = re.sub(r"(?:加|新增|添加|安排|创建|加入|删除|删掉|移除|取消|修改|调整|改到|改成|改为|变更|更新|add|create|remove|delete|cancel|reschedule|change|move|update|schedule)", " ", t, flags=re.I)
+    if kind == "course":
+        t = re.sub(r"(?:课程|上课|lecture|class|course|lec|lab|prac)", " ", t, flags=re.I)
+    else:
+        t = re.sub(r"(?:活动|事项|会议|event|activity|meeting|appointment)", " ", t, flags=re.I)
+    return re.sub(r"\s+", " ", re.sub(r"[，,。；;]+", " ", t)).strip()
+
+
+def _fallback_parse_schedule_command(text: str) -> ScheduleCommandParseResponse:
+    s = str(text or "").strip()
+    if not s or not _is_personal_schedule_intent(s):
+        return ScheduleCommandParseResponse(handled=False, confidence=0.0)
+    action = _detect_schedule_action(s) or "open"
+    target = _detect_schedule_target(s) or "activity"
+    day, _unsupported = _parse_schedule_day(s)
+    start, end, raw_time = _parse_schedule_time_range(s)
+    item: dict = {}
+    if day:
+        item["day"] = day
+    if start:
+        item["start"] = start
+    if end:
+        item["end"] = end
+    if target == "course":
+        loc = re.search(r"(?:地点|教室|位置|location|room)\s*[:：]?\s*([A-Za-z0-9_\- ]{2,40})", s, re.I)
+        tea = re.search(r"(?:老师|教师|授课人|teacher|lecturer)\s*[:：]?\s*([^，,。；;\n]{1,40})", s, re.I)
+        if loc:
+            item["location"] = loc.group(1).strip()
+        if tea:
+            item["teacher"] = tea.group(1).strip()
+    else:
+        intro = re.search(r"(?:简介|介绍|说明|备注|intro|description)\s*[:：]\s*([^\n]+)", s, re.I)
+        if intro:
+            item["intro"] = intro.group(1).strip()
+
+    name = ""
+    match_name = ""
+    if action == "add":
+        m = re.search(r"(?:加|新增|添加|安排|创建|加入|add|create|schedule)(?:个|一个|一条|一门|一节)?(?:课程|课|活动|事项|event|activity|class|course)?[:：\s]*([^\n，。,；;]+)", s, re.I)
+        name = _clean_schedule_noise(m.group(1), target, raw_time) if m else _clean_schedule_noise(s, target, raw_time)
+        if name:
+            item["name"] = name[:80]
+    elif action in ("update", "delete"):
+        m = re.search(r"(?:把|将)?\s*([^，。；;\n]{2,80}?)\s*(?:改到|改成|改为|调整到|调整为|变更为|更新为|删掉|删除|移除|取消|remove|delete|cancel|reschedule|change|move|update)", s, re.I)
+        if not m:
+            m = re.search(r"(?:修改|调整|更新|删除|删掉|移除|取消|remove|delete|cancel|change|update)\s*(?:课程|课表|课程表|活动|日程|event|course|class)?[:：\s]*([^，。；;\n]{2,80})", s, re.I)
+        if m:
+            match_name = _clean_schedule_noise(m.group(1), target, raw_time)
+    return ScheduleCommandParseResponse(
+        handled=True,
+        action=action,
+        target=target,
+        matchName=match_name,
+        item=item,
+        confidence=0.72 if action != "open" else 0.88,
+    )
+
+
+def _sanitize_schedule_command_payload(data: dict, fallback: ScheduleCommandParseResponse) -> ScheduleCommandParseResponse:
+    if not isinstance(data, dict):
+        return fallback
+    action = str(data.get("action") or "").strip().lower()
+    target = str(data.get("target") or "").strip().lower()
+    if action not in {"add", "update", "delete", "open", "none"}:
+        action = fallback.action or "open"
+    if target not in {"course", "activity"}:
+        target = fallback.target or "activity"
+    item = data.get("item") if isinstance(data.get("item"), dict) else {}
+    if item.get("day"):
+        day, _unsupported = _parse_schedule_day(str(item.get("day")))
+        if not day and str(item.get("day")).lower() in _SCHEDULE_DAY_MAP:
+            day = _SCHEDULE_DAY_MAP[str(item.get("day")).lower()]
+        item["day"] = day or str(item.get("day")).strip().lower()
+    if item.get("start"):
+        item["start"] = _parse_schedule_hm(str(item.get("start"))) or str(item.get("start")).strip()
+    if item.get("end"):
+        item["end"] = _parse_schedule_hm(str(item.get("end"))) or str(item.get("end")).strip()
+    if (not item.get("start") or not item.get("end")) and item.get("time"):
+        st, ed, _raw = _parse_schedule_time_range(str(item.get("time")))
+        if st:
+            item["start"] = st
+        if ed:
+            item["end"] = ed
+    try:
+        conf = float(data.get("confidence", fallback.confidence or 0.0) or 0.0)
+    except Exception:
+        conf = float(fallback.confidence or 0.0)
+    return ScheduleCommandParseResponse(
+        handled=bool(data.get("handled", fallback.handled)),
+        action=action,
+        target=target,
+        matchName=str(data.get("matchName") or data.get("match_name") or fallback.matchName or "").strip(),
+        item=item or fallback.item,
+        confidence=max(0.0, min(conf, 1.0)),
+    )
+
 # ✅ 为兼容现有 langgraph.json，保留一个最小的 graph 对象
 #    这里只是简单地把单轮对话包装成一个“图”，不再使用原来的复杂提示词和工具。
 def _simple_graph(inputs: dict) -> dict:
@@ -1070,6 +1363,7 @@ async def chat(req: ChatRequest):
 
         messages = [
             SystemMessage(content=system_prompt),
+            *_context_messages(req.context),
             HumanMessage(content=req.message),
         ]
         result = model.invoke(messages)
@@ -1123,7 +1417,9 @@ async def chat_stream(req: ChatRequest):
         try:
             # 关键词优先：demo 里“报到/迎新/开学/注册”等必须稳定跳到校园活动模块
             msg = (req.message or "").strip()
-            if any(k in msg for k in ["报到", "迎新", "开学", "注册", "新生报到", "新生注册"]):
+            if _is_personal_schedule_intent(msg):
+                module_hit = {"moduleKey": "schedule", "pageKey": None, "q": "", "a": "", "icon": "calendar", "score": 1.0}
+            elif any(k in msg for k in ["报到", "迎新", "开学", "注册", "新生报到", "新生注册"]):
                 module_hit = {"moduleKey": "campus", "pageKey": None, "q": "", "a": "", "icon": "calendar", "score": 1.0}
             else:
                 module_hit = _best_module_qa_match(req.message)
@@ -1166,7 +1462,7 @@ async def chat_stream(req: ChatRequest):
                 if refs:
                     system_prompt += (
                         "\n\n下面是与用户问题相关的多条内部参考信息。请你综合这些信息生成回答：\n"
-                        "- 用礼貌、简洁的陈述句回答\n"
+                        "- 用礼貌、清晰、适度展开的陈述句回答，不要过度简化\n"
                         "- 参考信息仅用于理解与核对事实，不要逐字复读参考原文；请用你自己的话同义改写/重组结构\n"
                         "- 如果参考信息已经足够回答，就以参考为主组织答案；如果参考信息不足，再结合你对校园常见流程/经验给出建议，并明确哪些是通用建议、哪些需要以学校官方最新通知为准\n"
                         "- 如果是流程，请用编号步骤\n"
@@ -1184,6 +1480,7 @@ async def chat_stream(req: ChatRequest):
 
             messages = [
                 SystemMessage(content=system_prompt),
+                *_context_messages(req.context),
                 HumanMessage(content=req.message),
             ]
 
@@ -1318,6 +1615,87 @@ async def reload_qa():
     """
     count = load_qa()
     return {"ok": True, "count": count, "source": QA_JSON_PATH}
+
+
+@app.post("/api/parse_schedule_command", response_model=ScheduleCommandParseResponse)
+async def parse_schedule_command(req: ScheduleCommandParseRequest):
+    """
+    Parse a personal-schedule command into a small mutation object.
+    The browser applies the mutation to localStorage, so this endpoint only
+    classifies intent and extracts fields.
+    """
+    text = (req.text or "").strip()
+    fallback = _fallback_parse_schedule_command(text)
+    contextual_intent = _is_contextual_schedule_intent(text, req.context)
+    if contextual_intent and not fallback.handled:
+        fallback = ScheduleCommandParseResponse(
+            handled=True,
+            action=_detect_schedule_action(text) or "none",
+            target=None,
+            matchName="",
+            item={},
+            confidence=0.62,
+        )
+    if not text or not fallback.handled:
+        return fallback
+
+    try:
+        context_payload = [
+            {"role": str(x.get("role", ""))[:20], "text": str(x.get("text", ""))[:600]}
+            for x in (req.context if isinstance(req.context, list) else [])[-3:]
+            if isinstance(x, dict)
+        ]
+        schedule_payload = req.schedule if isinstance(req.schedule, dict) else {}
+        if _normalize_language(req.language) == "en-US":
+            sys_prompt = (
+                "You parse commands for the Personal Schedule board in a local campus assistant.\n"
+                "Personal schedule, timetable, course schedule, class schedule, or schedule modification must route here, not to Campus Activities.\n"
+                "Use recentContext to resolve vague references such as it, that one, the previous item, delete it, or change it.\n"
+                "Extract only the user's intended local schedule edit. Output strict JSON only.\n"
+                "Schema: {\"handled\":true,\"action\":\"add|update|delete|open|none\",\"target\":\"course|activity\","
+                "\"matchName\":\"existing item name if updating/deleting, otherwise empty\","
+                "\"item\":{\"day\":\"mon|tue|wed|thu|fri\",\"name\":\"\",\"start\":\"HH:MM\",\"end\":\"HH:MM\","
+                "\"location\":\"\",\"teacher\":\"\",\"intro\":\"\"},\"confidence\":0~1}.\n"
+                "Use target=course for classes/timetable/course table/lecture/lab. Use target=activity for personal events or activities placed on the schedule.\n"
+                "If fields are missing but the user clearly wants to open or modify Personal Schedule, set action=open or none and confidence above 0.6."
+            )
+            human = {"text": text, "recentContext": context_payload}
+        else:
+            sys_prompt = (
+                "你负责解析本地网页“个人日程”板块的指令。\n"
+                "凡是个人日程、我的日程、日程表、课程表、课表、日程修改，都属于个人日程板块，不属于校园活动板块。\n"
+                "请使用 recentContext 解析“它、这个、刚才那个、删了、改了”等省略指代。\n"
+                "只抽取用户想对本地日程做的修改，并只输出严格 JSON。\n"
+                "格式：{\"handled\":true,\"action\":\"add|update|delete|open|none\",\"target\":\"course|activity\","
+                "\"matchName\":\"更新或删除时用于匹配的已有名称，没有则空\","
+                "\"item\":{\"day\":\"mon|tue|wed|thu|fri\",\"name\":\"\",\"start\":\"HH:MM\",\"end\":\"HH:MM\","
+                "\"location\":\"\",\"teacher\":\"\",\"intro\":\"\"},\"confidence\":0~1}。\n"
+                "课程表、课表、课程、上课、lecture、lab、class、course 用 target=course；个人日程里的活动/事项用 target=activity。\n"
+                "如果字段不足但用户明显想打开或修改个人日程，action=open 或 none，confidence 大于 0.6。"
+            )
+            human = {"用户输入": text, "recentContext": context_payload}
+        sys_prompt += (
+            "\nUse currentSchedule as the authoritative list of existing schedule items. "
+            "When the user refers to an item by weekday, time period, or approximate name, "
+            "choose the matching existing item and put its exact existing name in matchName. "
+            "If exactly one class/activity matches a day and period, treat it as the intended item. "
+            "If the user says course, class, timetable, lecture, lab, or includes a course-code-like token, target must be course, not activity. "
+            "Only use target=activity when the user clearly refers to activities, events, meetings, or appointments.\n"
+        )
+        human["currentSchedule"] = schedule_payload
+        result = model.invoke([SystemMessage(content=sys_prompt), HumanMessage(content=json.dumps(human, ensure_ascii=False))])
+        raw = result.content if hasattr(result, "content") else str(result)
+        raw = raw.strip()
+        m = re.search(r"\{[\s\S]*\}", raw)
+        if m:
+            raw = m.group(0)
+        data = json.loads(raw)
+        parsed = _sanitize_schedule_command_payload(data, fallback)
+        if parsed.handled and parsed.confidence >= 0.55:
+            return parsed
+    except Exception:
+        pass
+    return fallback
 
 
 @app.post("/api/module_qa_scan", response_model=ModuleScanResponse)
@@ -1725,7 +2103,7 @@ async def route_board(req: RouteBoardRequest):
     if not text:
         return RouteBoardResponse(moduleKey=None, pageKey=None, confidence=0.0)
 
-    allowed_modules = ["study", "intern", "campus", "life", "research"]
+    allowed_modules = ["study", "intern", "campus", "life", "research", "schedule"]
     allowed_pages = {
         "study": [
             "study_my",
@@ -1747,11 +2125,13 @@ async def route_board(req: RouteBoardRequest):
         "campus": ["campus_club", "campus_event", "campus_volunteer", "campus_leadership"],
         "life": ["life_dorm", "life_health", "life_food", "life_emergency"],
         "research": ["research_topic", "research_paper", "research_method", "research_writing"],
+        "schedule": ["schedule_home"],
     }
 
     # quick heuristic fallback
     def _heuristic(t: str) -> RouteBoardResponse:
-        tl = t.lower()
+        if _is_personal_schedule_intent(t):
+            return RouteBoardResponse(moduleKey="schedule", pageKey=None, confidence=0.82)
         if any(k in t for k in ["宿舍", "报修", "吃饭", "食堂", "医疗", "生活费", "紧急", "生病", "医保"]):
             return RouteBoardResponse(moduleKey="life", pageKey=None, confidence=0.62)
         if any(k in t for k in ["简历", "面试", "实习", "投递", "内推", "offer", "秋招", "春招"]):
@@ -1772,11 +2152,13 @@ async def route_board(req: RouteBoardRequest):
     try:
         sys_prompt = (
             "你是一个路由器，负责把用户问题路由到右侧栏“板块服务”。\n"
-            "可选 moduleKey: study/intern/campus/life/research 或 null。\n"
+            "可选 moduleKey: study/intern/campus/life/research/schedule 或 null。\n"
             "可选 pageKey: 必须是该 moduleKey 下允许的子板块 key，否则为 null。\n"
             "规则：\n"
             "- 只有明显属于某板块时才返回；不确定就返回 null。\n"
             "- 如果能命中子板块就返回 pageKey，否则只返回 moduleKey。\n"
+            "- 个人日程、我的日程、课程表、课表、日程修改、personal schedule、timetable、class schedule 必须返回 schedule，不要返回 campus。\n"
+            "- 校园活动只用于社团、志愿、讲座、比赛、活动策划等公共校园活动内容；个人日程里的活动增删改属于 schedule。\n"
             "- 只输出严格 JSON：{\"moduleKey\":...,\"pageKey\":...,\"confidence\":0~1}，不要额外文字。"
         )
         # provide allowed list for grounding

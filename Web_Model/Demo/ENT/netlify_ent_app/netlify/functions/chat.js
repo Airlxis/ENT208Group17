@@ -8,7 +8,7 @@ exports.handler = async function handler(event) {
     const body = event.body ? JSON.parse(event.body) : {};
     const message = String(body.message || "").trim();
     if (!message) return json(400, { error: "message 不能为空" });
-    return json(200, { reply: await answer(message) });
+    return json(200, { reply: await answer(message, body.language, body.context) });
   } catch (e) {
     return json(500, { error: e && e.message ? e.message : "服务异常" });
   }

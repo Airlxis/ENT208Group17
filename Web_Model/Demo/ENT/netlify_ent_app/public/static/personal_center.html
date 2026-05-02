@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>个人中心 - 西浦生活助手</title>
+    <title>个人中心 - XJTLU生活助手</title>
     <style>
       * {
         box-sizing: border-box;
@@ -11,12 +11,30 @@
         padding: 0;
       }
 
+      :root {
+        --navy: #3f448f;
+        --footer: #34387f;
+        --accent: #6a58d4;
+        --accent-dark: #5647bc;
+        --violet: #5f4fc8;
+        --page-bg-1: #f7f4ff;
+        --page-bg-2: #ede8ff;
+        --page-bg-3: #e0daf8;
+        --card-bg: #ffffff;
+        --line: #d9d4ef;
+        --ink: #242545;
+        --muted: #726f99;
+      }
+
       body {
         min-height: 100vh;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: linear-gradient(135deg, #eef2ff, #f9fafb);
-        color: #111827;
-        padding: 20px 0;
+        font-family: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background:
+          radial-gradient(1100px 500px at 84% 0%, rgba(128, 108, 219, 0.16), rgba(128, 108, 219, 0) 60%),
+          radial-gradient(1200px 520px at 12% 8%, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0) 56%),
+          linear-gradient(135deg, var(--page-bg-1) 0%, var(--page-bg-2) 48%, var(--page-bg-3) 100%);
+        color: var(--ink);
+        padding: 18px 0;
       }
 
       .wrap {
@@ -31,13 +49,19 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: linear-gradient(110deg, #4a4da3 0%, var(--footer) 55%, #5054ab 100%);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 10px 22px rgba(44, 33, 111, 0.24);
       }
 
       .title {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 800;
-        letter-spacing: -0.02em;
+        letter-spacing: 0;
+        color: #ffffff;
       }
 
       .top-actions {
@@ -47,31 +71,57 @@
       }
 
       .btn {
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        border: 1px solid var(--line);
         background: #ffffff;
-        color: #111827;
+        color: var(--ink);
         cursor: pointer;
         font-size: 13px;
         font-weight: 700;
         padding: 10px 12px;
-        transition: background 0.15s ease, border-color 0.15s ease;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
       }
 
       .btn:hover {
-        background: #f9fafb;
-        border-color: #c7d2fe;
+        background: #f3f0ff;
+        border-color: #bbb0e7;
       }
 
       .btn-primary {
-        background: #2563eb;
-        border-color: #2563eb;
+        background: var(--accent);
+        border-color: var(--accent);
         color: #ffffff;
+        box-shadow: 0 7px 15px rgba(106, 88, 212, 0.28);
       }
 
       .btn-primary:hover {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
+        background: var(--accent-dark);
+        border-color: var(--accent-dark);
+        box-shadow: 0 8px 16px rgba(86, 71, 188, 0.32);
+      }
+
+      .topbar .btn {
+        border-color: rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+      }
+
+      .topbar .btn:hover {
+        background: rgba(255, 255, 255, 0.24);
+        border-color: rgba(255, 255, 255, 0.52);
+      }
+
+      .topbar .btn.btn-primary {
+        background: #ffffff;
+        color: var(--violet);
+        border-color: #ffffff;
+        box-shadow: none;
+      }
+
+      .topbar .btn.btn-primary:hover {
+        background: #f4f0ff;
+        color: #4a3eb1;
+        border-color: #f4f0ff;
       }
 
       .grid {
@@ -87,17 +137,17 @@
       }
 
       .card {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 16px;
+        background: var(--card-bg);
+        border: 1px solid var(--line);
+        border-radius: 8px;
         padding: 16px;
-        box-shadow: 0 10px 25px -18px rgba(15, 23, 42, 0.35);
+        box-shadow: 0 16px 28px rgba(32, 40, 85, 0.11);
       }
 
       .card-title {
         font-weight: 900;
         font-size: 14px;
-        color: #111827;
+        color: var(--violet);
         margin-bottom: 12px;
       }
 
@@ -118,7 +168,7 @@
         width: 54px;
         height: 54px;
         border-radius: 50%;
-        border: 1px solid #d1d5db;
+        border: 1px solid var(--line);
         background: #fff;
         object-fit: cover;
         flex: 0 0 auto;
@@ -132,7 +182,7 @@
 
       .meta {
         font-size: 12px;
-        color: #6b7280;
+        color: var(--muted);
         margin-top: 4px;
       }
 
@@ -155,7 +205,7 @@
       .field label {
         display: block;
         font-size: 12px;
-        color: #475569;
+        color: #4c5582;
         margin-bottom: 6px;
         font-weight: 700;
       }
@@ -165,8 +215,8 @@
       select,
       textarea {
         width: 100%;
-        border-radius: 12px;
-        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        border: 1px solid var(--line);
         background: #ffffff;
         padding: 10px 12px;
         outline: none;
@@ -181,20 +231,20 @@
       input:focus,
       select:focus,
       textarea:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
+        border-color: var(--violet);
+        box-shadow: 0 0 0 2px rgba(90, 70, 180, 0.14);
       }
 
       .help {
         font-size: 12px;
-        color: #6b7280;
+        color: var(--muted);
         margin-top: 8px;
         line-height: 1.5;
       }
 
       .section-sep {
         height: 1px;
-        background: #f1f5f9;
+        background: #e8ebff;
         margin: 14px 0;
       }
 
@@ -210,9 +260,9 @@
         justify-content: space-between;
         gap: 12px;
         padding: 12px;
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: #f8f9ff;
       }
 
       .pref-left {
@@ -228,7 +278,7 @@
 
       .pref-sub {
         font-size: 12px;
-        color: #6b7280;
+        color: var(--muted);
       }
 
       .toggle {
@@ -236,8 +286,8 @@
         width: 44px;
         height: 26px;
         border-radius: 999px;
-        border: 1px solid #e5e7eb;
-        background: #e5e7eb;
+        border: 1px solid #cfd4ee;
+        background: #e7eaff;
         position: relative;
         cursor: pointer;
         outline: none;
@@ -258,8 +308,8 @@
       }
 
       .toggle:checked {
-        background: rgba(37, 99, 235, 0.2);
-        border-color: rgba(37, 99, 235, 0.5);
+        background: rgba(106, 88, 212, 0.28);
+        border-color: rgba(106, 88, 212, 0.58);
       }
 
       .toggle:checked::after {
@@ -273,7 +323,7 @@
         bottom: 18px;
         padding: 10px 14px;
         border-radius: 999px;
-        background: #111827;
+        background: #5a4ac4;
         color: #ffffff;
         font-size: 13px;
         opacity: 0;
@@ -283,6 +333,11 @@
 
       .toast.show {
         opacity: 0.95;
+      }
+
+      .pref-item .btn {
+        padding: 8px 10px;
+        border-radius: 8px;
       }
     </style>
   </head>
@@ -352,6 +407,14 @@
               </select>
             </div>
 
+            <div class="field">
+              <label for="languageEl">界面语言</label>
+              <select id="languageEl">
+                <option value="zh-CN">中文</option>
+                <option value="en-US">English</option>
+              </select>
+            </div>
+
             <div class="field full">
               <label for="bioEl">自我简介（可选）</label>
               <textarea id="bioEl" placeholder="例如：刚入学，想找实用学习方法和选课建议。"></textarea>
@@ -380,7 +443,7 @@
                 <div class="pref-title">板块偏好</div>
                 <div class="pref-sub">决定助手更常用哪个方向回答</div>
               </div>
-              <button class="btn" type="button" id="pickPrefBtn" style="padding:8px 10px;border-radius:12px;">
+              <button class="btn" type="button" id="pickPrefBtn">
                 选择
               </button>
             </div>
@@ -390,7 +453,7 @@
                 <div class="pref-title">我的收藏</div>
                 <div class="pref-sub">这里放你保存的回答/链接</div>
               </div>
-              <button class="btn" type="button" id="favoritesBtn" style="padding:8px 10px;border-radius:12px;">
+              <button class="btn" type="button" id="favoritesBtn">
                 查看
               </button>
             </div>
@@ -400,7 +463,7 @@
                 <div class="pref-title">学习计划</div>
                 <div class="pref-sub">记录阶段目标与待办</div>
               </div>
-              <button class="btn" type="button" id="planBtn" style="padding:8px 10px;border-radius:12px;">
+              <button class="btn" type="button" id="planBtn">
                 管理
               </button>
             </div>
@@ -427,6 +490,7 @@
       const majorEl = document.getElementById("majorEl");
       const levelEl = document.getElementById("levelEl");
       const studyGoalEl = document.getElementById("studyGoalEl");
+      const languageEl = document.getElementById("languageEl");
       const bioEl = document.getElementById("bioEl");
       const notifyEl = document.getElementById("notifyEl");
 
@@ -464,9 +528,180 @@
       }
 
       function showToast(text) {
-        toastEl.textContent = text || "已保存";
+        const fallback = languageEl && languageEl.value === "en-US" ? "Saved" : "已保存";
+        toastEl.textContent = text || fallback;
         toastEl.classList.add("show");
         setTimeout(() => toastEl.classList.remove("show"), 900);
+      }
+
+      const I18N = {
+        "zh-CN": {
+          title: "个人中心",
+          pageTitle: "个人中心 - XJTLU生活助手",
+          back: "返回聊天",
+          save: "保存",
+          base: "基础设置",
+          notLoggedIn: "未登录",
+          loggedIn: "账户已登录",
+          age: "年龄",
+          agePh: "例如：19",
+          gender: "性别",
+          unset: "未填写",
+          male: "男",
+          female: "女",
+          major: "专业",
+          majorPh: "例如：计算机科学（本科/硕士）",
+          level: "年级/学年",
+          unselected: "未选择",
+          year1: "一年级",
+          year2: "二年级",
+          year3: "三年级",
+          year4: "四年级",
+          grad: "研究生阶段",
+          goal: "偏好方向",
+          learning: "学习帮助优先",
+          intern: "实习就业优先",
+          campus: "校园活动优先",
+          life: "生活支持优先",
+          research: "科研探索优先",
+          language: "界面语言",
+          zh: "中文",
+          en: "English",
+          bio: "自我简介（可选）",
+          bioPh: "例如：刚入学，想找实用学习方法和选课建议。",
+          help: "这些信息仅保存在浏览器本地，不会上传到服务器。",
+          common: "个人中心常用内容",
+          notify: "消息通知",
+          notifySub: "回答完成、重要提醒时提示",
+          board: "板块偏好",
+          boardSub: "决定助手更常用哪个方向回答",
+          choose: "选择",
+          fav: "我的收藏",
+          favSub: "这里放你保存的回答/链接",
+          view: "查看",
+          plan: "学习计划",
+          planSub: "记录阶段目标与待办",
+          manage: "管理",
+          clear: "清除本地个人设置",
+          saved: "个人设置已保存",
+          cleared: "已清除本地设置",
+          prefPlaceholder: "板块偏好：先占位，后续再接功能。",
+          favPlaceholder: "我的收藏：先占位，后续再接功能。",
+          planPlaceholder: "学习计划：先占位，后续再接功能。",
+        },
+        "en-US": {
+          title: "Personal Center",
+          pageTitle: "Personal Center - XJTLU Life Assistant",
+          back: "Back to Chat",
+          save: "Save",
+          base: "Basic Settings",
+          notLoggedIn: "Not signed in",
+          loggedIn: "Signed in",
+          age: "Age",
+          agePh: "Example: 19",
+          gender: "Gender",
+          unset: "Not filled",
+          male: "Male",
+          female: "Female",
+          major: "Major",
+          majorPh: "Example: Computer Science (UG/PG)",
+          level: "Year",
+          unselected: "Not selected",
+          year1: "Year 1",
+          year2: "Year 2",
+          year3: "Year 3",
+          year4: "Year 4",
+          grad: "Postgraduate",
+          goal: "Preference",
+          learning: "Learning support first",
+          intern: "Internship and jobs first",
+          campus: "Campus activities first",
+          life: "Life support first",
+          research: "Research exploration first",
+          language: "Language",
+          zh: "中文",
+          en: "English",
+          bio: "Bio (optional)",
+          bioPh: "Example: New student looking for practical study methods and course advice.",
+          help: "This information is saved only in your browser and is not uploaded to the server.",
+          common: "Common Items",
+          notify: "Notifications",
+          notifySub: "Notify me when answers finish or important reminders appear",
+          board: "Board Preference",
+          boardSub: "Decides which direction the assistant prioritizes",
+          choose: "Choose",
+          fav: "Favorites",
+          favSub: "Saved answers and links appear here",
+          view: "View",
+          plan: "Study Plan",
+          planSub: "Track goals and tasks",
+          manage: "Manage",
+          clear: "Clear local personal settings",
+          saved: "Personal settings saved",
+          cleared: "Local settings cleared",
+          prefPlaceholder: "Board preferences are a placeholder for now.",
+          favPlaceholder: "Favorites are a placeholder for now.",
+          planPlaceholder: "Study plan is a placeholder for now.",
+        },
+      };
+
+      function currentLang() {
+        return languageEl && languageEl.value === "en-US" ? "en-US" : "zh-CN";
+      }
+
+      function applyLanguage() {
+        const t = I18N[currentLang()];
+        document.documentElement.lang = currentLang();
+        document.title = t.pageTitle;
+        document.querySelector(".title").textContent = t.title;
+        backBtn.textContent = t.back;
+        saveBtn.textContent = t.save;
+        document.querySelectorAll(".card-title")[0].textContent = t.base;
+        document.querySelectorAll(".card-title")[1].textContent = t.common;
+        document.querySelector('label[for="ageEl"]').textContent = t.age;
+        ageEl.placeholder = t.agePh;
+        document.querySelector('label[for="genderEl"]').textContent = t.gender;
+        genderEl.options[0].textContent = t.unset;
+        genderEl.options[1].textContent = t.male;
+        genderEl.options[2].textContent = t.female;
+        document.querySelector('label[for="majorEl"]').textContent = t.major;
+        majorEl.placeholder = t.majorPh;
+        document.querySelector('label[for="levelEl"]').textContent = t.level;
+        levelEl.options[0].textContent = t.unselected;
+        levelEl.options[1].textContent = t.year1;
+        levelEl.options[2].textContent = t.year2;
+        levelEl.options[3].textContent = t.year3;
+        levelEl.options[4].textContent = t.year4;
+        levelEl.options[5].textContent = t.grad;
+        document.querySelector('label[for="studyGoalEl"]').textContent = t.goal;
+        studyGoalEl.options[0].textContent = t.unselected;
+        studyGoalEl.options[1].textContent = t.learning;
+        studyGoalEl.options[2].textContent = t.intern;
+        studyGoalEl.options[3].textContent = t.campus;
+        studyGoalEl.options[4].textContent = t.life;
+        studyGoalEl.options[5].textContent = t.research;
+        document.querySelector('label[for="languageEl"]').textContent = t.language;
+        languageEl.options[0].textContent = t.zh;
+        languageEl.options[1].textContent = t.en;
+        document.querySelector('label[for="bioEl"]').textContent = t.bio;
+        bioEl.placeholder = t.bioPh;
+        document.querySelector(".help").textContent = t.help;
+        const prefTitles = document.querySelectorAll(".pref-title");
+        const prefSubs = document.querySelectorAll(".pref-sub");
+        prefTitles[0].textContent = t.notify;
+        prefSubs[0].textContent = t.notifySub;
+        prefTitles[1].textContent = t.board;
+        prefSubs[1].textContent = t.boardSub;
+        prefTitles[2].textContent = t.fav;
+        prefSubs[2].textContent = t.favSub;
+        prefTitles[3].textContent = t.plan;
+        prefSubs[3].textContent = t.planSub;
+        document.getElementById("pickPrefBtn").textContent = t.choose;
+        document.getElementById("favoritesBtn").textContent = t.view;
+        document.getElementById("planBtn").textContent = t.manage;
+        clearLocalBtn.textContent = t.clear;
+        if (userMetaEl.textContent) userMetaEl.textContent = t.loggedIn;
+        toastEl.textContent = t.saved;
       }
 
       function hydrate() {
@@ -483,7 +718,6 @@
 
         avatarEl.src = avatar;
         usernameEl.textContent = safeName;
-        userMetaEl.textContent = "账户已登录";
 
         const profile = loadProfile();
         ageEl.value = profile.age ?? "";
@@ -491,8 +725,10 @@
         majorEl.value = profile.major ?? "";
         levelEl.value = profile.level ?? "";
         studyGoalEl.value = profile.studyGoal ?? "";
+        languageEl.value = profile.language === "en-US" ? "en-US" : "zh-CN";
         bioEl.value = profile.bio ?? "";
         notifyEl.checked = !!profile.notify;
+        applyLanguage();
       }
 
       saveBtn.addEventListener("click", () => {
@@ -502,11 +738,21 @@
           major: majorEl.value.trim(),
           level: levelEl.value,
           studyGoal: studyGoalEl.value,
+          language: languageEl.value,
           bio: bioEl.value.trim(),
           notify: notifyEl.checked,
         };
         saveProfile(data);
-        showToast("个人设置已保存");
+        applyLanguage();
+        showToast(I18N[currentLang()].saved);
+      });
+
+      languageEl.addEventListener("change", () => {
+        const data = loadProfile();
+        data.language = languageEl.value;
+        saveProfile(data);
+        applyLanguage();
+        showToast(I18N[currentLang()].saved);
       });
 
       backBtn.addEventListener("click", () => {
@@ -516,13 +762,13 @@
       clearLocalBtn.addEventListener("click", () => {
         localStorage.removeItem(PROFILE_STORAGE_KEY);
         hydrate();
-        showToast("已清除本地设置");
+        showToast(I18N[currentLang()].cleared);
       });
 
       // 这些按钮目前只是 UI 占位，后续你想接功能再扩展
-      document.getElementById("pickPrefBtn").addEventListener("click", () => alert("板块偏好：先占位，后续再接功能。"));
-      document.getElementById("favoritesBtn").addEventListener("click", () => alert("我的收藏：先占位，后续再接功能。"));
-      document.getElementById("planBtn").addEventListener("click", () => alert("学习计划：先占位，后续再接功能。"));
+      document.getElementById("pickPrefBtn").addEventListener("click", () => alert(I18N[currentLang()].prefPlaceholder));
+      document.getElementById("favoritesBtn").addEventListener("click", () => alert(I18N[currentLang()].favPlaceholder));
+      document.getElementById("planBtn").addEventListener("click", () => alert(I18N[currentLang()].planPlaceholder));
 
       window.addEventListener("DOMContentLoaded", hydrate);
     </script>

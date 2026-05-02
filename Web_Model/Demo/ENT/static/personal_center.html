@@ -528,7 +528,8 @@
       }
 
       function showToast(text) {
-        toastEl.textContent = text || "已保存";
+        const fallback = languageEl && languageEl.value === "en-US" ? "Saved" : "已保存";
+        toastEl.textContent = text || fallback;
         toastEl.classList.add("show");
         setTimeout(() => toastEl.classList.remove("show"), 900);
       }
@@ -584,6 +585,9 @@
           clear: "清除本地个人设置",
           saved: "个人设置已保存",
           cleared: "已清除本地设置",
+          prefPlaceholder: "板块偏好：先占位，后续再接功能。",
+          favPlaceholder: "我的收藏：先占位，后续再接功能。",
+          planPlaceholder: "学习计划：先占位，后续再接功能。",
         },
         "en-US": {
           title: "Personal Center",
@@ -635,6 +639,9 @@
           clear: "Clear local personal settings",
           saved: "Personal settings saved",
           cleared: "Local settings cleared",
+          prefPlaceholder: "Board preferences are a placeholder for now.",
+          favPlaceholder: "Favorites are a placeholder for now.",
+          planPlaceholder: "Study plan is a placeholder for now.",
         },
       };
 
@@ -711,7 +718,6 @@
 
         avatarEl.src = avatar;
         usernameEl.textContent = safeName;
-        userMetaEl.textContent = "账户已登录";
 
         const profile = loadProfile();
         ageEl.value = profile.age ?? "";
@@ -760,9 +766,9 @@
       });
 
       // 这些按钮目前只是 UI 占位，后续你想接功能再扩展
-      document.getElementById("pickPrefBtn").addEventListener("click", () => alert("板块偏好：先占位，后续再接功能。"));
-      document.getElementById("favoritesBtn").addEventListener("click", () => alert("我的收藏：先占位，后续再接功能。"));
-      document.getElementById("planBtn").addEventListener("click", () => alert("学习计划：先占位，后续再接功能。"));
+      document.getElementById("pickPrefBtn").addEventListener("click", () => alert(I18N[currentLang()].prefPlaceholder));
+      document.getElementById("favoritesBtn").addEventListener("click", () => alert(I18N[currentLang()].favPlaceholder));
+      document.getElementById("planBtn").addEventListener("click", () => alert(I18N[currentLang()].planPlaceholder));
 
       window.addEventListener("DOMContentLoaded", hydrate);
     </script>

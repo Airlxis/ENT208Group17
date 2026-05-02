@@ -103,6 +103,9 @@ function topMatches(key, query, limit = 8) {
 
 function routeFor(text) {
   const t = String(text || "");
+  if (/(?:\u4e2a\u4eba\u65e5\u7a0b|\u6211\u7684\u65e5\u7a0b|\u65e5\u7a0b\u8868|\u65e5\u7a0b\u4fee\u6539|\u4fee\u6539\u65e5\u7a0b|\u8bfe\u7a0b\u8868|\u8bfe\u8868|\u4e2a\u4eba\u8bfe\u8868|\u6211\u7684\u8bfe\u8868|personal schedule|my schedule|course schedule|class schedule|timetable)/i.test(t)) {
+    return { moduleKey: "schedule", pageKey: null, confidence: 0.82 };
+  }
   if (/宿舍|报修|吃饭|食堂|医疗|生活费|紧急|生病|医保/.test(t)) {
     return { moduleKey: "life", pageKey: null, confidence: 0.62 };
   }
@@ -121,20 +124,74 @@ function routeFor(text) {
   return { moduleKey: null, pageKey: null, confidence: 0 };
 }
 
-function buildPrompt(message) {
-  const refs = topMatches("all", message, 3);
+function normalizeLanguage(language) {
+  return String(language || "").toLowerCase().startsWith("en") ? "en-US" : "zh-CN";
+}
+
+function sanitizeContext(context, maxItems = 3) {
+  const rows = Array.isArray(context) ? context : [];
+  return rows
+    .filter((x) => x && (x.role === "user" || x.role === "assistant") && String(x.text || "").trim())
+    .slice(-maxItems)
+    .map((x) => ({
+      role: x.role === "assistant" ? "assistant" : "user",
+      text: String(x.text || "").trim().slice(0, 600)
+    }));
+}
+
+function formatContextNote(context, language) {
+  const items = sanitizeContext(context);
+  if (!items.length) return "";
+  const en = normalizeLanguage(language) === "en-US";
+  const label = (role) => en ? (role === "assistant" ? "Assistant" : "User") : (role === "assistant" ? "助手" : "用户");
+  const lines = items.map((x, i) => `${i + 1}. ${label(x.role)}：${x.text}`).join("\n");
+  return en
+    ? `Simple recent context, at most three short messages. Use it only to resolve references such as "it", "that one", or "delete it"; do not invent details not shown here.\n${lines}`
+    : `简单前后文，最多三句短消息。只用于理解“它/刚才那个/删了”等省略指代，不要编造这里没有的信息。\n${lines}`;
+}
+
+function buildPrompt(message, language = "zh-CN", context = []) {
+  const lang = normalizeLanguage(language);
+  const en = lang === "en-US";
+  const route = routeFor(message);
+  const cleanMessage = String(message || "").trim();
+  const contextDependent = /(?:\u521a\u624d|\u4e4b\u524d|\u4e0a\u4e00\u4e2a|\u8fd9\u4e2a|\u90a3\u4e2a|\u5b83|\u5b83\u7684|\u4e0a\u4e0b\u6587|\u8bb0\u4f4f|\u5220\u4e86|\u53d6\u6d88\u5b83|\b(?:previous|earlier|that one|it|context|remember)\b)/i.test(cleanMessage);
+  const shouldUseRefs = !contextDependent && (cleanMessage.length >= 3 || /[A-Za-z0-9]{3,}/.test(cleanMessage));
+  const refs = shouldUseRefs ? topMatches(route.moduleKey || "all", message, 3) : [];
   const refText = refs
     .map((r, i) => `${i + 1}. ${r.action}\n${r.details}`)
     .join("\n\n");
   return [
-    "你是“西浦生活助手”，一名面向西交利物浦大学（XJTLU）学生的智能助手，主要帮助新生和在校生解决与西浦学习、生活相关的问题。",
-    "严禁使用表情符号、颜文字、特殊符号，不要输出任何 emoji。",
-    "使用自然、简洁的简体中文回答。对不确定或可能变动的信息，提醒以学校官方最新通知为准。",
-    refText ? `下面是内部参考信息，请综合后用自己的话回答，不要逐字复读：\n${refText}` : ""
+    en
+      ? "You are XJTLU Life Assistant, a practical assistant for Xi'an Jiaotong-Liverpool University students."
+      : "你是“西浦生活助手”，一名面向西交利物浦大学（XJTLU）学生的智能助手，主要帮助新生和在校生解决与西浦学习、生活相关的问题。",
+    en
+      ? "Do not use emoji, kaomoji, or decorative symbols."
+      : "严禁使用表情符号、颜文字、特殊符号，不要输出任何 emoji。",
+    en
+      ? "Answer in the same language as the user. Be clear and useful: do not over-compress the answer or omit key steps just to be brief."
+      : "回答要求：使用自然、清晰、信息足够的简体中文；不要为了简短而省略关键步骤，也不要只给一句过度压缩的结论。",
+    en
+      ? "For uncertain or changeable university rules, say that the student should follow the latest official XJTLU notice."
+      : "对不确定或可能变动的校内规定，提醒以学校官方最新通知为准。",
+    formatContextNote(context, lang),
+    refText
+      ? (en
+        ? `Internal reference information follows. Synthesize it in your own words and do not copy it verbatim:\n${refText}`
+        : `下面是内部参考信息，请综合后用自己的话回答，不要逐字复读：\n${refText}`)
+      : ""
   ].filter(Boolean).join("\n\n");
 }
 
-async function callChatCompletions({ apiKey, model, baseUrl, provider, message }) {
+function buildModelMessages({ message, language = "zh-CN", context = [] }) {
+  return [
+    { role: "system", content: buildPrompt(message, language, context) },
+    ...sanitizeContext(context).map((x) => ({ role: x.role, content: x.text })),
+    { role: "user", content: message }
+  ];
+}
+
+async function callChatCompletions({ apiKey, model, baseUrl, provider, message, language, context }) {
   if (!apiKey) return "";
   const resp = await fetch(`${baseUrl.replace(/\/+$/g, "")}/chat/completions`, {
     method: "POST",
@@ -144,10 +201,7 @@ async function callChatCompletions({ apiKey, model, baseUrl, provider, message }
     },
     body: JSON.stringify({
       model,
-      messages: [
-        { role: "system", content: buildPrompt(message) },
-        { role: "user", content: message }
-      ],
+      messages: buildModelMessages({ message, language, context }),
       temperature: 0.4
     })
   });
@@ -182,21 +236,25 @@ function getPreferredModelConfig() {
   return getDeepSeekConfig() || getOpenAIConfig();
 }
 
-async function callDeepSeek(message) {
+async function callDeepSeek(message, language, context) {
   const config = getDeepSeekConfig();
   if (!config) return "";
   return callChatCompletions({
     ...config,
-    message
+    message,
+    language,
+    context
   });
 }
 
-async function callOpenAI(message) {
+async function callOpenAI(message, language, context) {
   const config = getOpenAIConfig();
   if (!config) return "";
   return callChatCompletions({
     ...config,
-    message
+    message,
+    language,
+    context
   });
 }
 
@@ -226,12 +284,13 @@ async function callAiJson(systemPrompt, userPrompt) {
   return JSON.parse(match[1]);
 }
 
-async function answer(message) {
+async function answer(message, language = "zh-CN", context = []) {
+  const lang = normalizeLanguage(language);
   try {
-    const deepseek = await callDeepSeek(message);
+    const deepseek = await callDeepSeek(message, lang, context);
     if (deepseek) return deepseek;
 
-    const ai = await callOpenAI(message);
+    const ai = await callOpenAI(message, lang, context);
     if (ai) return ai;
   } catch (e) {
     // Fall back to local QA below.
@@ -240,6 +299,16 @@ async function answer(message) {
   const route = routeFor(message);
   const key = route.moduleKey || "all";
   const refs = topMatches(key, message, 2);
+  if (lang === "en-US") {
+    return [
+      `I received your question: ${message}`,
+      "",
+      refs.length
+        ? "I found related local reference material, but the cloud model is currently unavailable, so I cannot safely rewrite the full answer into English right now."
+        : "The cloud model is currently unavailable, so I can only return this local fallback message.",
+      "For university rules or time-sensitive details, please follow the latest official XJTLU notice."
+    ].join("\n");
+  }
   if (refs.length) {
     const first = refs[0];
     return [
@@ -258,6 +327,7 @@ async function answer(message) {
 
 module.exports = {
   answer,
+  buildModelMessages,
   buildPrompt,
   callAiJson,
   disabledMessage,

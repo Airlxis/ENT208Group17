@@ -3,167 +3,697 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>登录 - 西浦生活助手</title>
+  <title>登录 - XJTLU生活助手</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #3f448f;
+      --field: #f9faff;
+      --line: #d9d4ef;
+      --ink: #242545;
+      --muted: #73709a;
+      --accent: #6a58d4;
+      --accent-dark: #5647bc;
+      --violet: #5f4fc8;
+      --page: #f3efff;
+      --footer: #34387f;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
     body {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      font-family: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: var(--page);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
       min-height: 100vh;
+      display: grid;
+      grid-template-rows: 52px minmax(560px, 1fr) 36px;
+      overflow: hidden;
+      background:
+        radial-gradient(1200px 520px at 12% 8%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0) 56%),
+        linear-gradient(135deg, #f7f4ff 0%, #ede8ff 52%, #e0daf8 100%);
+    }
+
+    .topbar {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #eef2ff, #f9fafb);
-      color: #111827;
-      padding: 16px;
+      justify-content: space-between;
+      min-width: 0;
+      padding: 0 16px 0 14px;
+      background: var(--navy);
+      color: #fff;
     }
-    .panel {
-      width: 100%;
-      max-width: 420px;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 20px;
+      line-height: 1;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #fff;
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .brand-logo::after {
+      content: "";
+      width: 1px;
+      height: 28px;
+      background: rgba(255,255,255,0.88);
+    }
+
+    .brand-title {
+      min-width: 0;
+      color: #f6f7ff;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .lang-switch {
+      display: flex;
+      width: 120px;
+      height: 30px;
+      overflow: hidden;
+      border-radius: 3px;
       background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      box-shadow: 0 18px 55px -35px rgba(15, 23, 42, 0.35);
-      padding: 22px 18px 16px;
     }
-    .title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: #64748b; margin-bottom: 16px; }
-    .form-item { margin-bottom: 12px; }
-    .label { display: block; font-size: 12px; color: #475569; margin-bottom: 6px; }
-    input {
-      width: 100%;
-      height: 40px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      padding: 0 12px;
-      font-size: 14px;
-      outline: none;
-    }
-    input:focus { border-color: #4f46e5; box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.2); }
-    .avatar-row { display: flex; align-items: center; gap: 10px; margin: 8px 0 14px; }
-    .avatar {
-      width: 42px; height: 42px; border-radius: 50%;
-      border: 1px solid #d1d5db; background: #fff;
-    }
-    .hint { font-size: 12px; color: #64748b; }
-    .actions { display: flex; gap: 8px; margin-top: 8px; }
-    button {
-      flex: 1;
-      height: 40px;
-      border: none;
-      border-radius: 10px;
+
+    .lang-switch button {
+      width: 50%;
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+      background: #fff;
+      color: #8b8fa0;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
     }
-    .btn-primary { background: #2563eb; color: #fff; }
-    .btn-secondary { background: #f1f5f9; color: #0f172a; border: 1px solid #e2e8f0; }
-    .btn-primary:hover { background: #1d4ed8; }
-    .btn-secondary:hover { background: #eef2ff; border-color: #c7d2fe; }
-    .error { font-size: 12px; color: #dc2626; min-height: 18px; margin-top: 6px; }
+
+    .lang-switch button.active {
+      background: linear-gradient(135deg, #7a68dd, var(--accent));
+      color: #fff;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(320px, 1fr) 390px;
+      align-items: center;
+      gap: 52px;
+      width: min(1240px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 48px;
+    }
+
+    .headline {
+      color: #fff;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.16);
+      transform: translateY(4px);
+    }
+
+    .headline-cn {
+      margin: 0 0 22px;
+      font-size: clamp(34px, 4.2vw, 60px);
+      line-height: 1.14;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .headline-en {
+      margin: 0;
+      font-family: "Merriweather", "Times New Roman", serif;
+      font-size: clamp(38px, 4.8vw, 68px);
+      line-height: 1.02;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 360px;
+      justify-self: center;
+      padding: 32px 28px 24px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 14px 26px rgba(20, 35, 56, 0.14);
+    }
+
+    .auth-title {
+      margin: 0 0 28px;
+      color: var(--violet);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-align: center;
+    }
 
     .tabs {
-      display: flex;
-      gap: 10px;
-      margin: 6px 0 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--line);
     }
 
     .tab-btn {
-      flex: 1;
-      height: 36px;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-      background: #f1f5f9;
+      height: 42px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #8a8fa1;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      color: #0f172a;
+      font-size: 15px;
+      font-weight: 800;
+      position: relative;
     }
-    .tab-btn:hover { background: #eef2ff; border-color: #c7d2fe; }
 
     .tab-btn.active {
-      background: #2563eb;
-      color: #ffffff;
-      border-color: #2563eb;
+      color: var(--violet);
     }
 
-    .tab-panel {
-      margin-top: 6px;
+    .tab-btn.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      background: var(--violet);
+    }
+
+    .account-note {
+      min-height: 34px;
+      margin: 0 0 10px;
+      color: #5f6376;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .account-note a,
+    .small-link {
+      color: #456edb;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .account-note a:hover,
+    .small-link:hover {
+      text-decoration: underline;
+    }
+
+    .form-item {
+      margin-bottom: 20px;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 7px;
+      color: #54586c;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .field {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--field);
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .field:focus-within {
+      border-color: var(--violet);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(90, 70, 180, 0.12);
+    }
+
+    .field-icon {
+      flex: 0 0 38px;
+      color: #8a8fa1;
+      text-align: center;
+      line-height: 0;
+    }
+
+    .field input {
+      width: 100%;
+      min-width: 0;
+      height: 100%;
+      padding: 0 12px 0 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .field input::placeholder {
+      color: #a0a4b3;
+    }
+
+    .ghost-btn {
+      flex: 0 0 40px;
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #8a8fa1;
+      cursor: pointer;
+      line-height: 0;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+      height: 46px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .btn-primary {
+      border: 0;
+      background: linear-gradient(135deg, #7c6ae0, var(--accent));
+      color: #fff;
+      box-shadow: 0 7px 16px rgba(106, 88, 212, 0.28);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #6d5bd3, var(--accent-dark));
+      box-shadow: 0 8px 16px rgba(86, 71, 188, 0.32);
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #5f6376;
+    }
+
+    .btn-secondary:hover {
+      border-color: #b8bdd0;
+      background: #f7f8fb;
+    }
+
+    .form-foot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      margin-top: 16px;
+      color: #33364a;
+      font-size: 14px;
+    }
+
+    .help-dot {
+      display: inline-grid;
+      place-items: center;
+      width: 15px;
+      height: 15px;
+      margin-right: 7px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7b68dd, #5f4fc8);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .error,
+    .bottom-hint {
+      min-height: 18px;
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .error {
+      color: #c6283f;
     }
 
     .bottom-hint {
-      margin-top: 6px;
-      min-height: 18px;
-      font-size: 12px;
-      color: #2563eb;
+      color: #456edb;
     }
 
-    .small-link {
-      color: #2563eb;
-      cursor: pointer;
-      text-decoration: none;
+    .footer {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 0 20px;
+      background: linear-gradient(90deg, #4a4da3, var(--footer), #5054ab);
+      color: #fff;
+      font-size: 14px;
+      text-align: center;
+      white-space: nowrap;
     }
 
-    .small-link:hover {
-      text-decoration: underline;
+    .campus-img {
+      position: absolute;
+      left: 56px;
+      bottom: -3px;
+      width: 104px;
+      height: 30px;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        grid-template-rows: 52px minmax(610px, 1fr) auto;
+      }
+
+      .topbar {
+        padding-right: 12px;
+      }
+
+      .brand {
+        gap: 12px;
+      }
+
+      .brand-logo {
+        font-size: 28px;
+      }
+
+      .brand-logo::after {
+        height: 24px;
+      }
+
+      .brand-title {
+        font-size: 14px;
+      }
+
+      .lang-switch {
+        width: 96px;
+        height: 28px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 26px;
+        width: min(470px, calc(100% - 24px));
+        padding: 24px 0 26px;
+      }
+
+      .headline {
+        transform: none;
+      }
+
+      .headline-cn {
+        font-size: 30px;
+        margin-bottom: 8px;
+      }
+
+      .headline-en {
+        font-size: 34px;
+      }
+
+      .auth-card {
+        max-width: 100%;
+        padding: 24px 20px 18px;
+      }
+
+      .footer {
+        min-height: 48px;
+        padding: 8px 18px;
+        white-space: normal;
+        line-height: 1.5;
+      }
+
+      .campus-img {
+        display: none;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .brand-title {
+        display: none;
+      }
+
+      .headline-cn {
+        font-size: 34px;
+      }
+
+      .headline-en {
+        font-size: 38px;
+      }
+
+      .auth-title {
+        font-size: 20px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="panel">
-    <div class="title" id="pageTitle">登录</div>
-    <div class="subtitle">登录后将在侧边栏显示你的账号和头像</div>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand" aria-label="XJTLU Life Assistant">
+        <div class="brand-logo">XJTLU</div>
+        <div class="brand-title">Life Assistant</div>
+      </div>
+      <div class="lang-switch" aria-label="Language switch">
+        <button id="langZhBtn" class="active" type="button">中</button>
+        <button id="langEnBtn" type="button">En</button>
+      </div>
+    </header>
 
-    <div class="tabs">
-      <button class="tab-btn active" id="tabLoginBtn" type="button">登录</button>
-      <button class="tab-btn" id="tabRegisterBtn" type="button">注册</button>
-    </div>
-
-    <div id="loginPanel" class="tab-panel">
-      <div class="form-item">
-        <label class="label" for="loginUsername">账号</label>
-        <input id="loginUsername" placeholder="例如：han_xjtlu" />
+    <section class="hero">
+      <div class="headline" aria-label="XJTLU Life Assistant">
+        <h1 class="headline-cn" id="headlineCn">校园生活，一页直达</h1>
+        <p class="headline-en">Learn Better, Live Smarter</p>
       </div>
 
-      <div class="form-item">
-        <label class="label" for="loginPassword">密码</label>
-        <input id="loginPassword" type="password" placeholder="请输入密码" />
-      </div>
+      <section class="auth-card" aria-labelledby="pageTitle">
+        <h2 class="auth-title">XJTLU生活助手</h2>
 
-      <div class="actions">
-        <button class="btn-secondary" id="cancelBtn" type="button">取消</button>
-        <button class="btn-primary" id="loginBtn" type="button">登录</button>
-      </div>
+        <div class="tabs" role="tablist" aria-label="Authentication mode">
+          <button class="tab-btn active" id="tabLoginBtn" type="button" role="tab" aria-controls="loginPanel" aria-selected="true">登录</button>
+          <button class="tab-btn" id="tabRegisterBtn" type="button" role="tab" aria-controls="registerPanel" aria-selected="false">注册</button>
+        </div>
 
-      <div class="bottom-hint" id="loginBottomHint"></div>
-      <div class="error" id="errorText"></div>
-    </div>
+        <h3 class="sr-only" id="pageTitle">登录</h3>
 
-    <div id="registerPanel" class="tab-panel" style="display:none;">
-      <div class="form-item">
-        <label class="label" for="registerUsername">账号</label>
-        <input id="registerUsername" placeholder="例如：han_xjtlu" />
-      </div>
+        <div id="loginPanel" class="tab-panel" role="tabpanel" aria-labelledby="tabLoginBtn">
+          <p class="account-note" id="loginNote">欢迎回来，请输入你的账号与密码。</p>
 
-      <div class="form-item">
-        <label class="label" for="registerPassword">密码</label>
-        <input id="registerPassword" type="password" placeholder="请输入密码" />
-      </div>
+          <div class="form-item">
+            <label class="label" for="loginUsername">账号</label>
+            <div class="field">
+              <span class="field-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 21a8 8 0 0 0-16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+              </span>
+              <input id="loginUsername" autocomplete="username" placeholder="例如：han_xjtlu" />
+            </div>
+          </div>
 
-      <div class="actions">
-        <button class="btn-secondary" type="button" id="cancelBtn2">取消</button>
-        <button class="btn-primary" id="registerBtn" type="button">注册</button>
-      </div>
+          <div class="form-item">
+            <label class="label" for="loginPassword">密码</label>
+            <div class="field">
+              <span class="field-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+              </span>
+              <input id="loginPassword" type="password" autocomplete="current-password" placeholder="请输入密码" />
+              <button class="ghost-btn" id="toggleLoginPassword" type="button" aria-label="显示或隐藏密码">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.7"/>
+                  <circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
 
-      <div class="bottom-hint" id="registerBottomHint"></div>
-      <div class="error" id="registerErrorText"></div>
-    </div>
-  </div>
+          <div class="actions">
+            <button class="btn-primary" id="loginBtn" type="button">登录</button>
+            <button class="btn-secondary" id="cancelBtn" type="button">返回</button>
+          </div>
+
+          <div class="bottom-hint" id="loginBottomHint"></div>
+          <div class="error" id="errorText" aria-live="polite"></div>
+          <div class="form-foot"><span class="help-dot">?</span><span id="loginHelpText">忘记密码</span></div>
+        </div>
+
+        <div id="registerPanel" class="tab-panel" role="tabpanel" aria-labelledby="tabRegisterBtn" style="display:none;">
+          <p class="account-note" id="registerNote">创建一个本地账号，用于保存你的个人入口状态。</p>
+
+          <div class="form-item">
+            <label class="label" for="registerUsername">账号</label>
+            <div class="field">
+              <span class="field-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 21a8 8 0 0 0-16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+              </span>
+              <input id="registerUsername" autocomplete="username" placeholder="例如：han_xjtlu" />
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="label" for="registerPassword">密码</label>
+            <div class="field">
+              <span class="field-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+              </span>
+              <input id="registerPassword" type="password" autocomplete="new-password" placeholder="请输入密码" />
+              <button class="ghost-btn" id="toggleRegisterPassword" type="button" aria-label="显示或隐藏密码">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.7"/>
+                  <circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-primary" id="registerBtn" type="button">注册</button>
+            <button class="btn-secondary" type="button" id="cancelBtn2">返回</button>
+          </div>
+
+          <div class="bottom-hint" id="registerBottomHint"></div>
+          <div class="error" id="registerErrorText" aria-live="polite"></div>
+          <div class="form-foot"><span class="help-dot">i</span><span id="registerHelpText">账号仅保存在本机浏览器</span></div>
+        </div>
+      </section>
+    </section>
+
+    <footer class="footer">
+      <img
+        class="campus-img"
+        alt=""
+        src="data:image/svg+xml,%3Csvg%20width='180'%20height='54'%20viewBox='0%200%20180%2054'%20xmlns='http://www.w3.org/2000/svg'%3E%3Cg%20fill='none'%20stroke='%23ffffff'%20stroke-opacity='.72'%20stroke-width='1.2'%3E%3Cpath%20d='M6%2053V34l22-12%2022%2012v19M28%2022V5M18%2028V17M38%2028V17M50%2034l18-9%2018%209v19M68%2025V9M86%2034h28v19M100%2034V14l20%2010v29M120%2024l18%209v20M138%2033V18M154%2053V29l18%2010v14'/%3E%3Cpath%20d='M1%2053h178M14%2038h9M33%2038h9M61%2039h9M76%2039h7M93%2041h14M126%2039h9M146%2040h9'/%3E%3C/g%3E%3C/svg%3E"
+      />
+      <span id="copyrightText">XJTLU生活助手 · 本地版</span>
+    </footer>
+  </main>
 
   <script>
     const LOGIN_STORAGE_KEY = "xipu_life_assistant_user";
     const USER_DB_KEY = "xipu_life_assistant_users";
 
+    const text = {
+      zh: {
+        htmlLang: "zh-CN",
+        title: "登录 - XJTLU生活助手",
+        headline: "校园生活，一页直达",
+        loginTab: "登录",
+        registerTab: "注册",
+        loginTitle: "登录",
+        registerTitle: "注册",
+        account: "账号",
+        password: "密码",
+        loginNote: "欢迎回来，请登录以继续使用问答、工具和个人中心。",
+        registerNote: "创建本地账号后，可保存你的入口与使用偏好。",
+        usernamePlaceholder: "例如：han_xjtlu",
+        passwordPlaceholder: "请输入密码",
+        login: "登录",
+        register: "注册",
+        back: "返回",
+        forgot: "忘记密码？可直接重新注册本地账号",
+        localOnly: "账号仅保存在当前浏览器，不会上传服务器",
+        needUsername: "请输入账号",
+        needPassword: "请输入密码",
+        noUserPrefix: "未注册？",
+        registerFirst: "先注册",
+        wrongPassword: "密码不正确",
+        userExistsPrefix: "账号已存在，",
+        goLogin: "去登录",
+        registerDonePrefix: "注册成功，",
+        switchAccounts: "切换账号",
+        loggedInPrefix: "已登录账号 ",
+        copyright: "XJTLU生活助手 · 本地版"
+      },
+      en: {
+        htmlLang: "en",
+        title: "Sign in - XJTLU Life Assistant",
+        headline: "Learn Better, Live Smarter",
+        loginTab: "Sign in",
+        registerTab: "Register",
+        loginTitle: "Sign in",
+        registerTitle: "Register",
+        account: "Account",
+        password: "Password",
+        loginNote: "Welcome back. Sign in to continue with Q&A, tools, and your personal center.",
+        registerNote: "Create a local account to save your shortcuts and preferences.",
+        usernamePlaceholder: "Example: han_xjtlu",
+        passwordPlaceholder: "Enter password",
+        login: "Sign in",
+        register: "Register",
+        back: "Back",
+        forgot: "Forgot password? You can re-register a local account.",
+        localOnly: "Saved only in this browser and never uploaded",
+        needUsername: "Please enter your account",
+        needPassword: "Please enter your password",
+        noUserPrefix: "Not registered? ",
+        registerFirst: "Register first",
+        wrongPassword: "Incorrect password",
+        userExistsPrefix: "Account already exists. ",
+        goLogin: "Sign in",
+        registerDonePrefix: "Registered. ",
+        switchAccounts: "Switch accounts",
+        loggedInPrefix: "Logged in account ",
+        copyright: "XJTLU Life Assistant · Local Edition"
+      }
+    };
+
+    let currentLang = "zh";
+
     const pageTitleEl = document.getElementById("pageTitle");
+    const headlineCnEl = document.getElementById("headlineCn");
     const tabLoginBtnEl = document.getElementById("tabLoginBtn");
     const tabRegisterBtnEl = document.getElementById("tabRegisterBtn");
     const loginPanelEl = document.getElementById("loginPanel");
@@ -180,23 +710,26 @@
     const registerErrorTextEl = document.getElementById("registerErrorText");
     const loginBottomHintEl = document.getElementById("loginBottomHint");
     const registerBottomHintEl = document.getElementById("registerBottomHint");
+    const loginNoteEl = document.getElementById("loginNote");
+    const registerNoteEl = document.getElementById("registerNote");
+    const loginHelpTextEl = document.getElementById("loginHelpText");
+    const registerHelpTextEl = document.getElementById("registerHelpText");
+    const langZhBtnEl = document.getElementById("langZhBtn");
+    const langEnBtnEl = document.getElementById("langEnBtn");
+    const copyrightTextEl = document.getElementById("copyrightText");
+    const toggleLoginPasswordEl = document.getElementById("toggleLoginPassword");
+    const toggleRegisterPasswordEl = document.getElementById("toggleRegisterPassword");
 
     const params = new URLSearchParams(window.location.search);
     const redirectTo = params.get("redirect") || "/";
 
+    function t(key) {
+      return text[currentLang][key] || text.zh[key] || key;
+    }
+
     function fallbackAvatar(name) {
       const seed = encodeURIComponent(name || "Guest");
       return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}`;
-    }
-
-    cancelBtnEl.addEventListener("click", () => {
-      window.location.href = redirectTo;
-    });
-
-    if (cancelBtn2El) {
-      cancelBtn2El.addEventListener("click", () => {
-        window.location.href = redirectTo;
-      });
     }
 
     function loadUsers() {
@@ -215,6 +748,17 @@
       localStorage.setItem(USER_DB_KEY, JSON.stringify(users));
     }
 
+    function getLoginUser() {
+      try {
+        const raw = localStorage.getItem(LOGIN_STORAGE_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        return data && data.username ? data : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
     function clearLoginMessages() {
       errorTextEl.textContent = "";
       loginBottomHintEl.textContent = "";
@@ -225,28 +769,122 @@
       registerBottomHintEl.textContent = "";
     }
 
+    function updateLoggedInHint() {
+      const user = getLoginUser();
+      if (!user) {
+        loginNoteEl.textContent = t("loginNote");
+        return;
+      }
+      loginNoteEl.innerHTML = `${t("loggedInPrefix")}<a href="#" id="useCurrentUser">${escapeHtml(user.username)}</a><br><a href="#" id="switchAccountLink">${t("switchAccounts")}</a>`;
+      const useCurrentUserEl = document.getElementById("useCurrentUser");
+      const switchAccountLinkEl = document.getElementById("switchAccountLink");
+      if (useCurrentUserEl) {
+        useCurrentUserEl.addEventListener("click", (event) => {
+          event.preventDefault();
+          window.location.href = redirectTo;
+        });
+      }
+      if (switchAccountLinkEl) {
+        switchAccountLinkEl.addEventListener("click", (event) => {
+          event.preventDefault();
+          localStorage.removeItem(LOGIN_STORAGE_KEY);
+          loginNoteEl.textContent = t("loginNote");
+          loginUsernameEl.focus();
+        });
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      document.documentElement.lang = t("htmlLang");
+      document.title = t("title");
+      headlineCnEl.textContent = t("headline");
+      tabLoginBtnEl.textContent = t("loginTab");
+      tabRegisterBtnEl.textContent = t("registerTab");
+      loginBtnEl.textContent = t("login");
+      registerBtnEl.textContent = t("register");
+      cancelBtnEl.textContent = t("back");
+      cancelBtn2El.textContent = t("back");
+      loginHelpTextEl.textContent = t("forgot");
+      registerHelpTextEl.textContent = t("localOnly");
+      registerNoteEl.textContent = t("registerNote");
+      copyrightTextEl.textContent = t("copyright");
+
+      document.querySelectorAll("label[for='loginUsername'], label[for='registerUsername']").forEach((label) => {
+        label.textContent = t("account");
+      });
+      document.querySelectorAll("label[for='loginPassword'], label[for='registerPassword']").forEach((label) => {
+        label.textContent = t("password");
+      });
+
+      loginUsernameEl.placeholder = t("usernamePlaceholder");
+      registerUsernameEl.placeholder = t("usernamePlaceholder");
+      loginPasswordEl.placeholder = t("passwordPlaceholder");
+      registerPasswordEl.placeholder = t("passwordPlaceholder");
+
+      langZhBtnEl.classList.toggle("active", lang === "zh");
+      langEnBtnEl.classList.toggle("active", lang === "en");
+
+      if (loginPanelEl.style.display === "none") {
+        pageTitleEl.textContent = t("registerTitle");
+      } else {
+        pageTitleEl.textContent = t("loginTitle");
+        updateLoggedInHint();
+      }
+    }
+
     function showLoginTab() {
-      pageTitleEl.textContent = "登录";
+      pageTitleEl.textContent = t("loginTitle");
       tabLoginBtnEl.classList.add("active");
       tabRegisterBtnEl.classList.remove("active");
+      tabLoginBtnEl.setAttribute("aria-selected", "true");
+      tabRegisterBtnEl.setAttribute("aria-selected", "false");
       loginPanelEl.style.display = "block";
       registerPanelEl.style.display = "none";
       clearLoginMessages();
+      updateLoggedInHint();
       loginUsernameEl.focus();
     }
 
     function showRegisterTab() {
-      pageTitleEl.textContent = "注册";
+      pageTitleEl.textContent = t("registerTitle");
       tabRegisterBtnEl.classList.add("active");
       tabLoginBtnEl.classList.remove("active");
+      tabRegisterBtnEl.setAttribute("aria-selected", "true");
+      tabLoginBtnEl.setAttribute("aria-selected", "false");
       registerPanelEl.style.display = "block";
       loginPanelEl.style.display = "none";
       clearRegisterMessages();
+      registerNoteEl.textContent = t("registerNote");
       registerUsernameEl.focus();
     }
 
+    function togglePassword(inputEl) {
+      inputEl.type = inputEl.type === "password" ? "text" : "password";
+      inputEl.focus();
+    }
+
+    function goBack() {
+      window.location.href = redirectTo;
+    }
+
+    cancelBtnEl.addEventListener("click", goBack);
+    cancelBtn2El.addEventListener("click", goBack);
     tabLoginBtnEl.addEventListener("click", showLoginTab);
     tabRegisterBtnEl.addEventListener("click", showRegisterTab);
+    langZhBtnEl.addEventListener("click", () => applyLanguage("zh"));
+    langEnBtnEl.addEventListener("click", () => applyLanguage("en"));
+    toggleLoginPasswordEl.addEventListener("click", () => togglePassword(loginPasswordEl));
+    toggleRegisterPasswordEl.addEventListener("click", () => togglePassword(registerPasswordEl));
 
     loginBtnEl.addEventListener("click", () => {
       clearLoginMessages();
@@ -254,23 +892,23 @@
       const password = loginPasswordEl.value;
 
       if (!username) {
-        errorTextEl.textContent = "请输入账号";
+        errorTextEl.textContent = t("needUsername");
         loginUsernameEl.focus();
         return;
       }
       if (!password) {
-        errorTextEl.textContent = "请输入密码";
+        errorTextEl.textContent = t("needPassword");
         loginPasswordEl.focus();
         return;
       }
 
       const users = loadUsers();
       if (!users[username]) {
-        loginBottomHintEl.innerHTML = `未注册？<a href="#" id="toRegisterFromLogin" class="small-link">先注册</a>`;
+        loginBottomHintEl.innerHTML = `${t("noUserPrefix")}<a href="#" id="toRegisterFromLogin" class="small-link">${t("registerFirst")}</a>`;
         const link = document.getElementById("toRegisterFromLogin");
         if (link) {
-          link.addEventListener("click", (e) => {
-            e.preventDefault();
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
             registerUsernameEl.value = username;
             showRegisterTab();
           });
@@ -279,7 +917,7 @@
       }
 
       if (users[username] !== password) {
-        errorTextEl.textContent = "密码错误";
+        errorTextEl.textContent = t("wrongPassword");
         return;
       }
 
@@ -297,23 +935,23 @@
       const password = registerPasswordEl.value;
 
       if (!username) {
-        registerErrorTextEl.textContent = "请输入账号";
+        registerErrorTextEl.textContent = t("needUsername");
         registerUsernameEl.focus();
         return;
       }
       if (!password) {
-        registerErrorTextEl.textContent = "请输入密码";
+        registerErrorTextEl.textContent = t("needPassword");
         registerPasswordEl.focus();
         return;
       }
 
       const users = loadUsers();
       if (users[username]) {
-        registerBottomHintEl.innerHTML = `已有账户？<a href="#" id="toLoginFromRegister" class="small-link">去登录</a>`;
+        registerBottomHintEl.innerHTML = `${t("userExistsPrefix")}<a href="#" id="toLoginFromRegister" class="small-link">${t("goLogin")}</a>`;
         const link = document.getElementById("toLoginFromRegister");
         if (link) {
-          link.addEventListener("click", (e) => {
-            e.preventDefault();
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
             loginUsernameEl.value = username;
             showLoginTab();
           });
@@ -324,18 +962,30 @@
       users[username] = password;
       saveUsers(users);
 
-      // 注册成功后，引导去登录
-      registerBottomHintEl.innerHTML = `注册成功！<a href="#" id="toLoginAfterRegister" class="small-link">去登录</a>`;
+      registerBottomHintEl.innerHTML = `${t("registerDonePrefix")}<a href="#" id="toLoginAfterRegister" class="small-link">${t("goLogin")}</a>`;
       const link = document.getElementById("toLoginAfterRegister");
       if (link) {
-        link.addEventListener("click", (e) => {
-          e.preventDefault();
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
           loginUsernameEl.value = username;
           showLoginTab();
         });
       }
     });
+
+    [loginUsernameEl, loginPasswordEl].forEach((input) => {
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") loginBtnEl.click();
+      });
+    });
+
+    [registerUsernameEl, registerPasswordEl].forEach((input) => {
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") registerBtnEl.click();
+      });
+    });
+
+    applyLanguage("zh");
   </script>
 </body>
 </html>
-

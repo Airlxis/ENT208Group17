@@ -863,6 +863,8 @@
       line-height: 1.25;
       box-sizing: border-box;
       z-index: 2;
+      transform-origin: center top;
+      will-change: transform, opacity, filter;
     }
 
     .schedule-item.course {
@@ -879,6 +881,56 @@
       background: #c4b5fd; /* light purple for lab/practical */
       border-color: rgba(124, 58, 237, 0.45);
       color: #3b216b;
+    }
+
+    .schedule-item.course.schedule-entering {
+      animation: scheduleCourseEnter 0.42s cubic-bezier(0.2, 0.85, 0.25, 1.1) both;
+    }
+
+    .schedule-item.course.schedule-removing {
+      pointer-events: none;
+      animation: scheduleCourseRemove 0.28s ease-in forwards;
+    }
+
+    @keyframes scheduleCourseEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.96);
+        filter: saturate(0.92);
+        box-shadow: 0 0 0 rgba(109, 40, 217, 0);
+      }
+      58% {
+        opacity: 1;
+        transform: translateY(-2px) scale(1.015);
+        filter: saturate(1.08);
+        box-shadow: 0 8px 22px rgba(109, 40, 217, 0.22);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: saturate(1);
+        box-shadow: 0 2px 10px rgba(24, 39, 75, 0.08);
+      }
+    }
+
+    @keyframes scheduleCourseRemove {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: saturate(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.92);
+        filter: saturate(0.75);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .schedule-item.course.schedule-entering,
+      .schedule-item.course.schedule-removing {
+        animation-duration: 0.01ms;
+      }
     }
 
     .schedule-item.activity {
@@ -1334,6 +1386,28 @@
       min-height: 70px; /* 中英文统一高度 */
     }
 
+    .right-module-btn-schedule {
+      position: relative;
+      min-height: 96px;
+      padding: 18px 18px;
+      border-radius: 18px;
+      border-color: #c9c0ef;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(246, 243, 255, 0.97)),
+        linear-gradient(135deg, #f1edff, #fff4df);
+      box-shadow: 0 16px 28px rgba(74, 60, 170, 0.15);
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .right-module-btn-schedule::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-left: 5px solid var(--brand-mid);
+      pointer-events: none;
+    }
+
     .right-module-btn-icon {
       width: 40px;
       height: 40px;
@@ -1347,10 +1421,31 @@
       color: var(--brand-mid);
     }
 
+    .right-module-btn-schedule .right-module-btn-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      border-color: rgba(106, 88, 212, 0.32);
+      background: #ffffff;
+      color: var(--brand-mid);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 10px 18px rgba(106, 88, 212, 0.18);
+    }
+
     .right-module-btn-icon svg {
       width: 18px;
       height: 18px;
       display: block;
+    }
+
+    .right-module-btn-schedule .right-module-btn-icon svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    .right-module-btn-copy {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
     }
 
     .right-module-btn-text {
@@ -1365,9 +1460,35 @@
       min-height: 1.35em;
     }
 
+    .right-module-btn-schedule .right-module-btn-text {
+      font-size: 16px;
+      font-weight: 950;
+      letter-spacing: 0;
+      color: #3f368d;
+    }
+
+    .right-module-btn-sub {
+      display: block;
+      font-size: 12px;
+      line-height: 1.35;
+      color: #6e649a;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .right-module-btn:hover {
       background: var(--soft-2);
       border-color: #c8bceb;
+    }
+
+    .right-module-btn-schedule:hover {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(241, 237, 255, 0.98)),
+        linear-gradient(135deg, #ebe5ff, #ffefd1);
+      border-color: #a99ce0;
+      box-shadow: 0 18px 32px rgba(74, 60, 170, 0.2);
     }
 
     /* 收起态：模块入口按钮做严格对齐（中英文一致） */
@@ -1384,11 +1505,22 @@
       align-items: center;
     }
 
+    .right-sidebar:not(.expanded) .right-module-btn-schedule {
+      min-height: 88px;
+      padding: 15px 16px;
+      grid-template-columns: 54px minmax(0, 1fr);
+    }
+
     .right-sidebar:not(.expanded) .right-module-btn-icon {
       width: 40px;
       height: 40px;
       margin-top: 0;
       justify-self: center;
+    }
+
+    .right-sidebar:not(.expanded) .right-module-btn-schedule .right-module-btn-icon {
+      width: 54px;
+      height: 54px;
     }
 
     .right-sidebar:not(.expanded) .right-module-btn-text {
@@ -1399,6 +1531,11 @@
       line-height: 1.25;
       min-height: auto;
       width: 100%;
+    }
+
+    .right-sidebar:not(.expanded) .right-module-btn-schedule .right-module-btn-text {
+      font-size: 16px;
+      line-height: 1.2;
     }
 
     @media (min-width: 901px) {
@@ -1815,6 +1952,20 @@
     <div class="right-sidebar-title" id="rightSidebarTitle">板块服务</div>
     <div class="right-sidebar-card">
       <div class="right-module-buttons" aria-label="板块按钮列表">
+        <button class="right-module-btn right-module-btn-schedule" type="button" data-module="schedule">
+          <span class="right-module-btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="4.5" width="18" height="19" rx="4"></rect>
+              <path d="M9 3v4M19 3v4M5 10h18"></path>
+              <path d="M9.5 15h2.5M16 15h2.5M9.5 19h2.5M16 19h2.5"></path>
+              <path d="M20.8 6.8l2.1 2.1"></path>
+            </svg>
+          </span>
+          <span class="right-module-btn-copy">
+            <span class="right-module-btn-text">个人日程</span>
+            <span class="right-module-btn-sub">课程 / 活动 / 修改</span>
+          </span>
+        </button>
         <button class="right-module-btn" type="button" data-module="study">
           <span class="right-module-btn-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -1860,15 +2011,6 @@
             </svg>
           </span>
           <span class="right-module-btn-text">科研探索</span>
-        </button>
-        <button class="right-module-btn" type="button" data-module="schedule">
-          <span class="right-module-btn-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-              <path d="M16 2v4M8 2v4M3 10h18"></path>
-            </svg>
-          </span>
-          <span class="right-module-btn-text">个人日程</span>
         </button>
       </div>
     </div>
@@ -1982,6 +2124,7 @@
         retry: "重新回复",
         copy: "复制回答",
         copied: "已复制",
+        scheduleSub: "课程 / 活动 / 修改",
         modules: {
           study: "学习帮助",
           intern: "实习就业",
@@ -2019,6 +2162,7 @@
         retry: "Regenerate",
         copy: "Copy answer",
         copied: "Copied",
+        scheduleSub: "Classes / Events / Edits",
         modules: {
           study: "Learning Support",
           intern: "Internships and Jobs",
@@ -2109,10 +2253,16 @@
       if (emptySub) emptySub.textContent = t("emptySub");
       if (inputEl) inputEl.placeholder = t("placeholder");
       if (sendBtn) sendBtn.setAttribute("aria-label", t("send"));
+      if (rightBackBtnEl) {
+        rightBackBtnEl.setAttribute("aria-label", t("back"));
+        rightBackBtnEl.setAttribute("title", t("back"));
+      }
       document.querySelectorAll(".right-module-btn").forEach((btn) => {
         const key = btn.dataset.module || "";
         const label = btn.querySelector(".right-module-btn-text");
         if (label) label.textContent = getModuleName(key);
+        const sub = btn.querySelector(".right-module-btn-sub");
+        if (sub && key === "schedule") sub.textContent = t("scheduleSub");
       });
     }
 
@@ -2806,7 +2956,7 @@
     }
 
     const SCHEDULE_DAY_KEYS = ["mon", "tue", "wed", "thu", "fri"];
-    const PERSONAL_COURSE_ITEMS = [
+    const DEFAULT_PERSONAL_COURSE_ITEMS = [
       { day: "thu", name: "DTS206TC Lab", location: "TC-D-3001", teacher: "G. Ren", start: "09:00", end: "10:50" },
       { day: "tue", name: "DTS209TC Lec", location: "TC-FG-2001", teacher: "P. Lefevre", start: "11:00", end: "12:50" },
       { day: "tue", name: "DTS206TC Lec", location: "TC-FG-2001", teacher: "C. Wang", start: "14:00", end: "15:50" },
@@ -2842,16 +2992,91 @@
       { day: "fri", name: "Research Seminar", intro: "Guest speaker session with open Q and A.", time: "10:00-12:30" },
     ];
     const SCHEDULE_ACTIVITY_STORAGE_KEY = "xipu_schedule_activity_items_v1";
+    const SCHEDULE_COURSE_STORAGE_KEY = "xipu_schedule_course_items_v1";
     const SCHEDULE_RANGE_START_MIN = 9 * 60;
     const SCHEDULE_RANGE_END_MIN = 19 * 60;
+    let scheduleCourseItems = _loadScheduleCourseItems();
     let scheduleActivityItems = _loadScheduleActivityItems();
+    let lastScheduleFocus = null;
+    let scheduleMotion = null;
+
+    function _scheduleItemMotionKey(kind, item) {
+      const src = item || {};
+      const start = src.start || String(src.time || "").split("-")[0] || "";
+      const end = src.end || String(src.time || "").split("-")[1] || "";
+      const name = encodeURIComponent(String(src.name || "").trim().toLowerCase());
+      return [kind || "", src.day || "", start || "", end || "", name].join("|");
+    }
+
+    function _setScheduleMotion(action, kind, item) {
+      scheduleMotion = {
+        action,
+        kind,
+        key: _scheduleItemMotionKey(kind, item),
+        ts: Date.now(),
+      };
+    }
+
+    function _scheduleMotionClass(kind, item) {
+      if (!scheduleMotion || scheduleMotion.kind !== kind) return "";
+      if (scheduleMotion.key !== _scheduleItemMotionKey(kind, item)) return "";
+      return scheduleMotion.action === "enter" ? "schedule-entering" : "";
+    }
+
+    function _clearScheduleMotionSoon() {
+      const token = scheduleMotion;
+      window.setTimeout(() => {
+        if (scheduleMotion === token) scheduleMotion = null;
+      }, 650);
+    }
+
+    function _findRenderedScheduleItem(kind, item) {
+      const key = _scheduleItemMotionKey(kind, item);
+      const nodes = Array.from(document.querySelectorAll(".schedule-item[data-schedule-key]"));
+      return nodes.find((el) => el.dataset.scheduleKind === kind && el.dataset.scheduleKey === key) || null;
+    }
+
+    function _animateScheduleRemoval(kind, item) {
+      if (kind !== "course") return Promise.resolve();
+      const el = _findRenderedScheduleItem(kind, item);
+      if (!el) return Promise.resolve();
+      el.classList.remove("schedule-entering");
+      void el.offsetWidth;
+      el.classList.add("schedule-removing");
+      return new Promise((resolve) => {
+        let done = false;
+        const finish = () => {
+          if (done) return;
+          done = true;
+          resolve();
+        };
+        el.addEventListener("animationend", finish, { once: true });
+        window.setTimeout(finish, 340);
+      });
+    }
 
     function _dayOrderIndex(day) {
       return Math.max(0, SCHEDULE_DAY_KEYS.indexOf(String(day || "").toLowerCase()));
     }
 
+    function _cloneDefaultScheduleCourses() {
+      return DEFAULT_PERSONAL_COURSE_ITEMS.map((x) => ({ ...x }));
+    }
+
     function _cloneDefaultScheduleActivities() {
       return CAMPUS_ACTIVITY_ITEMS_CLEAN.map((x) => ({ ...x }));
+    }
+
+    function _sortScheduleCourseItems(list) {
+      return (Array.isArray(list) ? list : []).sort((a, b) => {
+        const da = _dayOrderIndex(a.day);
+        const db = _dayOrderIndex(b.day);
+        if (da !== db) return da - db;
+        const st = _toMinutes(a.start || "");
+        const bt = _toMinutes(b.start || "");
+        if (st !== bt) return st - bt;
+        return String(a.name || "").localeCompare(String(b.name || ""));
+      });
     }
 
     function _sortScheduleActivityItems(list) {
@@ -2950,6 +3175,92 @@
       return { start, end, raw: m[0] || "" };
     }
 
+    function _parseChineseHourToken(raw) {
+      const s = String(raw || "").trim();
+      if (!s) return null;
+      const digit = {
+        "\u96f6": 0,
+        "\u4e00": 1,
+        "\u4e8c": 2,
+        "\u4e24": 2,
+        "\u4e09": 3,
+        "\u56db": 4,
+        "\u4e94": 5,
+        "\u516d": 6,
+        "\u4e03": 7,
+        "\u516b": 8,
+        "\u4e5d": 9,
+      };
+      if (Object.prototype.hasOwnProperty.call(digit, s)) return digit[s];
+      if (s === "\u5341") return 10;
+      if (s.startsWith("\u5341")) return 10 + (digit[s.slice(1)] || 0);
+      if (s.endsWith("\u5341")) return (digit[s.slice(0, -1)] || 0) * 10;
+      const m = s.match(/^([\u4e00\u4e8c\u4e24\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d])\u5341([\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d])?$/);
+      if (m) return (digit[m[1]] || 0) * 10 + (m[2] ? digit[m[2]] || 0 : 0);
+      return null;
+    }
+
+    function _extractDayPeriod(text) {
+      const s = String(text || "");
+      if (/\u4e0a\u5348|morning/i.test(s)) return "morning";
+      if (/\u4e2d\u5348|noon/i.test(s)) return "noon";
+      if (/\u4e0b\u5348|afternoon/i.test(s)) return "afternoon";
+      if (/\u665a\u4e0a|\u508d\u665a|evening|night/i.test(s)) return "evening";
+      return "";
+    }
+
+    function _normalizeSchedulePeriod(period) {
+      const s = String(period || "").toLowerCase();
+      if (/morning|\u4e0a\u5348/.test(s)) return "morning";
+      if (/noon|\u4e2d\u5348/.test(s)) return "noon";
+      if (/afternoon|\u4e0b\u5348/.test(s)) return "afternoon";
+      if (/evening|night|\u665a\u4e0a|\u508d\u665a/.test(s)) return "evening";
+      return "";
+    }
+
+    function _adjustHmByDayPeriod(hm, period) {
+      const p = _normalizeSchedulePeriod(period);
+      if (!hm || (p !== "afternoon" && p !== "evening")) return hm;
+      const [hh, mm] = String(hm).split(":").map(Number);
+      if (!Number.isFinite(hh) || hh >= 12) return hm;
+      return `${String(hh + 12).padStart(2, "0")}:${String(mm || 0).padStart(2, "0")}`;
+    }
+
+    function _parseHmTokenSmart(raw, period = "") {
+      const direct = _parseHmToken(raw);
+      if (direct) return _adjustHmByDayPeriod(direct, period);
+      const t = String(raw || "").trim().replace(/\s+/g, "");
+      const m = t.match(/^([\u96f6\u4e00\u4e8c\u4e24\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341]{1,3})\u70b9(?:(\d{1,2})\u5206?)?$/);
+      if (!m) return "";
+      const h = _parseChineseHourToken(m[1]);
+      const minute = m[2] != null ? Number(m[2]) : 0;
+      if (!Number.isFinite(h) || !Number.isFinite(minute) || h < 0 || h > 23 || minute < 0 || minute > 59) return "";
+      return _adjustHmByDayPeriod(`${String(h).padStart(2, "0")}:${String(minute).padStart(2, "0")}`, period);
+    }
+
+    function _extractTimeRangeSmart(text) {
+      const s = String(text || "");
+      const token = "(?:\\d{1,2}(?:[:：.]\\d{1,2}|\\u70b9(?:\\d{1,2})?(?:\\u5206)?)?|[\\u96f6\\u4e00\\u4e8c\\u4e24\\u4e09\\u56db\\u4e94\\u516d\\u4e03\\u516b\\u4e5d\\u5341]{1,3}\\u70b9(?:\\d{1,2})?(?:\\u5206)?)";
+      const m = s.match(new RegExp(`(${token})\\s*(?:\\u5230|\\u81f3|~|\\uFF5E|-|\\u2014|\\u2013)\\s*(${token})`));
+      if (!m) {
+        const fallback = _extractTimeRange(text);
+        const period = _extractDayPeriod(s);
+        return {
+          start: _adjustHmByDayPeriod(fallback.start, period),
+          end: _adjustHmByDayPeriod(fallback.end, period),
+          raw: fallback.raw || "",
+          period,
+        };
+      }
+      const period = _extractDayPeriod(s);
+      return {
+        start: _parseHmTokenSmart(m[1], period),
+        end: _parseHmTokenSmart(m[2], period),
+        raw: m[0] || "",
+        period,
+      };
+    }
+
     function _extractActivityName(text, timeRangeRaw) {
       const s = String(text || "");
       const explicit = s.match(/(?:加|新增|添加|安排|创建|add|create|schedule)(?:个|一个)?(?:活动|event)?[:：\s]*([^\n，。,；;]+)/i);
@@ -2974,6 +3285,37 @@
       const s = String(text || "");
       const m = s.match(/(?:简介|介绍|说明|备注|intro|description)\s*[:：]\s*([^\n]+)/i);
       return m && m[1] ? m[1].trim() : "";
+    }
+
+    function _loadScheduleCourseItems() {
+      try {
+        const raw = localStorage.getItem(SCHEDULE_COURSE_STORAGE_KEY);
+        if (!raw) return _cloneDefaultScheduleCourses();
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return _cloneDefaultScheduleCourses();
+        const normalized = arr
+          .map((x) => {
+            const day = _normalizeActivityDayToken(x && x.day);
+            const start = _parseHmToken((x && x.start) || "");
+            const end = _parseHmToken((x && x.end) || "");
+            const name = String((x && x.name) || "").trim();
+            const location = String((x && x.location) || "").trim();
+            const teacher = String((x && x.teacher) || "").trim();
+            if (!day || !name || !start || !end) return null;
+            if (!_isWithinScheduleRange(start, end, SCHEDULE_RANGE_START_MIN, SCHEDULE_RANGE_END_MIN)) return null;
+            return { day, name, location, teacher, start, end };
+          })
+          .filter(Boolean);
+        return normalized.length ? _sortScheduleCourseItems(normalized) : _cloneDefaultScheduleCourses();
+      } catch (e) {
+        return _cloneDefaultScheduleCourses();
+      }
+    }
+
+    function _saveScheduleCourseItems() {
+      try {
+        localStorage.setItem(SCHEDULE_COURSE_STORAGE_KEY, JSON.stringify(scheduleCourseItems));
+      } catch (e) {}
     }
 
     function _loadScheduleActivityItems() {
@@ -3007,47 +3349,716 @@
       } catch (e) {}
     }
 
-    function tryHandleScheduleAddCommand(inputText, session) {
-      const text = String(inputText || "").trim();
-      if (!text) return false;
-      const hasAddVerb = /(?:加|新增|添加|安排|创建|add|create|schedule)/i.test(text);
-      const hasScheduleHint = /(?:活动|event|日程|行程|schedule)/i.test(text);
-      const dayInfo = _extractWeekdayKey(text);
-      const range = _extractTimeRange(text);
-      if (!dayInfo.day || !range.start || !range.end || !(hasAddVerb || hasScheduleHint)) return false;
+    function _detectScheduleAction(text) {
+      const s = String(text || "");
+      if (/(删除|删掉|移除|取消|remove|delete|cancel)/i.test(s)) return "delete";
+      if (/(修改|调整|改到|改成|改为|变更|更新|reschedule|change|move|update)/i.test(s)) return "update";
+      if (/(加|新增|添加|安排|创建|加入|add|create|schedule|安排到)/i.test(s)) return "add";
+      return "";
+    }
 
-      let reply = "";
-      if (dayInfo.unsupported || !SCHEDULE_DAY_KEYS.includes(dayInfo.day)) {
-        reply = isEnglishUi()
-          ? "I can only add activities from Monday to Friday right now."
-          : "目前只能添加周一到周五的活动。";
-      } else if (!_isWithinScheduleRange(range.start, range.end, SCHEDULE_RANGE_START_MIN, SCHEDULE_RANGE_END_MIN)) {
-        reply = isEnglishUi()
-          ? "Time must be within 09:00-19:00 and end time must be later than start time."
-          : "时间需在 09:00-19:00 之间，且结束时间要晚于开始时间。";
-      } else {
-        const name = _extractActivityName(text, range.raw);
-        if (!name) {
-          reply = isEnglishUi()
-            ? "I caught the day and time. Please add an activity name, for example: Tue 12:30-15:00 add CV Clinic."
-            : "我识别到周几和时间了，但还缺活动名称。示例：周二12:30到15:00加CV诊断。";
-        } else {
-          const intro = _extractActivityIntro(text) || (isEnglishUi() ? "Added from chat command." : "通过对话指令新增。");
-          const item = { day: dayInfo.day, name: name.slice(0, 60), intro: intro.slice(0, 120), time: `${range.start}-${range.end}` };
-          scheduleActivityItems = _sortScheduleActivityItems([...(scheduleActivityItems || []), item]);
-          _saveScheduleActivityItems();
-          if (rightModuleKey === "schedule" && rightModuleContentEl) renderRightModule();
-          const weekday = _eventWeekdayLabel(dayInfo.day, _scheduleLang());
-          reply = isEnglishUi()
-            ? `Added: ${item.name} on ${weekday} ${item.time}.`
-            : `已添加：${item.name}（${weekday} ${item.time}）。`;
+    function _hasCourseCodeLikeToken(text) {
+      return /[A-Za-z]{2,}\d{2,}[A-Za-z0-9]*/.test(String(text || ""));
+    }
+
+    function _hasExplicitCourseTarget(text) {
+      const s = String(text || "");
+      return /(?:\u8bfe\u7a0b\u8868|\u8bfe\u8868|\u8bfe\u7a0b|\u4e0a\u8bfe|\u6388\u8bfe|\u8bb2\u5ea7\u8bfe|\u6559\u5ba4|\u8001\u5e08|\u6559\u5e08|lecture|class|course|timetable|room|teacher|lec|lab|prac)/i.test(s) || _hasCourseCodeLikeToken(s);
+    }
+
+    function _hasExplicitActivityTarget(text) {
+      const s = String(text || "");
+      return /(?:\u6821\u56ed\u6d3b\u52a8|\u4e2a\u4eba\u6d3b\u52a8|\u6d3b\u52a8|\u884c\u7a0b|\u4e8b\u9879|\u4f1a\u8bae|event|activity|meeting|appointment)/i.test(s);
+    }
+
+    function _detectScheduleTarget(text) {
+      const s = String(text || "");
+      if (_hasExplicitCourseTarget(s)) return "course";
+      if (_hasExplicitActivityTarget(s)) return "activity";
+      if (/(课程表|课表|课程|上课|lecture|class|course|timetable|老师|教师|教室|room|teacher|lec|lab|prac)/i.test(s)) return "course";
+      if (/(活动|行程|事项|会议|event|activity|meeting|appointment)/i.test(s)) return "activity";
+      return "";
+    }
+
+    function _hasPersonalScheduleIntent(text) {
+      const s = String(text || "");
+      const action = _detectScheduleAction(s);
+      const target = _detectScheduleTarget(s);
+      const dayInfo = _extractWeekdayKey(s);
+      const range = _extractTimeRangeSmart(s);
+      if (/(个人日程|我的日程|日程表|日程修改|修改日程|课程表|课表|个人课表|我的课表|personal schedule|my schedule|course schedule|class schedule|timetable)/i.test(s)) {
+        return true;
+      }
+      return !!(action && target && (dayInfo.day || range.start || /日程|schedule|calendar/i.test(s)));
+    }
+
+    function _isScheduleEllipsisIntent(text, focus = null) {
+      const s = String(text || "").trim();
+      if (!s) return false;
+      const action = _detectScheduleAction(s);
+      if (!action || action === "add") return false;
+      if (_hasPersonalScheduleIntent(s)) return true;
+      if (!focus) return false;
+      const hasPronounRef = /(?:\u5b83|\u5b83\u4eec|\u8fd9\u4e2a|\u90a3\u4e2a|\u521a\u624d|\u4e0a\u4e00\u4e2a|it|that|previous)/i.test(s);
+      if (hasPronounRef) return true;
+      if (action === "delete" && s.length <= 12) return true;
+      if (action === "update" && (_extractWeekdayKey(s).day || _extractTimeRangeSmart(s).start)) return true;
+      return /^(删了|删除|删除它|删掉|删掉它|取消|取消它|取消刚才那个|把它删了|把刚才那个删了|改了|修改它|调整它|改一下|delete it|remove it|cancel it|delete that|remove that|change it|update it)$/i.test(s);
+    }
+
+    function _extractScheduleField(text, labelRegex) {
+      const s = String(text || "");
+      const m = s.match(labelRegex);
+      return m && m[1] ? m[1].trim().replace(/[，,。；;]+$/g, "").trim() : "";
+    }
+
+    function _extractCourseLocation(text) {
+      return _extractScheduleField(text, /(?:地点|教室|位置|location|room)\s*[:：]?\s*([A-Za-z0-9_\- ]{2,40})/i);
+    }
+
+    function _extractCourseTeacher(text) {
+      return _extractScheduleField(text, /(?:老师|教师|授课人|teacher|lecturer)\s*[:：]?\s*([^，,。；;\n]{1,40})/i);
+    }
+
+    function _stripScheduleNoise(text, kind, timeRangeRaw) {
+      let t = String(text || "");
+      if (timeRangeRaw) t = t.replace(timeRangeRaw, " ");
+      t = t
+        .replace(/(?:周|星期|礼拜)\s*[一二三四五六日天1234567]/g, " ")
+        .replace(/\b(mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/gi, " ")
+        .replace(/(?:地点|教室|位置|location|room)\s*[:：]?\s*[A-Za-z0-9_\- ]{2,40}/gi, " ")
+        .replace(/(?:老师|教师|授课人|teacher|lecturer)\s*[:：]?\s*[^，,。；;\n]{1,40}/gi, " ")
+        .replace(/(?:简介|介绍|说明|备注|intro|description)\s*[:：].*$/i, " ")
+        .replace(/(?:个人日程|我的日程|日程表|日程|行程|课程表|课表|个人课表|我的课表|calendar|personal schedule|my schedule|course schedule|class schedule|timetable)/gi, " ")
+        .replace(/(?:帮我|请|一下|一个|一条|一门|一节|个|门|节)/gi, " ")
+        .replace(/(?:加|新增|添加|安排|创建|加入|删除|删掉|移除|取消|修改|调整|改到|改成|改为|变更|更新|add|create|remove|delete|cancel|reschedule|change|move|update|schedule)/gi, " ");
+      if (kind === "course") t = t.replace(/(?:课程|上课|lecture|class|course|lec|lab|prac)/gi, " ");
+      else t = t.replace(/(?:活动|事项|会议|event|activity|meeting|appointment)/gi, " ");
+      return t.replace(/[，,。；;]+/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    function _extractScheduleName(text, kind, action, timeRangeRaw) {
+      const s = String(text || "");
+      const targetWords = kind === "course" ? "(?:课程|课|class|course|lecture)?" : "(?:活动|事项|event|activity|meeting)?";
+      if (action === "add") {
+        const explicit = s.match(new RegExp(`(?:加|新增|添加|安排|创建|加入|add|create|schedule)(?:个|一个|一条|一门|一节)?${targetWords}[:：\\s]*([^\\n，。,；;]+)`, "i"));
+        if (explicit && explicit[1]) {
+          const v = _stripScheduleNoise(explicit[1], kind, timeRangeRaw);
+          if (v) return v;
         }
       }
+      const cleaned = _stripScheduleNoise(s, kind, timeRangeRaw);
+      if (!cleaned) return "";
+      return cleaned.length > 80 ? cleaned.slice(0, 80).trim() : cleaned;
+    }
 
+    function _extractScheduleMatchName(text, kind, action, timeRangeRaw) {
+      const s = String(text || "");
+      const beforeChange = s.match(/(?:把|将)?\s*([^，。；;\n]{2,80}?)\s*(?:改到|改成|改为|调整到|调整为|变更为|更新为|删掉|删除|移除|取消|remove|delete|cancel|reschedule|change|move|update)/i);
+      if (beforeChange && beforeChange[1]) {
+        const v = _stripScheduleNoise(beforeChange[1], kind, timeRangeRaw);
+        if (v) return v;
+      }
+      const afterVerb = s.match(/(?:修改|调整|更新|删除|删掉|移除|取消|remove|delete|cancel|change|update)\s*(?:课程|课表|课程表|活动|日程|event|course|class)?[:：\s]*([^，。；;\n]{2,80})/i);
+      if (afterVerb && afterVerb[1]) {
+        const v = _stripScheduleNoise(afterVerb[1], kind, timeRangeRaw);
+        if (v) return v;
+      }
+      if (action === "delete" || action === "update") return _extractScheduleName(s, kind, action, timeRangeRaw);
+      return "";
+    }
+
+    function _normalizeScheduleCommand(raw) {
+      const src = raw && typeof raw === "object" ? raw : {};
+      const item0 = src.item && typeof src.item === "object" ? src.item : {};
+      const item = { ...item0 };
+      if (item.day) item.day = _normalizeActivityDayToken(item.day);
+      if (item.start) item.start = _parseHmToken(item.start);
+      if (item.end) item.end = _parseHmToken(item.end);
+      if (item.period) item.period = _normalizeSchedulePeriod(item.period);
+      if (item.period && item.start) item.start = _adjustHmByDayPeriod(item.start, item.period);
+      if (item.period && item.end) item.end = _adjustHmByDayPeriod(item.end, item.period);
+      if (!item.start || !item.end) {
+        const time = String(item.time || "");
+        if (time.includes("-")) {
+          const [st, ed] = time.split("-");
+          item.start = item.start || _parseHmToken(st);
+          item.end = item.end || _parseHmToken(ed);
+        }
+      }
+      const action = String(src.action || "").toLowerCase();
+      const target = String(src.target || "").toLowerCase();
+      return {
+        handled: !!src.handled,
+        action: ["add", "update", "delete", "open", "none"].includes(action) ? action : "",
+        target: target === "course" || target === "activity" ? target : "",
+        matchName: String(src.matchName || src.match_name || "").trim(),
+        item,
+        confidence: Number(src.confidence || 0),
+        rawText: String(src.rawText || src.text || "").trim(),
+      };
+    }
+
+    function _focusToScheduleCommand(text, focus) {
+      const action = _detectScheduleAction(text);
+      if (!focus || !action || action === "add") return null;
+      const target = focus.target || "activity";
+      const item = { ...(focus.item || {}) };
+      const dayInfo = _extractWeekdayKey(text);
+      const range = _extractTimeRangeSmart(text);
+      if (dayInfo.day) item.day = dayInfo.day;
+      if (range.start) item.start = range.start;
+      if (range.end) item.end = range.end;
+      if (range.period) item.period = range.period;
+      if (target === "course") {
+        const location = _extractCourseLocation(text);
+        const teacher = _extractCourseTeacher(text);
+        if (location) item.location = location;
+        if (teacher) item.teacher = teacher;
+      } else {
+        const intro = _extractActivityIntro(text);
+        if (intro) item.intro = intro;
+      }
+      return {
+        handled: true,
+        action,
+        target,
+        matchName: String(item.name || focus.matchName || "").trim(),
+        item,
+        confidence: 0.9,
+        rawText: String(text || "").trim(),
+      };
+    }
+
+    function _parseScheduleCommandLocal(text, focus = null) {
+      const s = String(text || "").trim();
+      if (!s) return null;
+      if (!_hasPersonalScheduleIntent(s)) {
+        if (_isScheduleEllipsisIntent(s, focus)) return _focusToScheduleCommand(s, focus);
+        return null;
+      }
+      const action = _detectScheduleAction(s) || "open";
+      const target = _detectScheduleTarget(s) || (focus && focus.target) || "";
+      const dayInfo = _extractWeekdayKey(s);
+      const range = _extractTimeRangeSmart(s);
+      const item = {};
+      if (dayInfo.day) item.day = dayInfo.day;
+      if (range.start) item.start = range.start;
+      if (range.end) item.end = range.end;
+      if (range.period) item.period = range.period;
+      if (target === "course") {
+        item.location = _extractCourseLocation(s);
+        item.teacher = _extractCourseTeacher(s);
+      } else {
+        item.intro = _extractActivityIntro(s);
+      }
+      if (action === "add") {
+        item.name = _extractScheduleName(s, target, action, range.raw);
+      }
+      const matchName = action === "update" || action === "delete" ? _extractScheduleMatchName(s, target, action, range.raw) : "";
+      if ((action === "delete" || action === "update") && !matchName && focus && (focus.target || target) === target) {
+        const focusItem = focus.item || {};
+        return {
+          handled: true,
+          action,
+          target,
+          matchName: String(focusItem.name || focus.matchName || "").trim(),
+          item: { ...focusItem, ...item },
+          confidence: 0.86,
+          rawText: s,
+          _dayUnsupported: dayInfo.unsupported,
+        };
+      }
+      return { handled: true, action, target, matchName, item, confidence: action === "open" ? 0.88 : 0.7, rawText: s, _dayUnsupported: dayInfo.unsupported };
+    }
+
+    function _scheduleSnapshotForModel() {
+      const courses = (Array.isArray(scheduleCourseItems) ? scheduleCourseItems : []).map((x) => ({
+        name: String((x && x.name) || ""),
+        day: String((x && x.day) || ""),
+        start: String((x && x.start) || ""),
+        end: String((x && x.end) || ""),
+        location: String((x && x.location) || ""),
+        teacher: String((x && x.teacher) || ""),
+      }));
+      const activities = (Array.isArray(scheduleActivityItems) ? scheduleActivityItems : []).map((x) => {
+        const [start, end] = String((x && x.time) || "").split("-");
+        return {
+          name: String((x && x.name) || ""),
+          day: String((x && x.day) || ""),
+          start: String(start || ""),
+          end: String(end || ""),
+          intro: String((x && x.intro) || ""),
+        };
+      });
+      return { courses, activities };
+    }
+
+    async function _parseScheduleCommandByModel(text, context = []) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
+      try {
+        const res = await fetch("/api/parse_schedule_command", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
+          body: JSON.stringify({ text, language: getAppLanguage(), context, schedule: _scheduleSnapshotForModel() }),
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        return _normalizeScheduleCommand(data);
+      } catch (e) {
+        return null;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    function _isScheduleCommandLocallyComplete(command) {
+      const cmd = _normalizeScheduleCommand(command);
+      if (!cmd.handled || !cmd.action) return false;
+      const item = cmd.item || {};
+      if (cmd.action === "open" || cmd.action === "none") return true;
+      if (cmd.action === "add") {
+        return !!(cmd.target && item.name && item.day && item.start && item.end);
+      }
+      if (cmd.action === "delete") {
+        return !!(cmd.matchName || item.name || (item.day && (item.period || (item.start && item.end))));
+      }
+      if (cmd.action === "update") {
+        const hasReference = !!(cmd.matchName || item.name);
+        const hasChange = !!(item.day || item.period || item.start || item.end || item.location || item.teacher || item.intro);
+        return hasReference && hasChange;
+      }
+      return false;
+    }
+
+    function _appendScheduleAssistantReply(reply, session) {
       const assistantMessageId = createMessageId();
       appendMessage("assistant", reply, assistantMessageId);
       if (session) session.messages.push({ role: "assistant", text: reply, id: assistantMessageId });
+    }
+
+    function _openScheduleBoard() {
+      lastClickedModuleKey = "schedule";
+      dynamicViewMode = "list";
+      expandRightSidebarAndCollapseLeft("schedule");
+    }
+
+    function _normalizeScheduleFocus(target, item, matchName = "") {
+      const src = item && typeof item === "object" ? item : {};
+      const start = src.start || String(src.time || "").split("-")[0] || "";
+      const end = src.end || String(src.time || "").split("-")[1] || "";
+      const name = String(src.name || matchName || "").trim();
+      if (!name) return null;
+      return {
+        target: target === "course" ? "course" : "activity",
+        matchName: name,
+        item: {
+          day: src.day || "",
+          name,
+          start,
+          end,
+          period: src.period || "",
+          location: src.location || "",
+          teacher: src.teacher || "",
+          intro: src.intro || "",
+        },
+        ts: Date.now(),
+      };
+    }
+
+    function _setScheduleFocus(target, item, matchName = "") {
+      const focus = _normalizeScheduleFocus(target, item, matchName);
+      if (focus) lastScheduleFocus = focus;
+      return focus;
+    }
+
+    function _dayLabelToKey(label) {
+      const s = String(label || "").trim().toLowerCase();
+      const zh = { "周一": "mon", "周二": "tue", "周三": "wed", "周四": "thu", "周五": "fri" };
+      if (zh[s]) return zh[s];
+      if (s.startsWith("mon")) return "mon";
+      if (s.startsWith("tue")) return "tue";
+      if (s.startsWith("wed")) return "wed";
+      if (s.startsWith("thu")) return "thu";
+      if (s.startsWith("fri")) return "fri";
+      return "";
+    }
+
+    function _focusFromScheduleReply(text) {
+      const s = String(text || "").trim();
+      if (!s) return null;
+      let m = s.match(/已添加(课程|活动)：\s*([^（\n]+)（([^ ]+)\s+(\d{2}:\d{2})-(\d{2}:\d{2})）/);
+      if (!m) m = s.match(/已修改(课程|活动)：\s*([^ ]+).*?现在是\s+([^ ]+)\s+(\d{2}:\d{2})-(\d{2}:\d{2})/);
+      if (m) {
+        return _normalizeScheduleFocus(m[1] === "课程" ? "course" : "activity", {
+          name: m[2].trim(),
+          day: _dayLabelToKey(m[3]),
+          start: m[4],
+          end: m[5],
+        });
+      }
+      m = s.match(/Added\s+(class|activity):\s*(.+?)\s+on\s+([A-Z]{3}|Mon(?:day)?|Tue(?:sday)?|Wed(?:nesday)?|Thu(?:rsday)?|Fri(?:day)?)\s+(\d{2}:\d{2})-(\d{2}:\d{2})/i);
+      if (!m) m = s.match(/Updated\s+(class|activity):\s*(.+?)\s+is now on\s+([A-Z]{3}|Mon(?:day)?|Tue(?:sday)?|Wed(?:nesday)?|Thu(?:rsday)?|Fri(?:day)?)\s+(\d{2}:\d{2})-(\d{2}:\d{2})/i);
+      if (m) {
+        return _normalizeScheduleFocus(m[1].toLowerCase() === "class" ? "course" : "activity", {
+          name: m[2].trim(),
+          day: _dayLabelToKey(m[3]),
+          start: m[4],
+          end: m[5],
+        });
+      }
+      return null;
+    }
+
+    function _getRecentScheduleFocus(session) {
+      if (lastScheduleFocus && lastScheduleFocus.item && lastScheduleFocus.item.name) return lastScheduleFocus;
+      const msgs = session && Array.isArray(session.messages) ? session.messages : [];
+      for (let i = msgs.length - 1; i >= 0; i--) {
+        const m = msgs[i];
+        if (!m || m.role !== "assistant") continue;
+        const focus = _focusFromScheduleReply(m.text);
+        if (focus) {
+          lastScheduleFocus = focus;
+          return focus;
+        }
+      }
+      return null;
+    }
+
+    function _compactScheduleName(s) {
+      return String(s || "").toLowerCase().replace(/[\s_\-:：，,。；;()（）]+/g, "");
+    }
+
+    function _findScheduleItemIndex(list, command) {
+      const arr = Array.isArray(list) ? list : [];
+      const item = (command && command.item) || {};
+      const candidates = [command && command.matchName, item.name].map((x) => _compactScheduleName(x)).filter(Boolean);
+      let bestIdx = -1;
+      let bestScore = 0;
+      arr.forEach((x, idx) => {
+        const name = _compactScheduleName(x && x.name);
+        let score = 0;
+        candidates.forEach((cand) => {
+          if (!cand || !name) return;
+          if (cand === name) score = Math.max(score, 100);
+          else if (name.includes(cand) || cand.includes(name)) score = Math.max(score, 82);
+        });
+        if (item.day && x.day === item.day) score += 5;
+        if (item.start && item.end) {
+          const sameTime = x.start === item.start && x.end === item.end;
+          const sameActTime = x.time === `${item.start}-${item.end}`;
+          if (sameTime || sameActTime) score = Math.max(score, 75);
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestIdx = idx;
+        }
+      });
+      return bestScore >= 75 ? bestIdx : -1;
+    }
+
+    function _scheduleItemTime(item) {
+      const src = item || {};
+      const start = src.start || String(src.time || "").split("-")[0] || "";
+      const end = src.end || String(src.time || "").split("-")[1] || "";
+      return { start, end, startMin: _toMinutes(start), endMin: _toMinutes(end) };
+    }
+
+    function _schedulePeriodRange(period) {
+      const p = _normalizeSchedulePeriod(period);
+      if (p === "morning") return { startMin: 9 * 60, endMin: 12 * 60 };
+      if (p === "noon") return { startMin: 11 * 60, endMin: 13 * 60 };
+      if (p === "afternoon") return { startMin: 12 * 60, endMin: 18 * 60 };
+      if (p === "evening") return { startMin: 18 * 60, endMin: 19 * 60 };
+      return null;
+    }
+
+    function _timeRangesOverlap(aStart, aEnd, bStart, bEnd) {
+      if (!Number.isFinite(aStart) || !Number.isFinite(aEnd) || !Number.isFinite(bStart) || !Number.isFinite(bEnd)) return false;
+      return Math.max(aStart, bStart) < Math.min(aEnd, bEnd);
+    }
+
+    function _levenshteinDistance(a, b) {
+      const s = String(a || "");
+      const t = String(b || "");
+      if (s === t) return 0;
+      if (!s.length) return t.length;
+      if (!t.length) return s.length;
+      let prev = Array.from({ length: t.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= s.length; i++) {
+        const cur = [i];
+        for (let j = 1; j <= t.length; j++) {
+          const cost = s[i - 1] === t[j - 1] ? 0 : 1;
+          cur[j] = Math.min(cur[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+        }
+        prev = cur;
+      }
+      return prev[t.length];
+    }
+
+    function _scheduleNameSimilarityScore(candidate, actual) {
+      const cand = _compactScheduleName(candidate);
+      const name = _compactScheduleName(actual);
+      if (!cand || !name) return 0;
+      if (cand === name) return 100;
+      if (cand.includes(name) || name.includes(cand)) return Math.min(94, 78 + Math.min(cand.length, name.length));
+      const dist = _levenshteinDistance(cand, name);
+      const ratio = 1 - dist / Math.max(cand.length, name.length, 1);
+      if (ratio >= 0.9) return 92;
+      if (ratio >= 0.82) return 84;
+      if (ratio >= 0.74 && Math.min(cand.length, name.length) >= 6) return 76;
+      return 0;
+    }
+
+    function _scheduleNameCandidates(command) {
+      const item = (command && command.item) || {};
+      const raw = String((command && command.rawText) || "");
+      const base = [command && command.matchName, item.name];
+      const tokenMatches = raw.match(/[A-Za-z]{2,}\d+[A-Za-z0-9]*/g) || [];
+      return [...base, ...tokenMatches].map((x) => String(x || "").trim()).filter(Boolean);
+    }
+
+    function _findScheduleItemMatchSmart(list, command) {
+      const arr = Array.isArray(list) ? list : [];
+      const item = (command && command.item) || {};
+      const candidates = _scheduleNameCandidates(command);
+      const periodRange = _schedulePeriodRange(item.period);
+      let best = { idx: -1, score: 0, nameScore: 0 };
+      let secondScore = 0;
+      arr.forEach((x, idx) => {
+        const itemTime = _scheduleItemTime(x);
+        let nameScore = 0;
+        candidates.forEach((cand) => {
+          nameScore = Math.max(nameScore, _scheduleNameSimilarityScore(cand, x && x.name));
+        });
+
+        let score = nameScore;
+        if (item.day && x.day === item.day) score += 28;
+        if (item.start && item.end) {
+          const desiredStart = _toMinutes(item.start);
+          const desiredEnd = _toMinutes(item.end);
+          const exact = itemTime.start === item.start && itemTime.end === item.end;
+          const overlaps = _timeRangesOverlap(desiredStart, desiredEnd, itemTime.startMin, itemTime.endMin);
+          if (exact) score += 45;
+          else if (overlaps) score += 28;
+        } else if (periodRange && _timeRangesOverlap(periodRange.startMin, periodRange.endMin, itemTime.startMin, itemTime.endMin)) {
+          score += 35;
+        }
+
+        if (score > best.score) {
+          secondScore = best.score;
+          best = { idx, score, nameScore };
+        } else if (score > secondScore) {
+          secondScore = score;
+        }
+      });
+      const threshold = best.nameScore >= 76 ? 76 : 60;
+      if (best.idx < 0 || best.score < threshold) return { idx: -1, score: best.score };
+      if (best.score < 90 && secondScore > 0 && best.score - secondScore < 4) return { idx: -1, score: best.score };
+      return best;
+    }
+
+    function _findScheduleItemIndexSmart(list, command) {
+      return _findScheduleItemMatchSmart(list, command).idx;
+    }
+
+    function _scheduleMissingDetailsReply(kind) {
+      if (isEnglishUi()) {
+        return kind === "course"
+          ? "I opened Personal Schedule. To change a class, include the class name, weekday, and time, for example: move DTS209TC Lec to Friday 10:00-11:50 in TC-FG-2001."
+          : "I opened Personal Schedule. To change an activity, include the activity name, weekday, and time, for example: add CV Clinic on Tuesday 12:30-15:00.";
+      }
+      return kind === "course"
+        ? "已打开个人日程。修改课程请尽量包含课程名、周几和时间，例如：把 DTS209TC Lec 改到周五 10:00-11:50，地点 TC-FG-2001。"
+        : "已打开个人日程。修改活动请尽量包含活动名、周几和时间，例如：周二 12:30-15:00 新增活动 CV 诊断。";
+    }
+
+    async function _applyScheduleCommand(command, session) {
+      const cmd = _normalizeScheduleCommand(command);
+      if (!cmd.handled) return false;
+      let kind = cmd.target || (cmd.action === "add" ? "activity" : "");
+      const explicitKind = _detectScheduleTarget(cmd.rawText || "");
+      if (explicitKind) kind = explicitKind;
+      const action = cmd.action || "open";
+      const item = cmd.item || {};
+      _openScheduleBoard();
+
+      if (action === "open" || action === "none") {
+        _appendScheduleAssistantReply(_scheduleMissingDetailsReply(kind || "activity"), session);
+        return true;
+      }
+
+      if (item.day && !SCHEDULE_DAY_KEYS.includes(item.day)) {
+        const reply = isEnglishUi()
+          ? "Personal Schedule currently supports Monday to Friday only."
+          : "个人日程目前只支持周一到周五。";
+        _appendScheduleAssistantReply(reply, session);
+        return true;
+      }
+
+      if (!kind && action === "add") kind = "activity";
+      let list = kind === "course" ? scheduleCourseItems : scheduleActivityItems;
+      let save = kind === "course" ? _saveScheduleCourseItems : _saveScheduleActivityItems;
+      let sort = kind === "course" ? _sortScheduleCourseItems : _sortScheduleActivityItems;
+      let label = isEnglishUi() ? (kind === "course" ? "class" : "activity") : kind === "course" ? "课程" : "活动";
+
+      if (action === "add") {
+        const name = String(item.name || "").trim();
+        if (!item.day || !item.start || !item.end || !name) {
+          _appendScheduleAssistantReply(_scheduleMissingDetailsReply(kind), session);
+          return true;
+        }
+        if (!_isWithinScheduleRange(item.start, item.end, SCHEDULE_RANGE_START_MIN, SCHEDULE_RANGE_END_MIN)) {
+          const reply = isEnglishUi()
+            ? "Time must be within 09:00-19:00 and end time must be later than start time."
+            : "时间需在 09:00-19:00 之间，且结束时间要晚于开始时间。";
+          _appendScheduleAssistantReply(reply, session);
+          return true;
+        }
+        if (kind === "course") {
+          const next = {
+            day: item.day,
+            name: name.slice(0, 60),
+            location: String(item.location || "").trim().slice(0, 60),
+            teacher: String(item.teacher || "").trim().slice(0, 60),
+            start: item.start,
+            end: item.end,
+          };
+          _setScheduleMotion("enter", kind, next);
+          scheduleCourseItems = sort([...(scheduleCourseItems || []), next]);
+          save();
+          _setScheduleFocus(kind, next);
+        } else {
+          const next = {
+            day: item.day,
+            name: name.slice(0, 60),
+            intro: String(item.intro || (isEnglishUi() ? "Added from chat command." : "通过对话指令新增。")).trim().slice(0, 120),
+            time: `${item.start}-${item.end}`,
+          };
+          scheduleActivityItems = sort([...(scheduleActivityItems || []), next]);
+          save();
+          _setScheduleFocus(kind, next);
+        }
+        renderRightModule();
+        _clearScheduleMotionSoon();
+        const weekday = _eventWeekdayLabel(item.day, _scheduleLang());
+        const reply = isEnglishUi()
+          ? `Added ${label}: ${name} on ${weekday} ${item.start}-${item.end}.`
+          : `已添加${label}：${name}（${weekday} ${item.start}-${item.end}）。`;
+        _appendScheduleAssistantReply(reply, session);
+        return true;
+      }
+
+      let idx = _findScheduleItemIndexSmart(list, cmd);
+      if (idx < 0 && action !== "add" && !explicitKind) {
+        const altKind = kind === "course" ? "activity" : "course";
+        const altList = altKind === "course" ? scheduleCourseItems : scheduleActivityItems;
+        const altIdx = _findScheduleItemIndexSmart(altList, cmd);
+        if (altIdx >= 0) {
+          kind = altKind;
+          list = altList;
+          save = kind === "course" ? _saveScheduleCourseItems : _saveScheduleActivityItems;
+          sort = kind === "course" ? _sortScheduleCourseItems : _sortScheduleActivityItems;
+          label = isEnglishUi() ? (kind === "course" ? "class" : "activity") : kind === "course" ? "课程" : "活动";
+          idx = altIdx;
+        }
+      }
+      if (idx < 0) {
+        const reply = isEnglishUi()
+          ? `I opened Personal Schedule, but could not find the ${label} to ${action === "delete" ? "delete" : "update"}. Please include the exact name shown on the card.`
+          : `已打开个人日程，但没有找到要${action === "delete" ? "删除" : "修改"}的${label}。请尽量写出卡片上的完整名称。`;
+        _appendScheduleAssistantReply(reply, session);
+        return true;
+      }
+
+      if (action === "delete") {
+        const old = list[idx];
+        await _animateScheduleRemoval(kind, old);
+        if (kind === "course") {
+          scheduleCourseItems = scheduleCourseItems.filter((_, i) => i !== idx);
+          save();
+        } else {
+          scheduleActivityItems = scheduleActivityItems.filter((_, i) => i !== idx);
+          save();
+        }
+        lastScheduleFocus = null;
+        renderRightModule();
+        const reply = isEnglishUi() ? `Deleted ${label}: ${old.name}.` : `已删除${label}：${old.name}。`;
+        _appendScheduleAssistantReply(reply, session);
+        return true;
+      }
+
+      const old = list[idx];
+      const nextDay = item.day || old.day;
+      const nextStart = item.start || old.start || String(old.time || "").split("-")[0];
+      const nextEnd = item.end || old.end || String(old.time || "").split("-")[1];
+      if (!_isWithinScheduleRange(nextStart, nextEnd, SCHEDULE_RANGE_START_MIN, SCHEDULE_RANGE_END_MIN)) {
+        const reply = isEnglishUi()
+          ? "Time must be within 09:00-19:00 and end time must be later than start time."
+          : "时间需在 09:00-19:00 之间，且结束时间要晚于开始时间。";
+        _appendScheduleAssistantReply(reply, session);
+        return true;
+      }
+      if (kind === "course") {
+        const next = {
+          ...old,
+          day: nextDay,
+          start: nextStart,
+          end: nextEnd,
+          location: String(item.location || old.location || "").trim(),
+          teacher: String(item.teacher || old.teacher || "").trim(),
+        };
+        scheduleCourseItems = sort(scheduleCourseItems.map((x, i) => (i === idx ? next : x)));
+        save();
+        _setScheduleFocus(kind, next);
+      } else {
+        const next = {
+          ...old,
+          day: nextDay,
+          time: `${nextStart}-${nextEnd}`,
+          intro: String(item.intro || old.intro || "").trim(),
+        };
+        scheduleActivityItems = sort(scheduleActivityItems.map((x, i) => (i === idx ? next : x)));
+        save();
+        _setScheduleFocus(kind, next);
+      }
+      renderRightModule();
+      const weekday = _eventWeekdayLabel(nextDay, _scheduleLang());
+      const reply = isEnglishUi()
+        ? `Updated ${label}: ${old.name} is now on ${weekday} ${nextStart}-${nextEnd}.`
+        : `已修改${label}：${old.name} 现在是 ${weekday} ${nextStart}-${nextEnd}。`;
+      _appendScheduleAssistantReply(reply, session);
       return true;
+    }
+
+    async function tryHandleScheduleCommand(inputText, session) {
+      const text = String(inputText || "").trim();
+      if (!text) return false;
+      const pseudoContext = typeof getRecentPseudoContext === "function" ? getRecentPseudoContext(session, text) : [];
+      const focus = _getRecentScheduleFocus(session);
+      const hasScheduleIntent = _hasPersonalScheduleIntent(text) || _isScheduleEllipsisIntent(text, focus);
+      const localCommand = _parseScheduleCommandLocal(text, focus);
+      const explicitTarget = _detectScheduleTarget(text);
+      let command = localCommand;
+      if (hasScheduleIntent) {
+        const modelCommand = await _parseScheduleCommandByModel(text, pseudoContext);
+        if (modelCommand && modelCommand.handled && modelCommand.confidence >= 0.55) {
+          const localHasFocusedTarget = !!(localCommand && localCommand.confidence >= 0.85 && (localCommand.matchName || (localCommand.item && localCommand.item.name)));
+          command = {
+            ...(localCommand || {}),
+            ...modelCommand,
+            action: modelCommand.action || (localCommand && localCommand.action) || "open",
+            target: explicitTarget || (localHasFocusedTarget && !modelCommand.matchName ? localCommand.target : modelCommand.target || (localCommand && localCommand.target) || "activity"),
+            item: { ...((localCommand && localCommand.item) || {}), ...(modelCommand.item || {}) },
+            matchName: modelCommand.matchName || (localCommand && localCommand.matchName) || "",
+            rawText: text,
+          };
+        }
+      }
+      if (!command || !command.handled) return false;
+      return _applyScheduleCommand(command, session);
     }
 
     function _scheduleLang() {
@@ -3103,7 +4114,7 @@
       }
 
       const byDayCourses = Object.fromEntries(SCHEDULE_DAY_KEYS.map((d) => [d, []]));
-      PERSONAL_COURSE_ITEMS.forEach((x) => {
+      scheduleCourseItems.forEach((x) => {
         if (!_isWithinScheduleRange(x.start, x.end, startMin, endMin)) return;
         if (byDayCourses[x.day]) byDayCourses[x.day].push(x);
       });
@@ -3136,8 +4147,10 @@
             const height = Math.max(28, Math.round((_toMinutes(it.end) - _toMinutes(it.start)) * pxPerMinute));
             const nm = String(it.name || "").toLowerCase();
             const colorClass = /lec/.test(nm) ? "course-lec" : /lab|prac/.test(nm) ? "course-lab" : "course-lab";
+            const motionClass = _scheduleMotionClass("course", it);
+            const itemKey = _scheduleItemMotionKey("course", it);
             return `
-              <div class="schedule-item course ${colorClass}" style="left:4px;width:calc(58% - 8px);top:${top}px;height:${height}px;">
+              <div class="schedule-item course ${colorClass} ${motionClass}" data-schedule-kind="course" data-schedule-key="${_escapeHtml(itemKey)}" style="left:4px;width:calc(58% - 8px);top:${top}px;height:${height}px;">
                 <div class="schedule-item-title">${_escapeHtml(it.name)}</div>
                 <div class="schedule-item-sub">${_escapeHtml(it.teacher || "")}</div>
                 <div class="schedule-item-sub">${_escapeHtml(it.location || "")}</div>
@@ -3241,6 +4254,99 @@
 
       if (mk === "schedule") {
         return renderPersonalSchedulePage();
+      }
+
+      if (mk === "study") {
+        if (!p || p === "study_home") {
+          return renderModulePage({
+            title: "Learning Support",
+            showInlineBack: false,
+            bodyHtml: `
+              <div class="module-grid" aria-label="Learning support modules">
+                <button class="module-action-btn" type="button" data-right-page="study_my"><div class="module-action-icon">${svgIcon("target")}</div><div class="module-action-text"><div class="module-action-title">My Learning</div><div class="module-action-sub">Goals, progress, weekly tasks</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_course"><div class="module-action-icon">${svgIcon("book")}</div><div class="module-action-text"><div class="module-action-title">Course Learning</div><div class="module-action-sub">Preview, review, homework, exams</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_english"><div class="module-action-icon">${svgIcon("globe")}</div><div class="module-action-text"><div class="module-action-title">English Learning</div><div class="module-action-sub">Reading, writing, speaking, listening</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_plan"><div class="module-action-icon">${svgIcon("calendar")}</div><div class="module-action-text"><div class="module-action-title">Study Plan</div><div class="module-action-sub">Weekly plan, Pomodoro, review rhythm</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_writing"><div class="module-action-icon">${svgIcon("pen")}</div><div class="module-action-text"><div class="module-action-title">Academic Writing</div><div class="module-action-sub">Structure, citations, polishing</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_methods"><div class="module-action-icon">${svgIcon("target")}</div><div class="module-action-text"><div class="module-action-title">Study Methods</div><div class="module-action-sub">Memory, practice, review templates</div></div></button>
+              </div>
+            `,
+          });
+        }
+        if (p === "study_my") {
+          return renderModulePage({
+            title: "My Learning",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph">Use this panel as a practical weekly study dashboard.</div>
+              <div class="module-section">
+                <div class="module-paragraph"><b>This week's goals</b></div>
+                <ul class="module-list">
+                  <li>Pick three measurable learning goals.</li>
+                  <li>Track progress with completed tasks, blockers, and next steps.</li>
+                  <li>Review mistakes by cause: concept, calculation, method, or attention.</li>
+                </ul>
+              </div>
+              <div class="module-grid">
+                <button class="module-action-btn" type="button" data-right-page="study_my_today"><div class="module-action-icon">${svgIcon("calendar")}</div><div class="module-action-text"><div class="module-action-title">Generate Today's Tasks</div><div class="module-action-sub">60-90 minute study blocks</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_my_review"><div class="module-action-icon">${svgIcon("target")}</div><div class="module-action-text"><div class="module-action-title">Review Template</div><div class="module-action-sub">Mistakes and tomorrow's fix</div></div></button>
+              </div>
+            `,
+          });
+        }
+        if (p === "study_course") {
+          return renderModulePage({
+            title: "Course Learning",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph">Choose a course area first. I can then turn your chapter, problem type, and lecture style into a concrete study path.</div>
+              <div class="module-grid" aria-label="Course areas">
+                <button class="module-action-btn" type="button" data-right-page="study_course_calc"><div class="module-action-icon">${svgIcon("book")}</div><div class="module-action-text"><div class="module-action-title">Calculus / Mathematical Analysis</div><div class="module-action-sub">Limits, derivatives, integrals, series</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_course_stats"><div class="module-action-icon">${svgIcon("target")}</div><div class="module-action-text"><div class="module-action-title">Probability and Statistics</div><div class="module-action-sub">Distributions, estimation, testing, regression</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_course_cs"><div class="module-action-icon">${svgIcon("pen")}</div><div class="module-action-text"><div class="module-action-title">Programming Fundamentals</div><div class="module-action-sub">Syntax, debugging, data structures</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_course_econ"><div class="module-action-icon">${svgIcon("calendar")}</div><div class="module-action-text"><div class="module-action-title">Principles of Economics</div><div class="module-action-sub">Supply, demand, elasticity, IS-LM</div></div></button>
+              </div>
+            `,
+          });
+        }
+        if (p === "study_english") {
+          return renderModulePage({
+            title: "English Learning",
+            showInlineBack: true,
+            bodyHtml: `
+              <div class="module-paragraph">Choose one training direction. I can then build a detailed routine and daily tasks.</div>
+              <div class="module-grid" aria-label="English learning directions">
+                <button class="module-action-btn" type="button" data-right-page="study_english_vocab"><div class="module-action-icon">${svgIcon("book")}</div><div class="module-action-text"><div class="module-action-title">Vocabulary and Grammar</div><div class="module-action-sub">High-frequency words and correction checklist</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_english_reading"><div class="module-action-icon">${svgIcon("target")}</div><div class="module-action-text"><div class="module-action-title">Reading</div><div class="module-action-sub">Locating, question types, speed</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_english_writing"><div class="module-action-icon">${svgIcon("pen")}</div><div class="module-action-text"><div class="module-action-title">Writing</div><div class="module-action-sub">Structure, argument, sentence upgrades</div></div></button>
+                <button class="module-action-btn" type="button" data-right-page="study_english_speaking"><div class="module-action-icon">${svgIcon("globe")}</div><div class="module-action-text"><div class="module-action-title">Speaking and Listening</div><div class="module-action-sub">Shadowing, topic cards, dictation</div></div></button>
+              </div>
+            `,
+          });
+        }
+        const map = {
+          study_my_today: ["Today's Tasks", "20 minutes: review one key concept and write a short summary.", "25 minutes: solve representative problems and mark the exact sticking point.", "15 minutes: review mistakes and decide one change for tomorrow."],
+          study_my_review: ["Review Template", "List three things completed today.", "Name the blocker: concept, calculation, method, attention, or time management.", "Write one concrete adjustment for the next study block."],
+          study_course_calc: ["Calculus / Mathematical Analysis", "Start with definitions and common expansions.", "Practice limits, derivatives, integrals, and series by problem type.", "Review errors by missing condition, wrong expansion order, or sign mistake."],
+          study_course_calc_limits: ["Limits and Continuity", "Identify the form first: 0/0, infinity/infinity, or indeterminate products.", "Try equivalent infinitesimals, Taylor expansion, substitution, then L'Hopital if conditions hold.", "Check expansion order and sign assumptions."],
+          study_course_calc_series: ["Taylor Expansion and Series", "Write the target order before expanding.", "Combine same-order terms and identify the leading term.", "Use remainder estimates when approximation accuracy matters."],
+          study_course_stats: ["Probability and Statistics", "Organize each distribution by mean, variance, and typical use case.", "Practice estimation, confidence intervals, hypothesis tests, and regression.", "Separate concept errors from calculation errors."],
+          study_course_cs: ["Programming Fundamentals", "Practice arrays, strings, hash maps, stacks, queues, and recursion.", "Use small, boundary, and random tests before submitting.", "Debug by checking indices, types, and edge cases first."],
+          study_course_econ: ["Principles of Economics", "Draw the graph before writing conclusions.", "Explain direction changes in price, quantity, and welfare.", "Connect the final answer to supply, demand, incentives, or policy assumptions."],
+          study_english_vocab: ["Vocabulary and Grammar", "Learn a small set of new words with roots, collocations, and example sentences.", "Review old words on a 1-3-7-14 day rhythm.", "Check grammar for tense, articles, subject-verb agreement, and clauses."],
+          study_english_reading: ["Reading", "Preview headings, topic sentences, and paragraph structure.", "Locate evidence before reading deeply.", "Review wrong answers by locating, paraphrase, and over-inference."],
+          study_english_writing: ["Writing", "Use a clear introduction, two body paragraphs, and a concise conclusion.", "Make each body paragraph follow claim, explanation, example, and link back.", "Check cohesion, grammar, and repeated expressions after drafting."],
+          study_english_speaking: ["Speaking and Listening", "Record one topic-card answer and listen back for pauses.", "Shadow short audio clips for rhythm and linking.", "Use dictation to catch weak forms and paraphrases."],
+          study_plan: ["Study Plan", "Set three measurable weekly priorities.", "Use two focused blocks per day and one short review.", "Plan rest deliberately so the schedule can actually last."],
+          study_writing: ["Academic Writing", "Build the outline before drafting paragraphs.", "Keep claims, evidence, and citations aligned.", "Polish terminology, transitions, and citation format at the end."],
+          study_methods: ["Study Methods", "Use the Feynman method to expose unclear concepts.", "Use spaced repetition on a 1-3-7-14 day rhythm.", "Review mistakes by cause and write one prevention rule."],
+        };
+        const row = map[p] || map.study_methods;
+        return renderModulePage({
+          title: row[0],
+          showInlineBack: true,
+          bodyHtml: `<ul class="module-list">${row.slice(1).map((x) => `<li>${x}</li>`).join("")}</ul>`,
+        });
       }
 
       if (mk === "intern") {
@@ -3392,7 +4498,7 @@
       const dynamicEnabled = rightModuleKey !== "schedule";
       setDynamicPanelEnabled(dynamicEnabled);
 
-      if (isEnglishUi() && page !== "dyn_detail" && rightModuleKey !== "study") {
+      if (isEnglishUi() && page !== "dyn_detail") {
         rightModuleContentEl.innerHTML = renderRightModuleEn(page);
         if (dynamicEnabled) renderDynamicModulesForKey(getBestDynamicKey());
         return;
@@ -3974,14 +5080,26 @@
       if (!s) return s;
       if (_containsUrl(s)) return s;
       if (!_needsOnlineServiceLink(s)) return s;
-      return `${s}\n\n相关入口：${DEFAULT_ONLINE_SERVICE_URL}`;
+      return `${s}\n\n${isEnglishUi() ? "Related entry:" : "相关入口："} ${DEFAULT_ONLINE_SERVICE_URL}`;
     }
 
     function toDeclarativeTitle(rawTitle) {
       let s = String(rawTitle || "").trim();
-      if (!s) return "推荐内容";
+      if (!s) return t("recommendation");
       s = s.replace(/[？?]+$/g, "").trim();
       s = s.replace(/^请问[:：]?\s*/g, "");
+      if (isEnglishUi()) {
+        if (/(when|date|time).*(semester|term|class start|school start)|(?:semester|term|class start|school start).*(when|date|time)/i.test(s)) return "Semester Start Time";
+        if (/(when|date|time).*(registration|enrol|enroll|check[\-\s]?in)|(?:registration|enrol|enroll|check[\-\s]?in).*(when|date|time)/i.test(s)) return "New Student Registration Time";
+        if (/(deadline|due date|ddl)/i.test(s)) return "Application Deadline";
+        if (/(where|location|address)/i.test(s)) return "Service Location";
+        if (/(fee|cost|price|payment)/i.test(s)) return "Fees and Costs";
+        if (/(contact|email|phone)/i.test(s)) return "Contact Information";
+        if (/(link|portal|website|site|system|entry)/i.test(s)) return "Official Access Link";
+        s = s.replace(/^(how to|how do i|can i|could i|is it possible to|where can i|when should i)\s+/i, "").trim();
+        if (!s) return "Recommended Information";
+        return s.charAt(0).toUpperCase() + s.slice(1);
+      }
       // 常见“疑问字段”直接映射为陈述句字段标题（避免看起来像问句）
       if (/(几号|什么时候|何时|时间|日期|几点).*(开学)/.test(s) || /(开学).*(几号|什么时候|何时|时间|日期|几点)/.test(s)) {
         return "学校开学时间";
@@ -4031,7 +5149,8 @@
       if (!list || list.length === 0) return "";
       return list
         .map((m, idx) => {
-          const rawTitle = m && m.allowRawTitle ? String(m.title || "推荐模块") : toDeclarativeTitle(m.title || "推荐模块");
+          const fallbackTitle = t("recommendation");
+          const rawTitle = m && m.allowRawTitle ? String(m.title || fallbackTitle) : toDeclarativeTitle(m.title || fallbackTitle);
           const title = _escapeHtml(rawTitle);
           const desc = _escapeHtml(m.desc || "");
           const icon = svgIcon(m.icon || "book");
@@ -4393,7 +5512,7 @@
         const cached = dynamicDetailCacheByKey && dynamicDetailCacheByKey[detailKey];
         if (cached && cached.data && Date.now() - (cached.ts || 0) < DYNAMIC_REWRITE_TTL_MS) {
           const d = cached.data;
-          const title = _escapeHtml(toDeclarativeTitle(d.title || card.title || "推荐内容"));
+          const title = _escapeHtml(toDeclarativeTitle(d.title || card.title || t("recommendation")));
           const desc = _escapeHtml(d.desc || "");
           const detailsText = String(d.details || "").trim();
           const lines = detailsText
@@ -4412,7 +5531,7 @@
           rightDynamicModulesEl.innerHTML = `
             <div class="ai-detail">
               <div class="ai-detail-top">
-                <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="返回列表" title="返回">
+                <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="${t("back")}" title="${t("back")}">
                   ${svgIcon("arrow-left")}
                 </button>
                 <div class="ai-detail-head">
@@ -4427,11 +5546,11 @@
         }
 
         // 先展示“标题 + 加载态”，避免只看到空白加载框
-        const preTitle = _escapeHtml(toDeclarativeTitle(card.title || card.action || "推荐内容"));
+        const preTitle = _escapeHtml(toDeclarativeTitle(card.title || card.action || t("recommendation")));
         rightDynamicModulesEl.innerHTML = `
           <div class="ai-detail">
             <div class="ai-detail-top">
-              <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="返回列表" title="返回">
+              <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="${t("back")}" title="${t("back")}">
                 ${svgIcon("arrow-left")}
               </button>
               <div class="ai-detail-head">
@@ -4441,7 +5560,7 @@
             </div>
             <div class="right-dynamic-loading" style="margin-top:10px;">
               <div class="right-dynamic-spinner" aria-hidden="true"></div>
-              <div>正在加载推荐内容…</div>
+              <div>${t("loadingRecommendations")}</div>
             </div>
           </div>
         `;
@@ -4523,7 +5642,7 @@
             rightDynamicModulesEl.innerHTML = `
               <div class="ai-detail">
                 <div class="ai-detail-top">
-                  <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="返回列表" title="返回">
+                  <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="${t("back")}" title="${t("back")}">
                     ${svgIcon("arrow-left")}
                   </button>
                   <div class="ai-detail-head">
@@ -4536,12 +5655,12 @@
             `;
           } catch (e) {
             // fallback: 直接渲染原 details
-            const title = _escapeHtml(toDeclarativeTitle(card.title || "推荐内容"));
+            const title = _escapeHtml(toDeclarativeTitle(card.title || t("recommendation")));
             const details = String(card.details || "").trim();
             rightDynamicModulesEl.innerHTML = `
               <div class="ai-detail">
                 <div class="ai-detail-top">
-                  <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="返回列表" title="返回">
+                  <button class="module-inline-back" type="button" data-dyn-view="list" aria-label="${t("back")}" title="${t("back")}">
                     ${svgIcon("arrow-left")}
                   </button>
                   <div class="ai-detail-head">
@@ -4580,7 +5699,7 @@
         const btn = t && t.closest ? t.closest("[data-dyn-details]") : null;
         if (!btn) return;
         const card = {
-          title: btn.getAttribute("data-dyn-title") || "推荐模块",
+          title: btn.getAttribute("data-dyn-title") || t("recommendation"),
           desc: btn.getAttribute("data-dyn-desc") || "",
           icon: btn.getAttribute("data-dyn-icon") || "book",
           action: btn.getAttribute("data-dyn-action") || "",
@@ -5074,6 +6193,34 @@
       return t;
     }
 
+    function _typingWait(ms) {
+      return new Promise((resolve) => window.setTimeout(resolve, ms));
+    }
+
+    function _typingDelayForChar(ch) {
+      if (!ch) return 0;
+      if (ch === "\n") return 42;
+      if (/[。！？.!?]/.test(ch)) return 46;
+      if (/[，、；;：:,]/.test(ch)) return 28;
+      if (/\s/.test(ch)) return 8;
+      return 15;
+    }
+
+    function _renderAssistantTypingText(assistantBubble, text) {
+      const cleaned = cleanAssistantText(text);
+      assistantBubble.innerHTML = _escapeAndLinkify(cleaned).replace(/\n/g, "<br>");
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    async function _typeAssistantDelta(state, assistantBubble, delta) {
+      for (const ch of Array.from(String(delta || ""))) {
+        state.text += ch;
+        state.gotFirstToken = true;
+        _renderAssistantTypingText(assistantBubble, state.text);
+        await _typingWait(_typingDelayForChar(ch));
+      }
+    }
+
     function findPrevUserMessageForAssistant(assistantRowEl) {
       const rows = Array.from(messagesEl.children);
       const idx = rows.indexOf(assistantRowEl);
@@ -5091,11 +6238,53 @@
       return null;
     }
 
+    function getRecentPseudoContext(session, promptText, assistantMessageIndex = null) {
+      const msgs = session && Array.isArray(session.messages) ? session.messages : [];
+      if (!msgs.length) return [];
+      const currentText = String(promptText || "").trim();
+      let end = msgs.length;
+
+      if (typeof assistantMessageIndex === "number" && assistantMessageIndex >= 0) {
+        for (let i = assistantMessageIndex - 1; i >= 0; i--) {
+          const m = msgs[i];
+          if (m && m.role === "user" && String(m.text || "").trim() === currentText) {
+            end = i;
+            break;
+          }
+        }
+      } else {
+        for (let i = msgs.length - 1; i >= 0; i--) {
+          const m = msgs[i];
+          if (m && m.role === "user" && String(m.text || "").trim() === currentText) {
+            end = i;
+            break;
+          }
+        }
+      }
+
+      return msgs
+        .slice(0, Math.max(0, end))
+        .filter((m) => m && (m.role === "user" || m.role === "assistant") && String(m.text || "").trim())
+        .slice(-3)
+        .map((m) => ({
+          role: m.role === "assistant" ? "assistant" : "user",
+          text: String(m.text || "").trim().slice(0, 600),
+        }));
+    }
+
+    function _chatUnavailableReply(err) {
+      const detail = err && err.message ? String(err.message).slice(0, 120) : "";
+      if (isEnglishUi()) {
+        return "The model service is temporarily unavailable, likely because the current VPN/DeepSeek API route returned an error. You can try again later; local Personal Schedule edits still work." + (detail ? ` (${detail})` : "");
+      }
+      return "\u6a21\u578b\u670d\u52a1\u6682\u65f6\u4e0d\u53ef\u7528\uff0c\u53ef\u80fd\u662f\u5f53\u524d VPN/DeepSeek API \u94fe\u8def\u8fd4\u56de\u9519\u8bef\u3002\u4f60\u53ef\u4ee5\u7a0d\u540e\u91cd\u8bd5\uff1b\u4e2a\u4eba\u65e5\u7a0b\u7684\u672c\u5730\u589e\u5220\u6539\u4ecd\u53ef\u7ee7\u7eed\u4f7f\u7528\u3002" + (detail ? ` (${detail})` : "");
+    }
+
     async function streamAssistantReply(promptText, assistantBubble, assistantMessageId, assistantMessageIndex, session) {
-      let assistantRaw = "";
+      const assistantTypingState = { text: "", gotFirstToken: false };
       let handledMeta = false;
       isChatStreaming = true;
-      let gotFirstToken = false;
+      const pseudoContext = getRecentPseudoContext(session, promptText, assistantMessageIndex);
 
       try {
         const res = await fetch("/api/chat_stream", {
@@ -5103,7 +6292,7 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ message: promptText, language: getAppLanguage() }),
+          body: JSON.stringify({ message: promptText, language: getAppLanguage(), context: pseudoContext }),
         });
 
         if (!res.ok) throw new Error("HTTP " + res.status);
@@ -5169,21 +6358,14 @@
               }
 
               if (delta) {
-                // 尽量模拟“逐字打字”：把增量拆成字符逐个追加
-                for (const ch of delta) {
-                  assistantRaw += ch;
-                  if (!gotFirstToken) gotFirstToken = true;
-                  const cleaned = cleanAssistantText(assistantRaw);
-                  assistantBubble.innerHTML = _escapeAndLinkify(cleaned).replace(/\n/g, "<br>");
-                  messagesEl.scrollTop = messagesEl.scrollHeight;
-                }
+                await _typeAssistantDelta(assistantTypingState, assistantBubble, delta);
               }
             }
             if (done) break;
           }
         }
 
-        const finalText = _ensureOnlineServiceLink(cleanAssistantText(assistantRaw) || t("emptyReply"));
+        const finalText = _ensureOnlineServiceLink(cleanAssistantText(assistantTypingState.text) || t("emptyReply"));
         assistantBubble.innerHTML = _escapeAndLinkify(finalText).replace(/\n/g, "<br>");
 
         if (session) {
@@ -5207,17 +6389,24 @@
         return finalText;
       } catch (err) {
         // 兜底：如果流式失败，退回到原来的 /api/chat 一次性接口
-        const res2 = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: promptText, language: getAppLanguage() }),
-        });
-        if (!res2.ok) throw err;
-
-        const data = await res2.json();
-        const reply = data.reply || t("emptyReply");
+        let reply = "";
+        try {
+          const res2 = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: promptText, language: getAppLanguage(), context: pseudoContext }),
+          });
+          if (!res2.ok) throw new Error("HTTP " + res2.status);
+          const data = await res2.json();
+          reply = data.reply || t("emptyReply");
+        } catch (fallbackErr) {
+          reply = _chatUnavailableReply(fallbackErr || err);
+        }
         const finalText = _ensureOnlineServiceLink(cleanAssistantText(reply) || t("emptyReply"));
-        gotFirstToken = true;
+        assistantTypingState.text = "";
+        assistantTypingState.gotFirstToken = false;
+        assistantBubble.textContent = "";
+        await _typeAssistantDelta(assistantTypingState, assistantBubble, finalText);
         assistantBubble.innerHTML = _escapeAndLinkify(finalText).replace(/\n/g, "<br>");
 
         if (session) {
@@ -5325,8 +6514,17 @@
       inputEl.value = "";
       inputEl.style.height = "44px";
       updateEmptyPrompt();
-      if (tryHandleScheduleAddCommand(text, session)) {
+      statusEl.textContent = t("thinking");
+      let scheduleHandled = false;
+      try {
+        scheduleHandled = await tryHandleScheduleCommand(text, session);
+      } catch (e) {
+        console.error("schedule command handling failed", e);
+      }
+      if (scheduleHandled) {
         isAwaitingAssistant = false;
+        sendBtn.disabled = false;
+        inputEl.disabled = false;
         statusEl.textContent = t("ready");
         return;
       }
